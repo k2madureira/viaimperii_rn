@@ -6,17 +6,8 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
 import { useAuth } from '../../../contexts/AuthContext';
-
-function UserIcon({ size = 36 }: { size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
-      <Path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" fill="#8B1A2B" />
-      <Path d="M12 14C6.47715 14 2 17.134 2 21V22H22V21C22 17.134 17.5228 14 12 14Z" fill="#8B1A2B" />
-    </Svg>
-  );
-}
+import { UserIcon } from '../../../navigation/icons/MenuIcons';
 
 interface Props {
   onChangePassword: () => void;
@@ -26,11 +17,11 @@ export default function UserMenu({ onChangePassword }: Props) {
   const { user, signOut } = useAuth();
   const [visible, setVisible] = useState(false);
   const [anchor, setAnchor] = useState({ top: 0, right: 0 });
-  const buttonRef = useRef<TouchableOpacity>(null);
+  const buttonRef = useRef<React.ComponentRef<typeof TouchableOpacity>>(null);
 
   const openMenu = () => {
-    buttonRef.current?.measure((_x, _y, _w, h, _px, py) => {
-      setAnchor({ top: py + h + 6, right: 16 });
+    buttonRef.current?.measureInWindow((_x, y, _w, h) => {
+      setAnchor({ top: y + h + 6, right: 16 });
       setVisible(true);
     });
   };

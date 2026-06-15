@@ -1,15 +1,11 @@
-import { useDrawerStatus } from '@react-navigation/drawer';
-import { DrawerActions, useNavigation } from '@react-navigation/native';
-import React, { useRef, useState } from 'react';
-import { Platform, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import React, { useState } from 'react';
+import { Platform, RefreshControl, ScrollView, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LogoIcon from '../../components/LogoIcon';
+import MenuButton from '../../components/MenuButton';
 import { useAuth } from '../../contexts/AuthContext';
-import { useSidebar } from '../../contexts/SidebarContext';
 import { HomeNavigationProp } from '../../navigation/HomeStack';
-import { HamburgerIcon } from '../../navigation/icons/MenuIcons';
-
-const TOGGLE_SIZE = 32;
 import AchievementsSection from './components/AchievementsSection';
 import ChangePasswordModal from './components/ChangePasswordModal';
 import MasterySection from './components/MasterySection';
@@ -24,19 +20,7 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<HomeNavigationProp>();
   const { user } = useAuth();
-  const { anchorY, buttonX, setGeom } = useSidebar();
-  const isDrawerOpen = useDrawerStatus() === 'open';
-  const greetingRef = useRef<View>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-
-  const measureGreeting = () => {
-    greetingRef.current?.measureInWindow((_x, y, w, h) => {
-      if (w > 0) {
-        // Botão colado na borda esquerda da tela, no nível do título.
-        setGeom({ anchorY: y + h + 4, buttonX: TOGGLE_SIZE / 2 });
-      }
-    });
-  };
 
   const isTemporary = user?.is_temporary_password === true;
 
@@ -65,7 +49,7 @@ export default function DashboardScreen() {
     <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 py-3 bg-white border-b border-[#f0f0f0]">
-        <View className="flex-row items-center">
+        <View className="flex-row items-center ml-10">
           <LogoIcon size={22} color="#8B1A2B" />
           <Text
             className="text-sm font-semibold text-[#111] tracking-[3px] ml-2"
@@ -83,15 +67,13 @@ export default function DashboardScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8B1A2B" />
         }>
-        {/* Saudação — deslocada à direita para o botão colado na borda não sobrepor */}
-        <View className="ml-[44px]">
-          <View ref={greetingRef} onLayout={measureGreeting} className="self-start">
-            <Text
-              className="text-[22px] font-extrabold text-[#111]"
-              style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-              Ave, {user?.name?.split(' ')[0]}!
-            </Text>
-          </View>
+        {/* Saudação */}
+        <View>
+          <Text
+            className="text-[22px] font-extrabold text-[#111]"
+            style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
+            Ave, {user?.name?.split(' ')[0]}!
+          </Text>
           <Text className="text-[13px] text-[#888] mt-0.5">Bem-vindo ao Império.</Text>
         </View>
 
@@ -120,30 +102,8 @@ export default function DashboardScreen() {
         />
       </ScrollView>
 
-      {/* Botão de menu colado na borda esquerda, no nível do título "Ave, user!".
-          Some quando o menu abre (o "X" passa a ser o do sidebar). */}
-      {!isDrawerOpen && (
-        <View pointerEvents="box-none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
-          <TouchableOpacity
-            onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-            activeOpacity={0.85}
-            style={{
-              position: 'absolute',
-              // topo do botão alinhado ao topo do sidebar (window y = anchorY)
-              top: anchorY - insets.top,
-              left: buttonX - TOGGLE_SIZE / 2,
-              width: TOGGLE_SIZE,
-              height: TOGGLE_SIZE,
-              borderTopRightRadius: TOGGLE_SIZE / 2,
-              borderBottomRightRadius: TOGGLE_SIZE / 2,
-              backgroundColor: '#8B1A2B',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}>
-            <HamburgerIcon size={17} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      )}
+      {/* Botão de menu global, ancorado a 20% da altura da tela */}
+      <MenuButton />
 
       {/* Modal de troca de senha — abre automaticamente se senha for temporária */}
       <ChangePasswordModal

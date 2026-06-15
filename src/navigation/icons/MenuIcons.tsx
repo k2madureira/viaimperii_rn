@@ -24,6 +24,21 @@ export function HamburgerIcon({ size = 24, color = '#111' }: IconProps) {
   );
 }
 
+export function UserIcon({ size = 22, color = '#8B1A2B' }: IconProps) {
+  return (
+    <Svg {...base(size)}>
+      <Path
+        d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z"
+        fill={color}
+      />
+      <Path
+        d="M12 14C6.47715 14 2 17.134 2 21V22H22V21C22 17.134 17.5228 14 12 14Z"
+        fill={color}
+      />
+    </Svg>
+  );
+}
+
 export function CloseIcon({ size = 22, color = '#111' }: IconProps) {
   return (
     <Svg {...base(size)}>

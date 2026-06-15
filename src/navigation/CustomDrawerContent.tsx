@@ -3,7 +3,6 @@ import React from 'react';
 import { Dimensions, Platform, Text, TouchableOpacity, View } from 'react-native';
 import LogoIcon from '../components/LogoIcon';
 import { useAuth } from '../contexts/AuthContext';
-import { useSidebar } from '../contexts/SidebarContext';
 import {
   CampaignsIcon,
   CloseIcon,
@@ -30,18 +29,17 @@ const ITEMS: {
 
 export default function CustomDrawerContent(props: DrawerContentComponentProps) {
   const { user, signOut } = useAuth();
-  const { anchorY } = useSidebar();
   const activeRoute = props.state.routeNames[props.state.index];
 
   return (
-    // Container transparente preenche todo o drawer; o cartão é ancorado ao
-    // título "Ave, user!" (topo = anchorY) e tem 60% de altura.
+    // Container transparente preenche todo o drawer; o cartão começa a 20% da
+    // altura (alinhado ao botão de menu) e tem 60% de altura.
     <View className="flex-1">
       <View
         className="bg-white rounded-r-[18px] overflow-hidden"
         style={{
-          marginTop: anchorY,
-          height: SCREEN_HEIGHT * 0.6,
+          marginTop: SCREEN_HEIGHT * 0.1,
+          height: SCREEN_HEIGHT * 0.4,
           shadowColor: '#000',
           shadowOpacity: 0.18,
           shadowRadius: 12,

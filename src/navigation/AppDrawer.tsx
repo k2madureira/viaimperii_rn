@@ -6,7 +6,6 @@ import CampaignsScreen from '../screens/campaigns/CampaignsScreen';
 import LegionScreen from '../screens/legion/LegionScreen';
 import MissionsScreen from '../screens/missions/MissionsScreen';
 import RankingScreen from '../screens/ranking/RankingScreen';
-import { SidebarProvider } from '../contexts/SidebarContext';
 import CustomDrawerContent from './CustomDrawerContent';
 import HomeStack from './HomeStack';
 
@@ -26,25 +25,23 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export default function AppDrawer() {
   return (
-    <SidebarProvider>
-      <Drawer.Navigator
-        drawerContent={(props) => <CustomDrawerContent {...props} />}
-        screenOptions={{
-          headerShown: false,
-          drawerPosition: 'left',
-          drawerType: 'front',
-          swipeEnabled: true,
-          swipeEdgeWidth: 60,
-          // Painel ocupa 40% da largura; o container é transparente para o
-          // cartão interno (60% de altura) flutuar ancorado ao título.
-          drawerStyle: { width: SCREEN_WIDTH * 0.4, backgroundColor: 'transparent' },
-        }}>
-        <Drawer.Screen name="Home" component={HomeStack} />
-        <Drawer.Screen name="Missions" component={MissionsScreen} />
-        <Drawer.Screen name="Campaigns" component={CampaignsScreen} />
-        <Drawer.Screen name="Ranking" component={RankingScreen} />
-        <Drawer.Screen name="Legion" component={LegionScreen} />
-      </Drawer.Navigator>
-    </SidebarProvider>
+    <Drawer.Navigator
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        headerShown: false,
+        drawerPosition: 'left',
+        drawerType: 'front',
+        swipeEnabled: true,
+        swipeEdgeWidth: 60,
+        // Painel ocupa 40% da largura; o container é transparente para o
+        // cartão interno (60% de altura) flutuar a 20% da altura.
+        drawerStyle: { width: SCREEN_WIDTH * 0.4, backgroundColor: 'transparent' },
+      }}>
+      <Drawer.Screen name="Home" component={HomeStack} />
+      <Drawer.Screen name="Missions" component={MissionsScreen} />
+      <Drawer.Screen name="Campaigns" component={CampaignsScreen} />
+      <Drawer.Screen name="Ranking" component={RankingScreen} />
+      <Drawer.Screen name="Legion" component={LegionScreen} />
+    </Drawer.Navigator>
   );
 }
