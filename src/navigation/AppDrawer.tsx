@@ -2,10 +2,10 @@ import { DrawerNavigationProp } from '@react-navigation/drawer';
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import React from 'react';
 import { Dimensions } from 'react-native';
-import CampaignsScreen from '../screens/campaigns/CampaignsScreen';
-import LegionScreen from '../screens/legion/LegionScreen';
-import MissionsScreen from '../screens/missions/MissionsScreen';
-import RankingScreen from '../screens/ranking/RankingScreen';
+import CampaignsScreen from '../screens/campaigns';
+import LegionScreen from '../screens/legion';
+import MissionsScreen from '../screens/missions';
+import RankingScreen from '../screens/ranking';
 import CustomDrawerContent from './CustomDrawerContent';
 import HomeStack from './HomeStack';
 

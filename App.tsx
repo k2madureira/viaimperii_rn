@@ -12,7 +12,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { AuthProvider } from './src/contexts/AuthContext';
 import RootNavigator from './src/navigation/RootNavigator';
-import SplashScreen from './src/screens/defaults/SplashScreen';
+import SplashScreen from './src/screens/defaults/splash';
 
 const queryClient = new QueryClient();
 

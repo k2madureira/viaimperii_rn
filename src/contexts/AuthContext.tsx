@@ -1,5 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { registerAuthHandlers } from '../api/config/authBridge';
 
 const ACCESS_KEY = 'access_token';
 const REFRESH_KEY = 'refresh_token';
@@ -58,6 +59,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setState(s => ({ ...s, isLoading: false }));
     }
     restore();
+  }, []);
+
+  // Liga o tokenManager (fora do React) ao estado: refresh atualiza os tokens,
+  // expiração da sessão desloga e leva de volta ao login.
+  useEffect(() => {
+    registerAuthHandlers({
+      onTokensRefreshed: (accessToken, refreshToken) => {
+        setState((prev) => ({ ...prev, accessToken, refreshToken }));
+      },
+      onSessionExpired: () => {
+        setState({ accessToken: null, refreshToken: null, user: null, isLoading: false });
+      },
+    });
+    return () => registerAuthHandlers({});
   }, []);
 
   const signIn = useCallback(async (accessToken: string, refreshToken: string, user: AuthUser) => {

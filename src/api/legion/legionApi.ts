@@ -1,4 +1,4 @@
-import { apiFetch } from '../config/defaultApi';
+import { apiFetch, readContent, readError } from '../config/defaultApi';
 
 export interface Legion {
   id: number;
@@ -11,10 +11,8 @@ export async function getLegion(legionId: number): Promise<Legion> {
   const response = await apiFetch(`/legions/${legionId}`);
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail ?? error.message ?? 'Erro ao carregar a legião');
+    throw new Error(await readError(response, 'Erro ao carregar a legião'));
   }
 
-  const json = await response.json();
-  return (json.content ?? json) as Legion;
+  return readContent<Legion>(response);
 }

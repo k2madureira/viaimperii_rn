@@ -1,8 +1,8 @@
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import DashboardScreen from '../screens/dashboard/DashboardScreen';
-import RanksScreen from '../screens/dashboard/RanksScreen';
+import DashboardScreen from '../screens/dashboard';
+import RanksScreen from '../screens/ranks';
 
 export type HomeStackParamList = {
   Dashboard: undefined;

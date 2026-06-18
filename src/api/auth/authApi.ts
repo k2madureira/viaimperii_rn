@@ -1,5 +1,5 @@
 import { LoginFormData } from '../../screens/auth/login/model/contracts/loginSchema';
-import { apiFetch } from '../config/defaultApi';
+import { apiFetch, readContent, readError } from '../config/defaultApi';
 
 export interface LoginResponse {
   access_token: string;
@@ -28,17 +28,15 @@ export async function loginRequest(data: LoginFormData): Promise<LoginResponse> 
   });
 
   if (!response.ok) {
-    const error = await response.json();
     if (response.status === 403) {
       throw new Error(
         'Cadastro incompleto. Verifique seu e-mail e use o código recebido para definir sua especialidade.',
       );
     }
-    throw new Error(error.detail ?? error.message ?? 'Erro ao fazer login');
+    throw new Error(await readError(response, 'Erro ao fazer login'));
   }
 
-  const json = await response.json();
-  return (json.content ?? json) as LoginResponse;
+  return readContent<LoginResponse>(response);
 }
 
 export interface CreateUserPayload {
@@ -62,12 +60,10 @@ export async function createUserRequest(data: CreateUserPayload): Promise<Create
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message ?? 'Erro ao criar conta');
+    throw new Error(await readError(response, 'Erro ao criar conta'));
   }
 
-  const json = await response.json();
-  return json.content as CreateUserResponse;
+  return readContent<CreateUserResponse>(response);
 }
 
 export async function updatePasswordRequest(
@@ -80,21 +76,19 @@ export async function updatePasswordRequest(
   });
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    const detail: string = error.detail ?? error.message ?? '';
+    const detail = await readError(response, '');
 
     if (response.status === 401) {
+      const d = detail.toLowerCase();
       const isWrongPassword =
-        detail.toLowerCase().includes('password') ||
-        detail.toLowerCase().includes('senha') ||
-        detail.toLowerCase().includes('incorrect') ||
-        detail.toLowerCase().includes('incorreta') ||
-        detail.toLowerCase().includes('invalid credentials') ||
-        detail === '';
+        d.includes('password') ||
+        d.includes('senha') ||
+        d.includes('incorrect') ||
+        d.includes('incorreta') ||
+        d.includes('invalid credentials') ||
+        d === '';
       throw new Error(
-        isWrongPassword
-          ? 'Senha atual incorreta.'
-          : 'Sessão expirada. Faça login novamente.',
+        isWrongPassword ? 'Senha atual incorreta.' : 'Sessão expirada. Faça login novamente.',
       );
     }
 
@@ -116,12 +110,10 @@ export async function verifyTokenRequest(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message ?? 'Código inválido ou expirado');
+    throw new Error(await readError(response, 'Código inválido ou expirado'));
   }
 
-  const json = await response.json();
-  return (json.content ?? json) as VerifyTokenResponse;
+  return readContent<VerifyTokenResponse>(response);
 }
 
 export async function forgotPasswordRequest(email: string): Promise<void> {
@@ -131,8 +123,7 @@ export async function forgotPasswordRequest(email: string): Promise<void> {
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message ?? 'Erro ao solicitar redefinição de senha');
+    throw new Error(await readError(response, 'Erro ao solicitar redefinição de senha'));
   }
 }
 
@@ -147,9 +138,8 @@ export async function oauthRequest(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message ?? `Erro ao fazer login com ${provider}`);
+    throw new Error(await readError(response, `Erro ao fazer login com ${provider}`));
   }
 
-  return response.json();
+  return readContent<LoginResponse>(response);
 }

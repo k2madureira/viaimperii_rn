@@ -1,4 +1,4 @@
-import { apiFetch } from '../config/defaultApi';
+import { apiFetch, readContent, readError } from '../config/defaultApi';
 
 export interface QuizOption {
   id: string;
@@ -34,12 +34,10 @@ export async function getQuizQuestions(testCode: string): Promise<QuizQuestionsR
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message ?? 'Erro ao carregar o quiz');
+    throw new Error(await readError(response, 'Erro ao carregar o quiz'));
   }
 
-  const json = await response.json();
-  return json.content as QuizQuestionsResponse;
+  return readContent<QuizQuestionsResponse>(response);
 }
 
 export async function submitQuizAnswers(
@@ -53,12 +51,10 @@ export async function submitQuizAnswers(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message ?? 'Erro ao enviar respostas');
+    throw new Error(await readError(response, 'Erro ao enviar respostas'));
   }
 
-  const json = await response.json();
-  return json.content as QuizResult;
+  return readContent<QuizResult>(response);
 }
 
 export async function updateUserSpecialty(
@@ -71,7 +67,6 @@ export async function updateUserSpecialty(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message ?? 'Erro ao atualizar especialidade');
+    throw new Error(await readError(response, 'Erro ao atualizar especialidade'));
   }
 }

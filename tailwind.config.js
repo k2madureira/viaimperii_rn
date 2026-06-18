@@ -5,7 +5,9 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#8B1A2B',
+        primary: '#8B1A2B', // vinho imperial
+        gold: '#D4AF37', // ouro imperial — destaques/recompensas
+        laurel: '#2F7A52', // verde-louro — sucesso/conclusão
       },
     },
   },

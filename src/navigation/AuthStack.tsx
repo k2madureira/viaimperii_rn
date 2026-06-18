@@ -1,9 +1,9 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
-import ForgotPasswordScreen from '../screens/auth/forgotPassword/ForgotPasswordScreen';
-import LoginScreen from '../screens/auth/login/LoginScreen';
-import SignupScreen from '../screens/auth/signup/SignupScreen';
-import SpecialtyQuizScreen from '../screens/defaults/SpecialtyQuizScreen';
+import ForgotPasswordScreen from '../screens/auth/forgotPassword';
+import LoginScreen from '../screens/auth/login';
+import SignupScreen from '../screens/auth/signup';
+import SpecialtyQuizScreen from '../screens/defaults/specialtyQuiz';
 import { AuthStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();

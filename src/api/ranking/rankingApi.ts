@@ -1,4 +1,4 @@
-import { apiFetch } from '../config/defaultApi';
+import { apiFetch, readContent, readError } from '../config/defaultApi';
 
 export interface RankingItem {
   position: number;
@@ -18,10 +18,8 @@ export async function getRanking(): Promise<RankingResponse> {
   const response = await apiFetch('/ranking');
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail ?? error.message ?? 'Erro ao carregar o ranking');
+    throw new Error(await readError(response, 'Erro ao carregar o ranking'));
   }
 
-  const json = await response.json();
-  return (json.content ?? json) as RankingResponse;
+  return readContent<RankingResponse>(response);
 }

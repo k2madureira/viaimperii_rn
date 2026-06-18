@@ -1,4 +1,4 @@
-import { apiFetch } from '../config/defaultApi';
+import { apiFetch, readContent, readError } from '../config/defaultApi';
 
 export interface CompletedMission {
   mission_id: string;
@@ -48,10 +48,42 @@ export async function getUserProfile(userId: string): Promise<GetUserResponse> {
   const response = await apiFetch(`/users/${userId}`);
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    throw new Error(error.detail ?? error.message ?? 'Erro ao carregar perfil');
+    throw new Error(await readError(response, 'Erro ao carregar perfil'));
   }
 
-  const json = await response.json();
-  return (json.content ?? json) as GetUserResponse;
+  return readContent<GetUserResponse>(response);
+}
+
+export type StatsPeriod = 'weekly' | 'monthly' | 'annual' | 'all';
+
+export interface UserStats {
+  period: string;
+  start_date: string | null;
+  end_date: string | null;
+  total_xp: number;
+  current_rank: string;
+  medals_count: number;
+  missions_in_progress: number;
+  missions_completed_total: number;
+  xp_in_period: number;
+  missions_completed: number;
+  campaigns_completed: number;
+  achievements_unlocked: number;
+  ranks_gained: number;
+  active_days: number;
+  xp_by_source: Record<string, number>;
+}
+
+export async function getUserStats(
+  userId: string,
+  period: StatsPeriod = 'all',
+): Promise<UserStats> {
+  const query = period !== 'all' ? `?period=${period}` : '';
+  const response = await apiFetch(`/users/${userId}/stats${query}`);
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao carregar estatísticas'));
+  }
+
+  return readContent<UserStats>(response);
 }

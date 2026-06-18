@@ -1,7 +1,7 @@
 import { DrawerContentComponentProps } from '@react-navigation/drawer';
 import React from 'react';
 import { Dimensions, Platform, Text, TouchableOpacity, View } from 'react-native';
-import LogoIcon from '../components/LogoIcon';
+import { LogoIcon } from '../components';
 import { useAuth } from '../contexts/AuthContext';
 import {
   CampaignsIcon,

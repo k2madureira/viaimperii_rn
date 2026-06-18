@@ -1,7 +1,7 @@
 import React from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Footer from '../../../components/Footer';
+import { Footer } from '../../../components';
 
 interface Props {
   children: React.ReactNode;
