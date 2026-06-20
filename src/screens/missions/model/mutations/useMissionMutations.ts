@@ -9,6 +9,7 @@ export function useStartMission() {
     mutationFn: (slug: string) => startMission(slug),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['missions'] });
+      queryClient.invalidateQueries({ queryKey: ['missions-available'] });
     },
     onError: (error: Error) => {
       Toast.show({ type: 'error', text1: 'Erro ao iniciar missão', text2: error.message });
@@ -28,6 +29,7 @@ export function useCompleteMission() {
         text2: `+${result.xp_earned} XP${result.medal_earned ? ` · Medalha: ${result.medal_earned}` : ''}`,
       });
       queryClient.invalidateQueries({ queryKey: ['missions'] });
+      queryClient.invalidateQueries({ queryKey: ['missions-available'] });
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
       queryClient.invalidateQueries({ queryKey: ['ranking'] });
     },

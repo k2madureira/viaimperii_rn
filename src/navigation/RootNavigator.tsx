@@ -1,7 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
-import AppDrawer from './AppDrawer';
+import BottomTabs from './BottomTabs';
 import AuthStack from './AuthStack';
 
 export default function RootNavigator() {
@@ -15,5 +15,5 @@ export default function RootNavigator() {
     );
   }
 
-  return accessToken ? <AppDrawer /> : <AuthStack />;
+  return accessToken ? <BottomTabs /> : <AuthStack />;
 }

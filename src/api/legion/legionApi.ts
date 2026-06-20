@@ -5,6 +5,8 @@ export interface Legion {
   name: string;
   symbol: string | null;
   description: string | null;
+  image_url?: string | null;
+  total_users?: number;
 }
 
 export async function getLegion(legionId: number): Promise<Legion> {

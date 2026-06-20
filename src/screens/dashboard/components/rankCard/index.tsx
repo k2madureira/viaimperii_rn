@@ -6,10 +6,18 @@ interface Props {
   totalXp: number;
   xpToNextRank: number;
   imageUrl?: string | null;
+  trackName?: string | null;
   onPress?: () => void;
 }
 
-export default function RankCard({ rank, totalXp, xpToNextRank, imageUrl, onPress }: Props) {
+export default function RankCard({
+  rank,
+  totalXp,
+  xpToNextRank,
+  imageUrl,
+  trackName,
+  onPress,
+}: Props) {
   const isMaxRank = xpToNextRank <= 0;
   // Progresso até a próxima patente com base nos valores da API.
   const progress = isMaxRank
@@ -46,6 +54,16 @@ export default function RankCard({ rank, totalXp, xpToNextRank, imageUrl, onPres
             style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
             {rank}
           </Text>
+
+          {/* Trilha selecionada — vazio enquanto o usuário não escolher */}
+          {trackName ? (
+            <View className="flex-row mt-1.5">
+              <View className="flex-row items-center bg-gold/20 rounded-full px-2.5 py-0.5">
+                <View className="w-1.5 h-1.5 rounded-full bg-gold mr-1.5" />
+                <Text className="text-[11px] font-bold text-gold">{trackName}</Text>
+              </View>
+            </View>
+          ) : null}
         </View>
 
         {onPress ? <Text className="text-white/60 text-[22px] ml-2">›</Text> : null}

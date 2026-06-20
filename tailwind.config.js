@@ -5,9 +5,11 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#8B1A2B', // vinho imperial
-        gold: '#D4AF37', // ouro imperial — destaques/recompensas
+        primary: '#9E1B32', // imperial red
+        gold: '#D4AF37', // imperial gold — destaques/recompensas
         laurel: '#2F7A52', // verde-louro — sucesso/conclusão
+        charcoal: '#121212', // charcoal black
+        lightgray: '#EAEAEA', // light gray
       },
     },
   },

@@ -16,6 +16,13 @@ export interface Mission {
   status: MissionStatus;
 }
 
+export interface RecommendedLegion {
+  id: number;
+  name: string;
+  image_url: string | null;
+  reason: 'theme' | 'correlated' | string;
+}
+
 export interface CompleteMissionResult {
   message: string;
   mission_slug: string;
@@ -26,6 +33,9 @@ export interface CompleteMissionResult {
   promoted: boolean;
   previous_rank?: string;
   medal_earned?: string;
+  requires_legion_selection?: boolean;
+  recommended_legions?: RecommendedLegion[];
+  requires_track_selection?: boolean;
 }
 
 export interface PaginatedMissions {
@@ -49,13 +59,17 @@ export async function getMissions(status?: MissionStatus): Promise<Mission[]> {
   return Array.isArray(data) ? data : (data?.items ?? []);
 }
 
+export type MissionDifficulty = 'easy' | 'medium' | 'hard';
+
 export async function getAvailableMissions(
   specialtyId?: number,
+  difficulty?: MissionDifficulty,
   page = 1,
   perPage = 50,
 ): Promise<PaginatedMissions> {
   const parts = [`page=${page}`, `perPage=${perPage}`];
   if (specialtyId != null) parts.push(`specialtyId=${specialtyId}`);
+  if (difficulty != null) parts.push(`difficulty=${difficulty}`);
 
   const response = await apiFetch(`/missions/available?${parts.join('&')}`);
 

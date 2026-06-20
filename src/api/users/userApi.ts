@@ -36,9 +36,36 @@ export interface Achievement {
   achieved_at: string | null;
 }
 
+export interface UserTrack {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+}
+
+export interface UserLegion {
+  id: number;
+  name: string;
+  symbol: string | null;
+  description: string | null;
+  image_url: string | null;
+  specialty_id: number | null;
+}
+
+export interface UserProvince {
+  id: number;
+  name: string;
+  abbreviation: string | null;
+  country_id: number | null;
+}
+
 export interface GetUserResponse {
   user: UserProfile;
   xp_to_next_rank: number;
+  must_choose_track: boolean;
+  track: UserTrack | null;
+  legion: UserLegion | null;
+  province: UserProvince | null;
   current_rank: RankImage | null;
   ranks: RankImage[];
   achievements: Achievement[];

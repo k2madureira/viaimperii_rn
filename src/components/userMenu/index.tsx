@@ -11,9 +11,10 @@ import { UserIcon } from '../../navigation/icons/MenuIcons';
 
 interface Props {
   onChangePassword: () => void;
+  onEdit?: () => void;
 }
 
-export default function UserMenu({ onChangePassword }: Props) {
+export default function UserMenu({ onChangePassword, onEdit }: Props) {
   const { user, signOut } = useAuth();
   const [visible, setVisible] = useState(false);
   const [anchor, setAnchor] = useState({ top: 0, right: 0 });
@@ -33,9 +34,15 @@ export default function UserMenu({ onChangePassword }: Props) {
       <TouchableOpacity
         ref={buttonRef}
         onPress={openMenu}
-        className="w-10 h-10 rounded-full bg-[#f4eaea] items-center justify-center"
+        className="flex-row items-center"
         activeOpacity={0.75}>
-        <UserIcon size={22} />
+        <View className="w-10 h-10 rounded-full bg-[#f4eaea] items-center justify-center">
+          <UserIcon size={22} />
+        </View>
+        {/* Indicador de que abre opções */}
+        <View className="w-4 h-4 rounded-full bg-primary items-center justify-center -ml-2 mt-5 border border-white">
+          <Text className="text-[8px] text-white leading-none">▾</Text>
+        </View>
       </TouchableOpacity>
 
       <Modal transparent visible={visible} animationType="fade" onRequestClose={close}>
@@ -56,6 +63,15 @@ export default function UserMenu({ onChangePassword }: Props) {
                   <Text className="text-[13px] font-bold text-[#111]" numberOfLines={1}>{user.name}</Text>
                   <Text className="text-[11px] text-[#888]" numberOfLines={1}>{user.email}</Text>
                 </View>
+              )}
+
+              {onEdit && (
+                <TouchableOpacity
+                  className="px-4 py-3"
+                  activeOpacity={0.7}
+                  onPress={() => { close(); onEdit(); }}>
+                  <Text className="text-[14px] font-medium text-[#111]">Editar</Text>
+                </TouchableOpacity>
               )}
 
               <TouchableOpacity

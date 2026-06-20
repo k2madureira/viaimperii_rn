@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 
-export type MissionsTab = 'available' | 'history';
+export type MissionsTab = 'available' | 'history' | 'inprogress';
 
 interface Props {
   value: MissionsTab;
@@ -10,9 +10,10 @@ interface Props {
 
 const TABS: { key: MissionsTab; label: string }[] = [
   { key: 'available', label: 'Disponíveis' },
+  { key: 'inprogress', label: 'Ativas' },
   { key: 'history', label: 'Histórico' },
 ];
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
 export default function MissionsTabs({ value, onChange }: Props) {
   return (
     <View className="flex-row bg-[#f0eded] rounded-[12px] p-1">
