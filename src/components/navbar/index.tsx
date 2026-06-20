@@ -1,3 +1,4 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import { ChangePasswordModal } from '../../screens/dashboard/components';
@@ -11,6 +12,7 @@ import UserMenu from '../userMenu';
  */
 export default function Navbar() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const navigation = useNavigation<any>();
 
   return (
     <>
@@ -23,7 +25,10 @@ export default function Navbar() {
             VIA IMPERII
           </Text>
         </View>
-        <UserMenu onChangePassword={() => setShowPasswordModal(true)} />
+        <UserMenu
+          onChangePassword={() => setShowPasswordModal(true)}
+          onEdit={() => navigation.navigate('Profile')}
+        />
       </View>
 
       {/* Modal de troca de senha (acionado manualmente pelo UserMenu) */}

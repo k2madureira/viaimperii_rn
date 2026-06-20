@@ -1,6 +1,6 @@
 import React from 'react';
 import { ScrollView, Text, TouchableOpacity } from 'react-native';
-import { Specialty } from '../../../api/specialties/specialtiesApi';
+import { Specialty } from '../../../../api/specialties/specialtiesApi';
 
 interface Props {
   specialties: Specialty[];

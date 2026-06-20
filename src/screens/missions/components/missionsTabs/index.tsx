@@ -13,7 +13,7 @@ const TABS: { key: MissionsTab; label: string }[] = [
   { key: 'inprogress', label: 'Ativas' },
   { key: 'history', label: 'Histórico' },
 ];
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
+
 export default function MissionsTabs({ value, onChange }: Props) {
   return (
     <View className="flex-row bg-[#f0eded] rounded-[12px] p-1">

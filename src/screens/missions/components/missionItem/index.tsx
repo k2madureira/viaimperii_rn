@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
-import { Mission } from '../../../api/missions/missionsApi';
+import { Mission } from '../../../../api/missions/missionsApi';
 
 interface Props {
   mission: Mission;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
-import { UserStats } from '../../../api/users/userApi';
+import { UserStats } from '../../../../api/users/userApi';
 
 interface Props {
   stats: UserStats | undefined;
