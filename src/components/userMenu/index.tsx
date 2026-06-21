@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import {
+  Image,
   Modal,
   Text,
   TouchableOpacity,
@@ -8,6 +9,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserIcon } from '../../navigation/icons/MenuIcons';
+import { useUserProfile } from '../../screens/dashboard/model/queries/useUserProfile';
 
 interface Props {
   onChangePassword: () => void;
@@ -16,6 +18,8 @@ interface Props {
 
 export default function UserMenu({ onChangePassword, onEdit }: Props) {
   const { user, signOut } = useAuth();
+  const profileQuery = useUserProfile(user?.user_id);
+  const avatarUrl = profileQuery.data?.active_avatar?.url ?? null;
   const [visible, setVisible] = useState(false);
   const [anchor, setAnchor] = useState({ top: 0, right: 0 });
   const buttonRef = useRef<React.ComponentRef<typeof TouchableOpacity>>(null);
@@ -36,8 +40,12 @@ export default function UserMenu({ onChangePassword, onEdit }: Props) {
         onPress={openMenu}
         className="flex-row items-center"
         activeOpacity={0.75}>
-        <View className="w-10 h-10 rounded-full bg-[#f4eaea] items-center justify-center">
-          <UserIcon size={22} />
+        <View className="w-10 h-10 rounded-full bg-[#f4eaea] items-center justify-center overflow-hidden">
+          {avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} style={{ width: 40, height: 40 }} resizeMode="cover" />
+          ) : (
+            <UserIcon size={22} />
+          )}
         </View>
         {/* Indicador de que abre opções */}
         <View className="w-4 h-4 rounded-full bg-primary items-center justify-center -ml-2 mt-5 border border-white">

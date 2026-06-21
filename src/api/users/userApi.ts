@@ -26,6 +26,17 @@ export interface RankImage {
   image_url: string | null;
 }
 
+// Asset cosmético equipado (avatar) — retornado no login e no detail do usuário.
+export interface UserAsset {
+  id: number;
+  name: string;
+  slug: string;
+  url: string | null;
+  type: string;
+  is_free: boolean;
+  price: number;
+}
+
 // Patente atual + dados de progressão (calculados no backend, cientes da trilha).
 export interface CurrentRank extends RankImage {
   total_xp: number;
@@ -84,6 +95,7 @@ export interface GetUserResponse {
   current_rank: CurrentRank | null;
   ranks: RankImage[];
   achievements: Achievement[];
+  active_avatar: UserAsset | null;
 }
 
 export async function getUserProfile(userId: string): Promise<GetUserResponse> {

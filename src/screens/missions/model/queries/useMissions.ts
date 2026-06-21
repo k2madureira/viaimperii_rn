@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { getMissions, Mission, MissionStatus } from '../../../../api/missions/missionsApi';
+import { getMissions, Mission, MissionSort, MissionStatus } from '../../../../api/missions/missionsApi';
 
-export function useMissions(status?: MissionStatus, enabled = true) {
+export function useMissions(status?: MissionStatus, enabled = true, sort?: MissionSort) {
   return useQuery({
-    queryKey: ['missions', status ?? 'all'],
-    queryFn: () => getMissions(status),
+    queryKey: ['missions', status ?? 'all', sort ?? null],
+    queryFn: () => getMissions(status, sort),
     enabled,
     select: (data): Mission[] => data.items,
   });

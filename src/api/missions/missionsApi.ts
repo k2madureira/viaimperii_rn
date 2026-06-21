@@ -1,6 +1,6 @@
 import { apiFetch, readContent, readError } from '../config/defaultApi';
 
-export type MissionStatus = 'available' | 'in_progress' | 'completed';
+export type MissionStatus = 'available' | 'in_progress' | 'pending_review' | 'completed';
 
 export interface Mission {
   id: number;
@@ -14,6 +14,13 @@ export interface Mission {
   specialty_name: string | null;
   track_id: number | null;
   status: MissionStatus;
+  // Preenchidos apenas enquanto status === 'pending_review' (janela de revisão).
+  completable_at: string | null;
+  remaining_seconds: number | null;
+  approvals_count: number;
+  approvals_required: number;
+  // Preenchido apenas quando status === 'completed' (data/hora da finalização, UTC).
+  completed_at: string | null;
 }
 
 export interface RecommendedLegion {
@@ -26,10 +33,15 @@ export interface RecommendedLegion {
 export interface CompleteMissionResult {
   message: string;
   mission_slug: string;
+  status: 'pending_review' | 'completed';
+  completable_at: string | null;
+  remaining_seconds: number | null;
+  approvals_required: number;
+  approvals_count: number;
   xp_earned: number;
   mastery_earned: Record<string, number>;
   total_xp: number;
-  current_rank: string;
+  current_rank: string | null;
   promoted: boolean;
   previous_rank?: string;
   medal_earned?: string;
@@ -61,9 +73,19 @@ export interface PaginatedMissions {
   availableMissions?: MissionAllowance;
 }
 
-export async function getMissions(status?: MissionStatus): Promise<PaginatedMissions> {
-  const statusParam = status ? `&status=${status}` : '';
-  const response = await apiFetch(`/missions?page=1&perPage=100${statusParam}`);
+export interface MissionSort {
+  sortField: 'completed_at' | 'difficulty';
+  sortOrder: 'asc' | 'desc';
+}
+
+export async function getMissions(
+  status?: MissionStatus,
+  sort?: MissionSort,
+): Promise<PaginatedMissions> {
+  const parts = ['page=1', 'perPage=100'];
+  if (status) parts.push(`status=${status}`);
+  if (sort) parts.push(`sortField=${sort.sortField}`, `sortOrder=${sort.sortOrder}`);
+  const response = await apiFetch(`/missions?${parts.join('&')}`);
 
   if (!response.ok) {
     throw new Error(await readError(response, 'Erro ao carregar missões'));
@@ -122,4 +144,79 @@ export async function completeMission(slug: string): Promise<CompleteMissionResu
   }
 
   return readContent<CompleteMissionResult>(response);
+}
+
+// ── Revisão de missões (aprovação de pares) ───────────────────────────────────
+
+export interface RankMini {
+  id: number;
+  name: string;
+  image: string | null;
+}
+
+export interface ActiveAvatar {
+  id: number;
+  name: string;
+  slug: string;
+  url: string | null;
+  type: string;
+}
+
+export interface ToReviewExecutor {
+  id: string;
+  name: string;
+  rank: RankMini | null;
+  image: string | null; // foto de perfil / avatar do OAuth
+  active_avatar: ActiveAvatar | null; // avatar cosmético equipado
+  legion_id: number | null;
+}
+
+export interface ToReviewItem {
+  mission_slug: string;
+  mission_name: string;
+  difficulty: 'easy' | 'medium' | 'hard' | null;
+  specialty_id: number | null;
+  xp_reward: number;
+  executor: ToReviewExecutor;
+  completable_at: string | null;
+  remaining_seconds: number | null;
+  approvals_count: number;
+  approvals_required: number;
+}
+
+interface ToReviewResponse {
+  page: number;
+  perPage: number;
+  totalItems: number;
+  items: ToReviewItem[];
+}
+
+export interface ApproveMissionResult extends CompleteMissionResult {
+  reviewer_xp_earned: number;
+}
+
+export async function getMissionsToReview(): Promise<ToReviewItem[]> {
+  const response = await apiFetch(
+    '/missions/to-review?page=1&perPage=100&sortField=remaining_seconds&sortOrder=asc',
+  );
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao carregar missões para revisão'));
+  }
+
+  const data = await readContent<ToReviewResponse>(response);
+  return data.items ?? [];
+}
+
+export async function approveMission(slug: string, executorId: string): Promise<ApproveMissionResult> {
+  const response = await apiFetch(`/missions/${slug}/approve`, {
+    method: 'POST',
+    body: JSON.stringify({ executor_id: executorId }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao aprovar missão'));
+  }
+
+  return readContent<ApproveMissionResult>(response);
 }

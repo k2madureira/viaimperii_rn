@@ -27,7 +27,7 @@ export default function Navbar() {
         </View>
         <UserMenu
           onChangePassword={() => setShowPasswordModal(true)}
-          onEdit={() => navigation.navigate('Profile')}
+          onEdit={() => navigation.navigate('Home', { screen: 'Profile' })}
         />
       </View>
 

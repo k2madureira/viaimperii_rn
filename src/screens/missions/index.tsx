@@ -3,11 +3,12 @@ import { ActivityIndicator, Platform, RefreshControl, ScrollView, Text, Touchabl
 import { useRewardedVideo } from './model/mutations/useRewardedVideo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionSelectModal, Navbar } from '../../components';
-import { Mission } from '../../api/missions/missionsApi';
+import { Mission, ToReviewItem } from '../../api/missions/missionsApi';
 import { StatsPeriod } from '../../api/users/userApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { XP_PER_RANK } from '../../constants/game';
 import { useUserProfile } from '../dashboard/model/queries/useUserProfile';
+import { parseBackendDate } from '../../utils/date';
 
 // Ordenação por dificuldade: fácil → médio → difícil (nulos por último).
 const DIFFICULTY_ORDER: Record<string, number> = { easy: 0, medium: 1, hard: 2 };
@@ -22,6 +23,7 @@ import {
   MissionsTab,
   MissionsTabs,
   PeriodStats,
+  ReviewItem,
   SpecialtyFilter,
   StatsFilter,
 } from './components';
@@ -29,11 +31,15 @@ import {
 const PAGE_SIZE = 5;
 import { useCompleteMission, useStartMission } from './model/mutations/useMissionMutations';
 import { useJoinLegion } from './model/mutations/useJoinLegion';
+import { useApproveMission } from './model/mutations/useApproveMission';
 import { useAvailableMissions } from './model/queries/useAvailableMissions';
 import { useLegions } from './model/queries/useLegions';
 import { useMissions } from './model/queries/useMissions';
+import { useMissionsToReview } from './model/queries/useMissionsToReview';
 import { useSpecialties } from './model/queries/useSpecialties';
 import { useUserStats } from './model/queries/useUserStats';
+
+type ViewMode = 'missions' | 'review';
 
 const FIRST_TRACK_RANK: Record<string, string> = {
   legionarios: 'Legionary I',
@@ -47,11 +53,13 @@ export default function MissionsScreen() {
   const profileQuery = useUserProfile(user?.user_id);
   const userTrack = profileQuery.data?.track ?? null;
 
+  const [viewMode, setViewMode] = useState<ViewMode>('missions');
   const [period, setPeriod] = useState<StatsPeriod>('monthly');
   const [tab, setTab] = useState<MissionsTab>('available');
   const [missionType, setMissionType] = useState<'daily' | 'monthly'>('daily');
   const [specialtyId, setSpecialtyId] = useState<number | null>(null);
   const [visible, setVisible] = useState(PAGE_SIZE);
+  const isReview = viewMode === 'review';
 
   const isHistory = tab === 'history';
   const isInProgress = tab === 'inprogress';
@@ -70,9 +78,15 @@ export default function MissionsScreen() {
   // Catálogo completo (já filtrado por trilha no backend) — usado para derivar
   // quais especialidades pertencem à trilha do usuário, sem o efeito da cota diária.
   const catalogQuery = useMissions(undefined, true);
-  // Histórico = em andamento + concluídas, filtrados pelo backend (status=...).
-  const inProgressQuery = useMissions('in_progress', isInProgress);
-  const completedQuery = useMissions('completed', isHistory);
+  // Histórico = missões concluídas (status=completed), mais recentes primeiro.
+  const completedQuery = useMissions('completed', isHistory, {
+    sortField: 'completed_at',
+    sortOrder: 'desc',
+  });
+
+  // Fila de revisão de pares (só carrega quando o modo "Revisão" está ativo).
+  const toReviewQuery = useMissionsToReview(isReview);
+  const approveM = useApproveMission();
 
   const startM = useStartMission();
   const completeM = useCompleteMission();
@@ -115,33 +129,44 @@ export default function MissionsScreen() {
   const allowance = availableQuery.data?.availableMissions;
   const activeAllowanceCount = missionType === 'daily' ? (allowance?.daily ?? null) : (allowance?.weekly ?? null);
   const activeResetAt = missionType === 'daily' ? allowance?.daily_reset_at : allowance?.weekly_reset_at;
-  const historyMissions = sortByDifficulty([
-    ...(inProgressQuery.data ?? []),
-    ...(completedQuery.data ?? []),
-  ]);
+  // Já ordenado por data de conclusão (desc) no backend.
+  const historyMissions = completedQuery.data ?? [];
 
-  const inProgressMissions = sortByDifficulty(inProgressQuery.data ?? []);
-  const inProgressLoading = inProgressQuery.isLoading;
-  const inProgressError = inProgressQuery.isError;
+  // "Ativas" = em andamento + em revisão (pending_review). O backend não filtra
+  // pending_review por status, então derivamos do catálogo completo.
+  const inProgressMissions = sortByDifficulty(
+    (catalogQuery.data ?? []).filter(
+      (m) => m.status === 'in_progress' || m.status === 'pending_review',
+    ),
+  );
+  const inProgressLoading = catalogQuery.isLoading;
+  const inProgressError = catalogQuery.isError;
 
   const historyLoading =  completedQuery.isLoading;
   const historyError =  completedQuery.isError;
 
   let refreshing = statsQuery.isRefetching;
 
-  if(isHistory) {
+  if (isReview) {
+    refreshing = toReviewQuery.isRefetching;
+  } else if(isHistory) {
     refreshing = completedQuery.isRefetching;
   } else if(isInProgress){
-    refreshing = inProgressQuery.isRefetching;
+    refreshing = catalogQuery.isRefetching;
   } else if (!isHistory && !isInProgress) {
     refreshing = availableQuery.isRefetching
   }
 
   const onRefresh = () => {
+    if (isReview) {
+      toReviewQuery.refetch();
+      return;
+    }
     statsQuery.refetch();
     if (isHistory) {
-      inProgressQuery.refetch();
       completedQuery.refetch();
+    } else if (isInProgress) {
+      catalogQuery.refetch();
     } else {
       availableQuery.refetch();
     }
@@ -182,6 +207,29 @@ export default function MissionsScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8B1A2B" />
         }>
+        {/* ── Troca de abas: Minhas Missões | Revisão ─────────────────────── */}
+        <View className="flex-row bg-[#efeaea] rounded-[12px] p-1">
+          <ModeTab
+            label="Minhas Missões"
+            active={!isReview}
+            onPress={() => setViewMode('missions')}
+          />
+          <ModeTab
+            label="Revisão"
+            active={isReview}
+            badge={toReviewQuery.data?.length}
+            onPress={() => setViewMode('review')}
+          />
+        </View>
+
+        {isReview ? (
+          <ReviewSection
+            query={toReviewQuery}
+            onApprove={(slug, executorId) => approveM.mutate({ slug, executorId })}
+            pendingSlug={approveM.isPending ? approveM.variables?.slug ?? null : null}
+          />
+        ) : (
+        <>
         {/* Filtro de período + estatísticas */}
         <StatsFilter value={period} onChange={setPeriod} />
         <PeriodStats stats={statsQuery.data} isLoading={statsQuery.isLoading} />
@@ -300,7 +348,7 @@ export default function MissionsScreen() {
                 ) : inProgressError ? (
                   <ErrorBox text="Não foi possível carregar as missões em progresso." />
                 ) : inProgressMissions.length === 0 ? (
-                  <EmptyBox text="Nenhuma missão em andamento." />
+                  <EmptyBox text="Nenhuma missão ativa ou em revisão." />
                 ) : (
                   renderList(inProgressMissions)
                 )}
@@ -324,6 +372,8 @@ export default function MissionsScreen() {
             )}
           </View>
         </View>
+        </>
+        )}
       </ScrollView>
 
       <LegionSelectModal
@@ -395,7 +445,8 @@ function AllowanceBar({
 }) {
   const resetLabel = React.useMemo(() => {
     if (!resetAt) return null;
-    const reset = new Date(resetAt);
+    const reset = parseBackendDate(resetAt);
+    if (!reset) return null;
     const now = new Date();
     const diffMs = reset.getTime() - now.getTime();
     if (diffMs <= 0) return null;
@@ -465,6 +516,79 @@ function ErrorBox({ text }: { text: string }) {
   return (
     <View className="bg-white border border-[#f0eded] rounded-[14px] py-10 items-center px-6">
       <Text className="text-[13px] text-[#c0392b] text-center">{text}</Text>
+    </View>
+  );
+}
+
+function ModeTab({
+  label,
+  active,
+  badge,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  badge?: number;
+  onPress: () => void;
+}) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={onPress}
+      className={`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-[9px] ${active ? 'bg-white' : ''}`}
+      style={active ? { shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 } : undefined}>
+      <Text className={`text-[13px] font-bold ${active ? 'text-primary' : 'text-[#888]'}`}>
+        {label}
+      </Text>
+      {badge != null && badge > 0 && (
+        <View className="bg-primary rounded-full px-1.5 py-0.5 min-w-[18px] items-center">
+          <Text className="text-[10px] font-bold text-white">{badge}</Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+}
+
+function ReviewSection({
+  query,
+  onApprove,
+  pendingSlug,
+}: {
+  query: { isLoading: boolean; isError: boolean; data?: ToReviewItem[] };
+  onApprove: (slug: string, executorId: string) => void;
+  pendingSlug: string | null;
+}) {
+  const items = query.data ?? [];
+  return (
+    <View className="bg-white border border-[#f0eded] rounded-[20px] p-3 gap-3">
+      <View className="px-1 pt-1">
+        <Text className="text-[14px] font-extrabold text-charcoal">Aguardando sua revisão</Text>
+        <Text className="text-[11px] text-[#999] mt-0.5 leading-[15px]">
+          Valide missões médias/difíceis de companheiros da sua legião com patente abaixo da sua.
+          Duas aprovações concluem a missão.
+        </Text>
+      </View>
+
+      {query.isLoading ? (
+        <View className="py-12 items-center">
+          <ActivityIndicator color="#8B1A2B" />
+        </View>
+      ) : query.isError ? (
+        <ErrorBox text="Não foi possível carregar as missões para revisão." />
+      ) : items.length === 0 ? (
+        <EmptyBox text="Nenhuma missão aguardando sua revisão no momento." />
+      ) : (
+        <View className="gap-3">
+          {items.map((item) => (
+            <ReviewItem
+              key={`${item.mission_slug}-${item.executor.id}`}
+              item={item}
+              onApprove={onApprove}
+              pending={pendingSlug === item.mission_slug}
+            />
+          ))}
+        </View>
+      )}
     </View>
   );
 }

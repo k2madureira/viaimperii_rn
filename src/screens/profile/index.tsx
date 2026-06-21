@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../contexts/AuthContext';
 import { ChangePasswordModal } from '../dashboard/components';
@@ -21,6 +21,7 @@ export default function ProfileScreen() {
   const track = data?.track?.name ?? '—';
   const province = data?.province ? `${data.province.name}` : '—';
   const initial = name.trim().charAt(0).toUpperCase();
+  const avatarUrl = data?.active_avatar?.url ?? null;
 
   return (
     <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
@@ -44,8 +45,12 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}>
         {/* Cabeçalho do perfil */}
         <View className="items-center pt-2">
-          <View className="w-20 h-20 rounded-full bg-primary items-center justify-center">
-            <Text className="text-[30px] font-extrabold text-white">{initial}</Text>
+          <View className="w-20 h-20 rounded-full bg-primary items-center justify-center overflow-hidden">
+            {avatarUrl ? (
+              <Image source={{ uri: avatarUrl }} style={{ width: 80, height: 80 }} resizeMode="cover" />
+            ) : (
+              <Text className="text-[30px] font-extrabold text-white">{initial}</Text>
+            )}
           </View>
           <Text
             className="text-[22px] font-extrabold text-charcoal mt-3"
