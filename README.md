@@ -44,6 +44,8 @@ npm install
 
 ```bash
 npx expo start
+npx expo start --dev-client
+eas build --profile development --platform android
 ```
 
 O terminal exibirá um **QR Code** e as opções abaixo:

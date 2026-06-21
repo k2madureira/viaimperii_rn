@@ -9,21 +9,22 @@ interface Props {
   pending: boolean;
 }
 
-const STATUS_LABEL: Record<Mission['status'], string> = {
-  available: 'Disponível',
-  in_progress: 'Em andamento',
-  completed: 'Concluída',
-};
-
 const DIFFICULTY_LABEL: Record<string, string> = {
   easy: 'Fácil',
   medium: 'Médio',
   hard: 'Difícil',
 };
 
+const DIFFICULTY_COLOR: Record<string, string> = {
+  easy: '#2F7A52',
+  medium: '#D4AF37',
+  hard: '#9E1B32',
+};
+
 export default function MissionItem({ mission, onStart, onComplete, pending }: Props) {
   const isCompleted = mission.status === 'completed';
   const isInProgress = mission.status === 'in_progress';
+  const diffColor = DIFFICULTY_COLOR[mission.difficulty ?? ''] ?? '#aaa';
 
   return (
     <View
@@ -37,30 +38,39 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
       <View className="flex-row items-start justify-between">
         <View className="flex-1 pr-3">
           <Text className="text-[14px] font-bold text-[#222]">{mission.name}</Text>
-          <View className="flex-row items-center flex-wrap gap-x-2 mt-1">
-            <Text className="text-[11px] text-[#999]">
-              {mission.specialty_name ?? 'Geral'}
-            </Text>
+          <View className="flex-row items-center flex-wrap gap-x-2 mt-1.5">
+            {mission.specialty_name && (
+              <Text className="text-[11px] text-[#999]">{mission.specialty_name}</Text>
+            )}
             {mission.difficulty && (
-              <Text className="text-[11px] text-[#999]">
-                · {DIFFICULTY_LABEL[mission.difficulty] ?? mission.difficulty}
-              </Text>
+              <View
+                className="px-1.5 py-0.5 rounded-full"
+                style={{ backgroundColor: `${diffColor}18` }}>
+                <Text className="text-[10px] font-bold" style={{ color: diffColor }}>
+                  {DIFFICULTY_LABEL[mission.difficulty] ?? mission.difficulty}
+                </Text>
+              </View>
             )}
             {mission.type && (
-              <Text className="text-[11px] text-[#999]">
-                · {mission.type === 'daily' ? 'Diária' : 'Mensal'}
+              <Text className="text-[10px] text-[#bbb]">
+                {mission.type === 'daily' ? 'Diária' : 'Semanal'}
               </Text>
             )}
           </View>
         </View>
-        <View className="items-end">
-          <Text className="text-[13px] font-bold text-primary">+{mission.xp_reward} XP</Text>
-          <Text
-            className={`text-[10px] font-semibold mt-0.5 ${
-              isInProgress ? 'text-primary' : isCompleted ? 'text-laurel' : 'text-[#aaa]'
-            }`}>
-            {STATUS_LABEL[mission.status]}
-          </Text>
+
+        <View className="items-end gap-1">
+          <Text className="text-[13px] font-extrabold text-gold">+{mission.xp_reward} XP</Text>
+          {isCompleted && (
+            <View className="bg-laurel/15 rounded-full px-2 py-0.5">
+              <Text className="text-[10px] font-bold text-laurel">Concluída</Text>
+            </View>
+          )}
+          {isInProgress && (
+            <View className="bg-primary/10 rounded-full px-2 py-0.5">
+              <Text className="text-[10px] font-bold text-primary">Em andamento</Text>
+            </View>
+          )}
         </View>
       </View>
 
@@ -69,16 +79,15 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
           <TouchableOpacity
             disabled={pending}
             activeOpacity={0.85}
-            onPress={() =>
-              isInProgress ? onComplete(mission.slug) : onStart(mission.slug)
-            }
-            className={`rounded-[10px] py-2.5 items-center ${isInProgress ? 'bg-primary' : 'bg-[#f4eaea]'}`}>
+            onPress={() => isInProgress ? onComplete(mission.slug) : onStart(mission.slug)}
+            className={`rounded-[10px] py-2.5 items-center ${
+              isInProgress ? 'bg-primary' : 'bg-[#6B1221]'
+            }`}>
             {pending ? (
-              <ActivityIndicator color={isInProgress ? '#fff' : '#8B1A2B'} size="small" />
+              <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text
-                className={`text-[13px] font-bold ${isInProgress ? 'text-white' : 'text-primary'}`}>
-                {isInProgress ? 'Concluir' : 'Iniciar'}
+              <Text className="text-[13px] font-bold text-white">
+                {isInProgress ? 'Concluir missão' : 'Iniciar missão'}
               </Text>
             )}
           </TouchableOpacity>

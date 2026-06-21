@@ -5,6 +5,29 @@ export interface Track {
   name: string;
   slug: string; // 'legionarios' | 'patricios'
   description: string | null;
+  attributes: string[];
+  max_rank_image_url: string | null;
+}
+
+export interface ChooseTrackResult {
+  message: string;
+  track: string;
+  rank: string;
+  total_xp: number;
+  xp_penalty: number;
+}
+
+export async function chooseTrack(userId: string, trackSlug: string): Promise<ChooseTrackResult> {
+  const response = await apiFetch(`/users/${userId}/track`, {
+    method: 'POST',
+    body: JSON.stringify({ track: trackSlug }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao escolher trilha'));
+  }
+
+  return readContent<ChooseTrackResult>(response);
 }
 
 export interface Rank {
@@ -15,6 +38,7 @@ export interface Rank {
   icon_url: string | null;
   image_url: string | null;
   track_id: number | null; // NULL = patente compartilhada (Recruta I-IV, Governador+)
+  xp_required: number; // XP acumulado para alcançar a patente (curva variável)
 }
 
 interface PaginatedRanks {

@@ -4,7 +4,7 @@ import { Platform, Text, View } from 'react-native';
 import { ChangePasswordModal } from '../../screens/dashboard/components';
 import LogoIcon from '../logoIcon';
 import UserMenu from '../userMenu';
-
+ 
 /**
  * Navbar usada nas telas internas (Missions, Ranking, etc.):
  * logo + nome do app à esquerda, UserMenu à direita.

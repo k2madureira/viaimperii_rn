@@ -26,6 +26,18 @@ export interface RankImage {
   image_url: string | null;
 }
 
+// Patente atual + dados de progressão (calculados no backend, cientes da trilha).
+export interface CurrentRank extends RankImage {
+  total_xp: number;
+  current_rank_xp: number; // XP acumulado para alcançar a patente atual
+  xp_in_current_rank: number; // XP dentro da faixa da patente atual
+  current_rank_span: number; // largura da faixa (0 na patente máxima)
+  next_rank_name: string | null;
+  next_rank_xp: number | null; // XP acumulado para a próxima patente
+  xp_to_next_rank: number;
+  progress_pct: number; // progresso dentro da faixa, 0..100
+}
+
 export interface Achievement {
   id: number;
   name: string;
@@ -62,11 +74,14 @@ export interface UserProvince {
 export interface GetUserResponse {
   user: UserProfile;
   xp_to_next_rank: number;
+  xp_in_current_rank: number;
+  current_rank_span: number;
+  next_rank_name: string | null;
   must_choose_track: boolean;
   track: UserTrack | null;
   legion: UserLegion | null;
   province: UserProvince | null;
-  current_rank: RankImage | null;
+  current_rank: CurrentRank | null;
   ranks: RankImage[];
   achievements: Achievement[];
 }

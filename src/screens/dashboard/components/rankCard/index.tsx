@@ -5,6 +5,7 @@ interface Props {
   rank: string;
   totalXp: number;
   xpToNextRank: number;
+  progressPct?: number | null; // progresso na faixa (0..100), calculado no backend
   imageUrl?: string | null;
   trackName?: string | null;
   onPress?: () => void;
@@ -14,17 +15,19 @@ export default function RankCard({
   rank,
   totalXp,
   xpToNextRank,
+  progressPct,
   imageUrl,
   trackName,
   onPress,
 }: Props) {
   const isMaxRank = xpToNextRank <= 0;
-  // Progresso até a próxima patente com base nos valores da API.
-  const progress = isMaxRank
-    ? 1
-    : totalXp > 0
-      ? Math.min(1, totalXp / (totalXp + xpToNextRank))
-      : 0;
+  // Progresso dentro da faixa da patente — usa o valor do backend quando disponível.
+  const progress =
+    progressPct != null
+      ? Math.min(1, progressPct / 100)
+      : isMaxRank
+        ? 1
+        : 0;
 
   const Wrapper: any = onPress ? TouchableOpacity : View;
 

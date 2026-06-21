@@ -38,14 +38,30 @@ export interface CompleteMissionResult {
   requires_track_selection?: boolean;
 }
 
+export interface MissionAllowance {
+  date: string;
+  daily: number;
+  weekly: number;
+  daily_reset_at: string;
+  weekly_reset_at: string;
+  rewarded_video_available: boolean;
+}
+
+export interface RewardedVideoResult {
+  message: string;
+  bonus_missions: number;
+  availableMissions: MissionAllowance;
+}
+
 export interface PaginatedMissions {
   page: number;
   perPage: number;
   totalItems: number;
   items: Mission[];
+  availableMissions?: MissionAllowance;
 }
 
-export async function getMissions(status?: MissionStatus): Promise<Mission[]> {
+export async function getMissions(status?: MissionStatus): Promise<PaginatedMissions> {
   const statusParam = status ? `&status=${status}` : '';
   const response = await apiFetch(`/missions?page=1&perPage=100${statusParam}`);
 
@@ -53,10 +69,10 @@ export async function getMissions(status?: MissionStatus): Promise<Mission[]> {
     throw new Error(await readError(response, 'Erro ao carregar missões'));
   }
 
-  // O endpoint retorna PaginatedMissions ({ items }); mantemos compatibilidade
-  // caso volte a ser uma lista.
   const data = await readContent<PaginatedMissions | Mission[]>(response);
-  return Array.isArray(data) ? data : (data?.items ?? []);
+  return Array.isArray(data)
+    ? { page: 1, perPage: data.length, totalItems: data.length, items: data }
+    : data;
 }
 
 export type MissionDifficulty = 'easy' | 'medium' | 'hard';
@@ -86,6 +102,16 @@ export async function startMission(slug: string): Promise<void> {
   if (!response.ok) {
     throw new Error(await readError(response, 'Erro ao iniciar missão'));
   }
+}
+
+export async function registerRewardedVideo(): Promise<RewardedVideoResult> {
+  const response = await apiFetch('/missions/rewarded-video', { method: 'POST' });
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao registrar vídeo assistido'));
+  }
+
+  return readContent<RewardedVideoResult>(response);
 }
 
 export async function completeMission(slug: string): Promise<CompleteMissionResult> {

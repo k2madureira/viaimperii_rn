@@ -32,6 +32,7 @@ export function useCompleteMission() {
       queryClient.invalidateQueries({ queryKey: ['missions-available'] });
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
       queryClient.invalidateQueries({ queryKey: ['ranking'] });
+      queryClient.invalidateQueries({ queryKey: ['user-stats'] });
     },
     onError: (error: Error) => {
       Toast.show({ type: 'error', text1: 'Erro ao concluir missão', text2: error.message });

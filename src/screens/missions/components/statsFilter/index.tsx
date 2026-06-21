@@ -24,8 +24,10 @@ export default function StatsFilter({ value, onChange }: Props) {
             key={opt.key}
             activeOpacity={0.8}
             onPress={() => onChange(opt.key)}
-            className={`flex-1 py-2 rounded-[10px] items-center border ${active ? 'bg-primary border-primary' : 'bg-white border-[#e0e0e0]'}`}>
-            <Text className={`text-[12px] font-bold ${active ? 'text-white' : 'text-[#666]'}`}>
+            className={`flex-1 py-2 rounded-[10px] items-center border ${
+              active ? 'bg-[#6B1221] border-[#6B1221]' : 'bg-white border-[#e0e0e0]'
+            }`}>
+            <Text className={`text-[12px] font-bold ${active ? 'text-white' : 'text-[#888]'}`}>
               {opt.label}
             </Text>
           </TouchableOpacity>

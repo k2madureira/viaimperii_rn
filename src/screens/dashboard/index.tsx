@@ -10,10 +10,9 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LegionSelectModal, ProvinceSetupModal, UserMenu } from '../../components';
+import { LegionSelectModal, Navbar, ProvinceSetupModal, TrackSelectModal } from '../../components';
 import { MASTERY_ICONS } from '../../components/masteryIcons';
 import { useAuth } from '../../contexts/AuthContext';
-import { XP_PER_RANK } from '../../constants/game';
 import { legionColorById } from '../../utils/legionColors';
 import { ChangePasswordModal } from './components';
 import { useLegions } from '../missions/model/queries/useLegions';
@@ -23,6 +22,8 @@ import { useUserProfile } from './model/queries/useUserProfile';
 import { useCampaigns } from './model/queries/useCampaigns';
 import { useLegionDetail } from './model/queries/useLegionDetail';
 import { useUpdateProvince } from './model/mutations/useUpdateProvince';
+import { useChooseTrack } from './model/mutations/useChooseTrack';
+import { useTracks } from '../ranks/model/queries/useTracks';
 
 const MASTERIES = [
   { key: 'Engineering', latin: 'Fabrorum', pt: 'Engenharia' },
@@ -47,7 +48,7 @@ export default function DashboardScreen() {
   const data = profileQuery.data;
   const profile = data?.user;
   const currentRank = data?.current_rank ?? null;
-  const xpToNextRank = data?.xp_to_next_rank ?? 0;
+  const xpToNextRank = currentRank?.xp_to_next_rank ?? data?.xp_to_next_rank ?? 0;
   const legion = data?.legion ?? null;
   const legionDetailQuery = useLegionDetail(legion?.id);
 
@@ -60,17 +61,22 @@ export default function DashboardScreen() {
     campaignsQuery.refetch();
   };
 
-  // ── Província / Legião (modais automáticos) ────────────────────────────────
+  // ── Modais automáticos (senha → província → trilha → legião) ──────────────
   const updateProvinceM = useUpdateProvince(user?.user_id);
   const joinLegionM = useJoinLegion(user?.user_id);
+  const chooseTrackM = useChooseTrack(user?.user_id);
+  const tracksQuery = useTracks();
+
   const [provinceModalVisible, setProvinceModalVisible] = useState(false);
   const [provinceDismissed, setProvinceDismissed] = useState(false);
+  const [trackModalVisible, setTrackModalVisible] = useState(false);
+  const [trackDismissed, setTrackDismissed] = useState(false);
   const [legionModalVisible, setLegionModalVisible] = useState(false);
   const [legionDismissed, setLegionDismissed] = useState(false);
   const [recommendedIds, setRecommendedIds] = useState<number[]>([]);
-  const [showPassword, setShowPassword] = useState(false);
 
   const needsProvince = profileQuery.isSuccess && data?.province == null;
+  const needsTrack = profileQuery.isSuccess && data?.must_choose_track === true;
   const hasLegion = legion != null;
   const completedCount = profile?.completed_missions?.length ?? 0;
 
@@ -80,20 +86,30 @@ export default function DashboardScreen() {
   }, [isTemporary, provinceDismissed, needsProvince]);
 
   useEffect(() => {
-    if (isTemporary || legionDismissed || needsProvince) return;
+    if (isTemporary || trackDismissed || needsProvince) return;
+    if (needsTrack) setTrackModalVisible(true);
+  }, [isTemporary, trackDismissed, needsProvince, needsTrack]);
+
+  useEffect(() => {
+    if (isTemporary || legionDismissed || needsProvince || needsTrack) return;
     if (!hasLegion && completedCount > 0) setLegionModalVisible(true);
-  }, [isTemporary, legionDismissed, needsProvince, hasLegion, completedCount]);
+  }, [isTemporary, legionDismissed, needsProvince, needsTrack, hasLegion, completedCount]);
 
   // ── Dados derivados ────────────────────────────────────────────────────────
   const firstName = user?.name?.split(' ')[0] ?? 'Legionário';
   const rankName = profile?.rank ?? user?.rank ?? '—';
   const totalXp = profile?.total_xp ?? user?.total_xp ?? 0;
   const currentLevel = currentRank?.level ?? 1;
-  const isMaxRank = xpToNextRank <= 0;
-  const xpInRank = isMaxRank ? XP_PER_RANK : Math.max(0, XP_PER_RANK - xpToNextRank);
-  const rankProgress = Math.min(1, xpInRank / XP_PER_RANK);
-  const ranks = data?.ranks ?? [];
-  const nextRankName = ranks.find((r) => r.level === currentLevel + 1)?.name ?? null;
+  // Bloqueado: tem XP para avançar mas ainda não escolheu trilha (Recruta IV).
+  const mustChooseTrack = data?.must_choose_track === true;
+  // Patente máxima de verdade (Imperador) — não confundir com o estado bloqueado.
+  const isMaxRank = xpToNextRank <= 0 && !mustChooseTrack;
+  // Progresso dentro da faixa da patente — calculado no backend (progress_pct, 0..100).
+  const rankProgress = mustChooseTrack
+    ? 1
+    : Math.min(1, (currentRank?.progress_pct ?? 0) / 100);
+  // Nome da próxima patente já considerando a trilha do usuário (vem do backend).
+  const nextRankName = currentRank?.next_rank_name ?? data?.next_rank_name ?? null;
 
   const mastery = profile?.mastery ?? {};
   const mainSpecialty = profile?.main_specialty ?? null;
@@ -119,6 +135,7 @@ export default function DashboardScreen() {
 
   return (
     <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+      <Navbar />
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 24, gap: 18 }}
@@ -127,22 +144,16 @@ export default function DashboardScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#9E1B32" />
         }>
         {/* 1 — HEADER */}
-        <View className="flex-row items-start justify-between">
-          <View className="flex-1">
-            <Text
-              className="text-[26px] font-extrabold text-charcoal"
-              style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-              Ave, {firstName}
-            </Text>
-            <Text className="text-[13px] text-[#777] mt-0.5" numberOfLines={1}>
-              {rankName}
-              {legion ? ` • ${legion.name}` : ''}
-            </Text>
-          </View>
-          <UserMenu
-            onEdit={() => navigation.navigate('Profile')}
-            onChangePassword={() => setShowPassword(true)}
-          />
+        <View>
+          <Text
+            className="text-[26px] font-extrabold text-charcoal"
+            style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
+            Ave, {firstName}
+          </Text>
+          <Text className="text-[13px] text-[#777] mt-0.5" numberOfLines={1}>
+            {rankName}
+            {legion ? ` • ${legion.name}` : ''}
+          </Text>
         </View>
 
         {/* 2 — RANK PROGRESSION */}
@@ -158,7 +169,7 @@ export default function DashboardScreen() {
                 {rankName}
               </Text>
               <Text className="text-[13px] text-white/80 mt-1">
-                {xpInRank} / {XP_PER_RANK} XP
+                {totalXp.toLocaleString('pt-BR')} XP
               </Text>
             </View>
 
@@ -182,9 +193,11 @@ export default function DashboardScreen() {
           </View>
 
           <Text className="text-[12px] text-white/85 mt-2">
-            {isMaxRank
-              ? 'Patente máxima alcançada'
-              : `Faltam ${xpToNextRank} XP para ${nextRankName ?? 'a próxima patente'}`}
+            {mustChooseTrack
+              ? 'Escolha uma trilha para avançar de patente'
+              : isMaxRank
+                ? 'Patente máxima alcançada'
+                : `Faltam ${xpToNextRank} XP para ${nextRankName ?? 'a próxima patente'}`}
           </Text>
 
           <TouchableOpacity
@@ -349,15 +362,8 @@ export default function DashboardScreen() {
         )}
       </ScrollView>
 
-      {/* Modais automáticos */}
+      {/* Modal automático para senha temporária */}
       <ChangePasswordModal visible={isTemporary} isTemporary={isTemporary} onClose={() => {}} />
-
-      {/* Troca de senha manual (via dropdown do usuário) */}
-      <ChangePasswordModal
-        visible={showPassword && !isTemporary}
-        isTemporary={false}
-        onClose={() => setShowPassword(false)}
-      />
 
       <ProvinceSetupModal
         visible={provinceModalVisible}
@@ -371,6 +377,24 @@ export default function DashboardScreen() {
             onSuccess: () => setProvinceModalVisible(false),
           })
         }
+      />
+
+      <TrackSelectModal
+        visible={trackModalVisible}
+        tracks={tracksQuery.data ?? []}
+        currentTrackSlug={data?.track?.slug ?? null}
+        isLoading={chooseTrackM.isPending}
+        onChoose={(slug) =>
+          chooseTrackM.mutate(slug, {
+            onSuccess: () => {
+              setTrackModalVisible(false);
+            },
+          })
+        }
+        onClose={() => {
+          setTrackModalVisible(false);
+          setTrackDismissed(true);
+        }}
       />
 
       <LegionSelectModal

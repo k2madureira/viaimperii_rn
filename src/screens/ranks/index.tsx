@@ -9,9 +9,9 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { LockIcon } from '../../components/icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../contexts/AuthContext';
-import { XP_PER_RANK } from '../../constants/game';
 import { HomeNavigationProp } from '../../navigation/HomeStack';
 import { RankCard } from '../dashboard/components';
 import { useUserProfile } from '../dashboard/model/queries/useUserProfile';
@@ -75,6 +75,7 @@ export default function RanksScreen() {
           rank={rank}
           totalXp={totalXp}
           xpToNextRank={xpToNextRank}
+          progressPct={currentRank?.progress_pct}
           imageUrl={currentRank?.image_url}
           trackName={userTrack?.name}
         />
@@ -111,16 +112,24 @@ export default function RanksScreen() {
           ) : (
             <View className="bg-white border border-[#f0eded] rounded-[14px] overflow-hidden">
               {sortedRanks.map((r, idx) => {
-                const xpRequired = (r.level - 1) * XP_PER_RANK;
+                const xpRequired = r.xp_required ?? 0;
                 const isCurrent = r.level === currentLevel;
                 const isAchieved = currentLevel > 0 && r.level <= currentLevel;
                 const isChoiceRank = r.level === CHOICE_RANK_LEVEL;
+                const isTrackSpecific = r.track_id != null;
+
+                // Bloqueado se específico de trilha e o usuário não tem trilha
+                // ou é de uma trilha diferente da sua
+                const isLocked = isTrackSpecific && (!userTrack || r.track_id !== userTrack.id);
+
+                // Os 2 últimos ranks (top 3 por level) têm XP oculto
+                const isTopSecret = idx >= sortedRanks.length - 3;
 
                 return (
                   <View
                     key={r.id}
                     className={`px-4 py-3 ${idx > 0 ? 'border-t border-[#f4f1f1]' : ''} ${
-                      isChoiceRank ? 'bg-gold/10' : isCurrent ? 'bg-[#f4eaea]' : ''
+                      isChoiceRank ? 'bg-gold/10' : isCurrent ? 'bg-[#f4eaea]' : isLocked ? 'bg-[#f8f8f8]' : ''
                     }`}>
                     <View className="flex-row items-center">
                       {/* Imagem da patente */}
@@ -128,7 +137,7 @@ export default function RanksScreen() {
                         {r.image_url ? (
                           <Image
                             source={{ uri: r.image_url }}
-                            style={{ width: 36, height: 36, opacity: isAchieved ? 1 : 0.35 }}
+                            style={{ width: 36, height: 36, opacity: isLocked ? 0.2 : isAchieved ? 1 : 0.35 }}
                             resizeMode="contain"
                           />
                         ) : (
@@ -138,26 +147,39 @@ export default function RanksScreen() {
 
                       <View className="flex-1 ml-3">
                         <Text
-                          className={`text-[14px] font-semibold ${isCurrent ? 'text-primary' : isAchieved ? 'text-[#222]' : 'text-[#999]'}`}>
+                          className={`text-[14px] font-semibold ${
+                            isLocked ? 'text-[#ccc]' : isCurrent ? 'text-primary' : isAchieved ? 'text-[#222]' : 'text-[#999]'
+                          }`}>
                           {r.name}
                           {isCurrent ? ' · atual' : ''}
                         </Text>
-                        <Text className="text-[11px] text-[#aaa]">Nível {r.level}</Text>
+                        <Text className={`text-[11px] ${isLocked ? 'text-[#ddd]' : 'text-[#aaa]'}`}>
+                          Nível {r.level}
+                          {isLocked && !userTrack ? ' · escolha uma trilha' : ''}
+                        </Text>
                       </View>
 
                       <View className="items-end">
-                        <Text
-                          className={`text-[13px] font-bold ${isAchieved ? 'text-[#333]' : 'text-[#bbb]'}`}>
-                          {xpRequired.toLocaleString('pt-BR')} XP
-                        </Text>
-                        {isAchieved && !isCurrent && (
-                          <Text className="text-[10px] text-primary font-semibold">conquistada</Text>
+                        {isLocked ? (
+                          <LockIcon size={16} color="#ccc" strokeWidth={2} />
+                        ) : isTopSecret ? (
+                          <Text className="text-[15px] font-bold text-[#ccc]">? XP</Text>
+                        ) : (
+                          <>
+                            <Text
+                              className={`text-[13px] font-bold ${isAchieved ? 'text-[#333]' : 'text-[#bbb]'}`}>
+                              {xpRequired.toLocaleString('pt-BR')} XP
+                            </Text>
+                            {isAchieved && !isCurrent && (
+                              <Text className="text-[10px] text-primary font-semibold">conquistada</Text>
+                            )}
+                          </>
                         )}
                       </View>
                     </View>
 
-                    {/* Evento: escolha de trilha ao chegar no Recruta IV */}
-                    {isChoiceRank && (
+                    {/* Banner de escolha de trilha — só aparece se o usuário ainda não tem trilha */}
+                    {isChoiceRank && !userTrack && (
                       <View className="flex-row items-center mt-2.5 bg-gold/20 rounded-[10px] px-3 py-2">
                         <Text className="text-[14px] mr-2">⚔️</Text>
                         <View className="flex-1">
