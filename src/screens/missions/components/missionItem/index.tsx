@@ -7,7 +7,7 @@ import { parseBackendDate, formatBackendDateTime } from '../../../../utils/date'
 interface Props {
   mission: Mission;
   onStart: (slug: string) => void;
-  onComplete: (slug: string) => void;
+  onComplete: (mission: Mission) => void;
   pending: boolean;
 }
 
@@ -15,6 +15,14 @@ const DIFFICULTY_LABEL: Record<string, string> = {
   easy: 'Fácil',
   medium: 'Médio',
   hard: 'Difícil',
+};
+
+// Tipo de prova exigida para concluir a missão (exibido como badge no card).
+const PROOF_LABEL: Record<string, string> = {
+  link: 'Link',
+  image: 'Imagem',
+  text: 'Texto',
+  any: 'Evidência',
 };
 
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -174,6 +182,14 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
                 {mission.type === 'daily' ? 'Diária' : 'Semanal'}
               </Text>
             )}
+            {mission.proof_type && mission.proof_type !== 'none' && (
+              <View className="px-1.5 py-0.5 rounded-full bg-[#eef2f7] flex-row items-center gap-1">
+                <Text className="text-[9px]">📎</Text>
+                <Text className="text-[10px] font-bold text-[#5b6b7f]">
+                  Requer {PROOF_LABEL[mission.proof_type] ?? 'evidência'}
+                </Text>
+              </View>
+            )}
           </View>
 
           {isCompleted && completedAtLabel && (
@@ -210,7 +226,7 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
           <TouchableOpacity
             disabled={pending}
             activeOpacity={0.85}
-            onPress={() => onComplete(mission.slug)}
+            onPress={() => onComplete(mission)}
             className="rounded-[10px] py-2.5 items-center bg-primary">
             {pending ? (
               <ActivityIndicator color="#fff" size="small" />

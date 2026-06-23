@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, Linking, Text, TouchableOpacity, View } from 'react-native';
 import { ToReviewItem } from '../../../../api/missions/missionsApi';
 import { parseBackendDate } from '../../../../utils/date';
 
 interface Props {
   item: ToReviewItem;
   onApprove: (slug: string, executorId: string) => void;
+  onReject: (slug: string, executorId: string) => void;
   pending: boolean;
 }
 
@@ -31,7 +32,7 @@ function formatRemaining(totalSeconds: number): string {
   return `${s}s`;
 }
 
-export default function ReviewItem({ item, onApprove, pending }: Props) {
+export default function ReviewItem({ item, onApprove, onReject, pending }: Props) {
   const diffColor = DIFFICULTY_COLOR[item.difficulty ?? ''] ?? '#aaa';
   const targetMs = parseBackendDate(item.completable_at)?.getTime() ?? null;
   const avatarUrl = item.executor.active_avatar?.url ?? item.executor.image ?? null;
@@ -88,6 +89,42 @@ export default function ReviewItem({ item, onApprove, pending }: Props) {
         </View>
       </View>
 
+      {/* Critério de aceitação */}
+      {item.acceptance_criteria ? (
+        <View className="mt-3 bg-[#f7f7f7] rounded-[10px] px-3 py-2">
+          <Text className="text-[10px] font-bold text-[#999] uppercase tracking-[1px] mb-0.5">
+            Critério
+          </Text>
+          <Text className="text-[12px] text-[#555] leading-[16px]">{item.acceptance_criteria}</Text>
+        </View>
+      ) : null}
+
+      {/* Evidência submetida */}
+      {item.submission ? (
+        <View className="mt-3 border border-[#eee] rounded-[10px] p-3 gap-2">
+          <Text className="text-[10px] font-bold text-primary uppercase tracking-[1px]">
+            Evidência ({item.submission.kind})
+          </Text>
+          {item.submission.kind === 'image' && item.submission.image_url ? (
+            <Image
+              source={{ uri: item.submission.image_url }}
+              style={{ width: '100%', height: 180, borderRadius: 8 }}
+              resizeMode="cover"
+            />
+          ) : item.submission.kind === 'link' && item.submission.content ? (
+            <TouchableOpacity onPress={() => Linking.openURL(item.submission!.content!)} activeOpacity={0.7}>
+              <Text className="text-[13px] text-primary underline" numberOfLines={2}>
+                {item.submission.content}
+              </Text>
+            </TouchableOpacity>
+          ) : item.submission.content ? (
+            <Text className="text-[13px] text-[#444] leading-[18px]">{item.submission.content}</Text>
+          ) : (
+            <Text className="text-[12px] text-[#999]">Sem conteúdo.</Text>
+          )}
+        </View>
+      ) : null}
+
       {/* Progresso de aprovações */}
       <View className="mt-3 gap-1.5">
         <View className="flex-row items-center justify-between">
@@ -108,17 +145,30 @@ export default function ReviewItem({ item, onApprove, pending }: Props) {
         </View>
       </View>
 
-      <TouchableOpacity
-        disabled={pending}
-        activeOpacity={0.85}
-        onPress={() => onApprove(item.mission_slug, item.executor.id)}
-        className={`mt-3 rounded-[10px] py-2.5 items-center ${pending ? 'bg-laurel/50' : 'bg-laurel'}`}>
-        {pending ? (
-          <ActivityIndicator color="#fff" size="small" />
-        ) : (
-          <Text className="text-[13px] font-bold text-white">Aprovar conclusão</Text>
-        )}
-      </TouchableOpacity>
+      <View className="mt-3 flex-row gap-2.5">
+        <TouchableOpacity
+          disabled={pending}
+          activeOpacity={0.85}
+          onPress={() => onReject(item.mission_slug, item.executor.id)}
+          className={`flex-1 rounded-[10px] py-2.5 items-center border ${
+            pending ? 'border-primary/30' : 'border-primary'
+          }`}>
+          <Text className={`text-[13px] font-bold ${pending ? 'text-primary/40' : 'text-primary'}`}>
+            Rejeitar
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          disabled={pending}
+          activeOpacity={0.85}
+          onPress={() => onApprove(item.mission_slug, item.executor.id)}
+          className={`flex-1 rounded-[10px] py-2.5 items-center ${pending ? 'bg-laurel/50' : 'bg-laurel'}`}>
+          {pending ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text className="text-[13px] font-bold text-white">Aprovar</Text>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
