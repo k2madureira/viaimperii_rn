@@ -11,6 +11,25 @@ missões/campanhas e ganha maestrias, medalhas e conquistas.
 
 ---
 
+## FLUXO GIT
+
+Branches: **`main`** (produção, sempre estável) e **`develop`** (integração). Nenhum
+commit direto em `main`.
+
+1. **Feature** → crie uma branch a partir de `develop` (ex.: `feat/<nome>`, `fix/<nome>`).
+   Toda alteração acontece em branch de feature, **nunca direto em `develop`**.
+2. **Feature finalizada** → abra **PR da feature para `develop`**. Revise/valide
+   (`tsc --noEmit` sem novos erros) e faça o merge em `develop`.
+3. **Release a cada 3 features** → quando **3 features** forem integradas em `develop`,
+   suba a `main`: merge (fast-forward quando possível) `develop` → `main`, **crie a tag**
+   semver (`vX.Y.Z`) e a **release** no GitHub com as notas das features incluídas.
+
+- Versão segue **SemVer**, espelhando `package.json`. A tag aponta para o commit
+  promovido a `main`.
+- Mensagens de commit/PR em pt-BR, no padrão `feat:` / `fix:` / `chore:`.
+
+---
+
 ## STACK
 
 - **Expo SDK 54** · React Native 0.81 · React 19 · Hermes

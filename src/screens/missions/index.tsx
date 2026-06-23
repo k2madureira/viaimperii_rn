@@ -3,7 +3,7 @@ import { ActivityIndicator, Platform, RefreshControl, ScrollView, Text, Touchabl
 import { useRewardedVideo } from './model/mutations/useRewardedVideo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionSelectModal, Navbar } from '../../components';
-import { Mission, ToReviewItem } from '../../api/missions/missionsApi';
+import { Mission, MissionEvidence, ToReviewItem } from '../../api/missions/missionsApi';
 import { StatsPeriod } from '../../api/users/userApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { XP_PER_RANK } from '../../constants/game';
@@ -20,6 +20,7 @@ const sortByDifficulty = (list: Mission[]) =>
 import {
   LoadMoreButton,
   MissionItem,
+  EvidenceModal,
   MissionsTab,
   MissionsTabs,
   PeriodStats,
@@ -32,6 +33,7 @@ const PAGE_SIZE = 5;
 import { useCompleteMission, useStartMission } from './model/mutations/useMissionMutations';
 import { useJoinLegion } from './model/mutations/useJoinLegion';
 import { useApproveMission } from './model/mutations/useApproveMission';
+import { useRejectMission } from './model/mutations/useRejectMission';
 import { useAvailableMissions } from './model/queries/useAvailableMissions';
 import { useLegions } from './model/queries/useLegions';
 import { useMissions } from './model/queries/useMissions';
@@ -97,22 +99,38 @@ export default function MissionsScreen() {
   // Modal de escolha de legião (abre após a 1ª missão concluída sem legião).
   const [legionModalVisible, setLegionModalVisible] = useState(false);
   const [recommendedIds, setRecommendedIds] = useState<number[]>([]);
+  // Modal de evidência (missões com proof_type != none).
+  const [evidenceMission, setEvidenceMission] = useState<Mission | null>(null);
+  const rejectM = useRejectMission();
 
-  const handleComplete = (slug: string) => {
-    completeM.mutate(slug, {
-      onSuccess: (result) => {
-        if (result.requires_legion_selection) {
-          setRecommendedIds((result.recommended_legions ?? []).map((l) => l.id));
-          setLegionModalVisible(true);
-        }
+  const submitComplete = (slug: string, evidence?: MissionEvidence) => {
+    completeM.mutate(
+      { slug, evidence },
+      {
+        onSuccess: (result) => {
+          setEvidenceMission(null);
+          if (result.requires_legion_selection) {
+            setRecommendedIds((result.recommended_legions ?? []).map((l) => l.id));
+            setLegionModalVisible(true);
+          }
+        },
       },
-    });
+    );
+  };
+
+  // Concluir: missões com evidência abrem o modal; as demais concluem direto.
+  const handleComplete = (mission: Mission) => {
+    if (mission.proof_type && mission.proof_type !== 'none') {
+      setEvidenceMission(mission);
+    } else {
+      submitComplete(mission.slug);
+    }
   };
 
   const pendingSlug = startM.isPending
     ? startM.variables
     : completeM.isPending
-      ? completeM.variables
+      ? completeM.variables?.slug
       : null;
 
   const allAvailable = availableQuery.data?.items ?? [];
@@ -226,7 +244,14 @@ export default function MissionsScreen() {
           <ReviewSection
             query={toReviewQuery}
             onApprove={(slug, executorId) => approveM.mutate({ slug, executorId })}
-            pendingSlug={approveM.isPending ? approveM.variables?.slug ?? null : null}
+            onReject={(slug, executorId) => rejectM.mutate({ slug, executorId })}
+            pendingSlug={
+              approveM.isPending
+                ? approveM.variables?.slug ?? null
+                : rejectM.isPending
+                  ? rejectM.variables?.slug ?? null
+                  : null
+            }
           />
         ) : (
         <>
@@ -387,6 +412,13 @@ export default function MissionsScreen() {
             onSuccess: () => setLegionModalVisible(false),
           })
         }
+      />
+
+      <EvidenceModal
+        mission={evidenceMission}
+        submitting={completeM.isPending}
+        onClose={() => setEvidenceMission(null)}
+        onSubmit={(evidence) => evidenceMission && submitComplete(evidenceMission.slug, evidence)}
       />
     </View>
   );
@@ -552,10 +584,12 @@ function ModeTab({
 function ReviewSection({
   query,
   onApprove,
+  onReject,
   pendingSlug,
 }: {
   query: { isLoading: boolean; isError: boolean; data?: ToReviewItem[] };
   onApprove: (slug: string, executorId: string) => void;
+  onReject: (slug: string, executorId: string) => void;
   pendingSlug: string | null;
 }) {
   const items = query.data ?? [];
@@ -584,6 +618,7 @@ function ReviewSection({
               key={`${item.mission_slug}-${item.executor.id}`}
               item={item}
               onApprove={onApprove}
+              onReject={onReject}
               pending={pendingSlug === item.mission_slug}
             />
           ))}

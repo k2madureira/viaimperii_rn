@@ -1,6 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
-import { completeMission, startMission } from '../../../../api/missions/missionsApi';
+import {
+  completeMission,
+  MissionEvidence,
+  startMission,
+} from '../../../../api/missions/missionsApi';
 
 export function useStartMission() {
   const queryClient = useQueryClient();
@@ -21,7 +25,8 @@ export function useCompleteMission() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (slug: string) => completeMission(slug),
+    mutationFn: (vars: { slug: string; evidence?: MissionEvidence }) =>
+      completeMission(vars.slug, vars.evidence),
     onSuccess: (result) => {
       if (result.status === 'completed') {
         Toast.show({

@@ -1,6 +1,9 @@
 // Ícone de cadeado
 export { default as LockIcon } from './lock';
 
+// Ícone de imagem
+export { default as ImageIcon } from './image';
+
 // Ícones de navegação (bottom tabs)
 export { default as HomeIcon } from '../../navigation/icons/HomeIcon';
 export { default as MissionsIcon } from '../../navigation/icons/MissionsIcon';
