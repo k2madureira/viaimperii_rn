@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
+import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
 import { ImageIcon } from '../../../../components/icons';
 import {
@@ -45,6 +46,7 @@ interface Props {
 
 // Modal de evidência para concluir missões com proof_type != none.
 export default function EvidenceModal({ mission, submitting, onClose, onSubmit }: Props) {
+  const { t } = useTranslation();
   const proof = mission?.proof_type ?? 'none';
   const wantsLink = proof === 'link' || proof === 'any';
   const wantsText = proof === 'text' || proof === 'any';
@@ -66,7 +68,7 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
   const pickImage = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      Toast.show({ type: 'error', text1: 'Permissão de galeria negada.' });
+      Toast.show({ type: 'error', text1: t('evidenceModal.toastGalleryDenied') });
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -80,7 +82,7 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
       const compressed = await compressEvidence(asset.uri, asset.width);
       setImageUri(compressed);
     } catch (e: any) {
-      Toast.show({ type: 'error', text1: 'Erro ao processar a imagem', text2: e?.message });
+      Toast.show({ type: 'error', text1: t('evidenceModal.toastImageError'), text2: e?.message });
     } finally {
       setUploading(false);
     }
@@ -110,7 +112,7 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
       onSubmit(evidence);
     } catch (e: any) {
       setUploading(false);
-      Toast.show({ type: 'error', text1: 'Erro ao enviar evidência', text2: e?.message });
+      Toast.show({ type: 'error', text1: t('evidenceModal.toastEvidenceError'), text2: e?.message });
     }
   };
 
@@ -127,13 +129,13 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={{ gap: 12 }}>
-              <Text className="text-[16px] font-extrabold text-charcoal">Comprovar conclusão</Text>
+              <Text className="text-[16px] font-extrabold text-charcoal">{t('evidenceModal.title')}</Text>
               <Text className="text-[13px] text-[#555]">{mission?.name}</Text>
 
               {mission?.acceptance_criteria ? (
             <View className="bg-gold/10 border border-gold/30 rounded-[12px] px-3 py-2.5">
               <Text className="text-[11px] font-bold text-[#9a7b1f] uppercase tracking-[1px] mb-1">
-                Critério de aceitação
+                {t('evidenceModal.acceptanceCriterion')}
               </Text>
               <Text className="text-[12px] text-[#7a5b00] leading-[17px]">
                 {mission.acceptance_criteria}
@@ -142,12 +144,12 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
           ) : null}
 
           {proof === 'any' && (
-            <Text className="text-[11px] text-[#888]">Envie ao menos uma evidência (link, texto ou imagem).</Text>
+            <Text className="text-[11px] text-[#888]">{t('evidenceModal.atLeastOne')}</Text>
           )}
 
           {wantsLink && (
             <View className="gap-1">
-              <Text className="text-[12px] font-semibold text-charcoal">Link</Text>
+              <Text className="text-[12px] font-semibold text-charcoal">{t('evidenceModal.link')}</Text>
               <TextInput
                 value={link}
                 onChangeText={setLink}
@@ -162,11 +164,11 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
 
           {wantsText && (
             <View className="gap-1">
-              <Text className="text-[12px] font-semibold text-charcoal">Descrição</Text>
+              <Text className="text-[12px] font-semibold text-charcoal">{t('evidenceModal.description')}</Text>
               <TextInput
                 value={text}
                 onChangeText={setText}
-                placeholder="Descreva como concluiu a missão..."
+                placeholder={t('evidenceModal.descriptionPlaceholder')}
                 placeholderTextColor="#aaa"
                 multiline
                 className="border border-[#e0e0e0] rounded-[10px] px-3 py-2.5 text-[14px] text-charcoal min-h-[80px]"
@@ -177,14 +179,14 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
 
           {wantsImage && (
             <View className="gap-1.5">
-              <Text className="text-[12px] font-semibold text-charcoal">Imagem</Text>
+              <Text className="text-[12px] font-semibold text-charcoal">{t('evidenceModal.image')}</Text>
               {imageUri ? (
                 <View className="rounded-[12px] overflow-hidden border border-[#e0e0e0]">
                   <Image source={{ uri: imageUri }} style={{ width: '100%', height: 160 }} resizeMode="cover" />
                   <TouchableOpacity
                     onPress={() => setImageUri(null)}
                     className="absolute top-2 right-2 bg-black/60 rounded-full px-2 py-1">
-                    <Text className="text-[11px] font-bold text-white">Remover</Text>
+                    <Text className="text-[11px] font-bold text-white">{t('evidenceModal.remove')}</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -193,7 +195,7 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
                   activeOpacity={0.85}
                   className="border border-dashed border-[#cbbcbc] rounded-[12px] py-6 items-center flex-row justify-center gap-2">
                   <ImageIcon size={18} color="#9E1B32" />
-                  <Text className="text-[13px] font-bold text-primary">Escolher imagem</Text>
+                  <Text className="text-[13px] font-bold text-primary">{t('evidenceModal.chooseImage')}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -205,7 +207,7 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
               disabled={busy}
               activeOpacity={0.85}
               className="flex-1 rounded-[12px] py-3 items-center border border-[#e0e0e0]">
-              <Text className="text-[14px] font-bold text-[#666]">Cancelar</Text>
+              <Text className="text-[14px] font-bold text-[#666]">{t('evidenceModal.cancel')}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={handleSubmit}
@@ -217,7 +219,7 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
               {busy ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
-                <Text className="text-[14px] font-bold text-white">Enviar</Text>
+                <Text className="text-[14px] font-bold text-white">{t('evidenceModal.send')}</Text>
               )}
             </TouchableOpacity>
           </View>

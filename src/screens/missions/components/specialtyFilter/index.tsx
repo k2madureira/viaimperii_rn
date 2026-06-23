@@ -1,5 +1,6 @@
 import React from 'react';
 import { ScrollView, Text, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Specialty } from '../../../../api/specialties/specialtiesApi';
 
 interface Props {
@@ -30,12 +31,13 @@ function Chip({
 }
 
 export default function SpecialtyFilter({ specialties, value, onChange }: Props) {
+  const { t } = useTranslation();
   return (
     <ScrollView
       horizontal
       showsHorizontalScrollIndicator={false}
       contentContainerStyle={{ gap: 8, paddingRight: 4 }}>
-      <Chip label="Todas" active={value === null} onPress={() => onChange(null)} />
+      <Chip label={t('specialtyFilter.all')} active={value === null} onPress={() => onChange(null)} />
       {specialties.map((s) => (
         <Chip
           key={s.id}

@@ -101,6 +101,32 @@ commit direto em `main`.
 
 ---
 
+## INTERNACIONALIZAÇÃO (i18n)
+
+**Obrigatório:** TODA feature nova deve ser internacionalizada. Nenhuma string visível ao
+usuário pode ficar hard-coded em português (ou qualquer idioma) no JSX/TS.
+
+- **Stack:** `i18next` + `react-i18next` + `expo-localization` (detecta o idioma do device).
+  Setup em `src/i18n/index.ts`; idioma padrão/fallback: `pt`. Idiomas: `pt` e `en`.
+- **Locales:** `src/i18n/locales/pt.ts` e `src/i18n/locales/en.ts`. As duas devem ter
+  **exatamente as mesmas chaves** — ao adicionar uma chave em uma, adicione na outra.
+- **Organização das chaves:** por feature/namespace (`dashboard`, `missions`, `ranks`,
+  `profile`, `legions`, `achievements`, `quiz`, `toasts`, `validation`, etc.) +
+  `common` para o que é compartilhado (`cancel`, `confirm`, `xp`, `appName`…).
+- **Em componentes React:** use o hook `const { t } = useTranslation();` e `t('namespace.chave')`.
+- **Fora de componentes** (schemas zod, hooks de mutation/toasts, helpers): importe a
+  instância — `import i18n from '<...>/i18n'` — e use `i18n.t('namespace.chave')`.
+  Funciona porque `App.tsx` importa `./src/i18n` antes de tudo (init síncrono).
+- **Interpolação:** `t('chave', { nome })` com `{{nome}}` no texto. **Plural:** use sufixos
+  `_one` / `_other` e passe `{ count }` (ex.: `missions.remaining_one/_other`).
+- **Números:** use `valor.toLocaleString()` (sem fixar `'pt-BR'`) para respeitar o locale.
+- **Não traduzir:** nomes próprios vindos do backend (patentes, legiões, conquistas,
+  nomes latinos de maestria) e abreviações universais de tempo (`h`/`min`/`s`).
+- Ao concluir uma feature, garanta que não restou texto fixo: revise JSX, `placeholder`,
+  `Toast.show`, mensagens de schema e labels passadas por props.
+
+---
+
 ## API / AUTENTICAÇÃO
 
 - **Envelope:** TODA resposta JSON (sucesso E erro) vem como `{ time, content }`.

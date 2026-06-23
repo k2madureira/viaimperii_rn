@@ -1,5 +1,6 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { StatsPeriod } from '../../../../api/users/userApi';
 
 interface Props {
@@ -7,28 +8,24 @@ interface Props {
   onChange: (period: StatsPeriod) => void;
 }
 
-const OPTIONS: { key: StatsPeriod; label: string }[] = [
-  { key: 'weekly', label: 'Semana' },
-  { key: 'monthly', label: 'Mês' },
-  { key: 'annual', label: 'Ano' },
-  { key: 'all', label: 'Tudo' },
-];
+const OPTION_KEYS: StatsPeriod[] = ['weekly', 'monthly', 'annual', 'all'];
 
 export default function StatsFilter({ value, onChange }: Props) {
+  const { t } = useTranslation();
   return (
     <View className="flex-row gap-2">
-      {OPTIONS.map((opt) => {
-        const active = value === opt.key;
+      {OPTION_KEYS.map((key) => {
+        const active = value === key;
         return (
           <TouchableOpacity
-            key={opt.key}
+            key={key}
             activeOpacity={0.8}
-            onPress={() => onChange(opt.key)}
+            onPress={() => onChange(key)}
             className={`flex-1 py-2 rounded-[10px] items-center border ${
               active ? 'bg-[#6B1221] border-[#6B1221]' : 'bg-white border-[#e0e0e0]'
             }`}>
             <Text className={`text-[12px] font-bold ${active ? 'text-white' : 'text-[#888]'}`}>
-              {opt.label}
+              {t(`statsFilter.${key}`)}
             </Text>
           </TouchableOpacity>
         );

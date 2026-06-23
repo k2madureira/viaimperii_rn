@@ -1,24 +1,25 @@
 import { z } from 'zod';
+import i18n from '../../../../i18n';
 
 const SPECIAL_CHARS = "!@#$%^&*()_+-=[]{}|;':\",./<>?";
 
 const newPasswordSchema = z
   .string()
-  .min(7, 'Senha deve ter no mínimo 7 caracteres.')
-  .refine(v => /[A-Z]/.test(v), 'Deve conter ao menos uma letra maiúscula.')
+  .min(7, i18n.t('validation.passwordMin'))
+  .refine(v => /[A-Z]/.test(v), i18n.t('validation.passwordUppercase'))
   .refine(
     v => [...v].some(c => SPECIAL_CHARS.includes(c)),
-    'Deve conter ao menos um caractere especial.',
+    i18n.t('validation.passwordSpecial'),
   );
 
 export const changePasswordSchema = z
   .object({
-    current_password: z.string().min(1, 'Informe a senha atual.'),
+    current_password: z.string().min(1, i18n.t('validation.currentPasswordRequired')),
     new_password: newPasswordSchema,
-    confirm_password: z.string().min(1, 'Confirme a nova senha.'),
+    confirm_password: z.string().min(1, i18n.t('validation.confirmNewPasswordRequired')),
   })
   .refine(v => v.new_password === v.confirm_password, {
-    message: 'As senhas não coincidem.',
+    message: i18n.t('validation.passwordsDontMatch'),
     path: ['confirm_password'],
   });
 

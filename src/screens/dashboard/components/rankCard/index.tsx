@@ -1,5 +1,6 @@
 import React from 'react';
 import { Image, Platform, Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   rank: string;
@@ -20,6 +21,7 @@ export default function RankCard({
   trackName,
   onPress,
 }: Props) {
+  const { t } = useTranslation();
   const isMaxRank = xpToNextRank <= 0;
   // Progresso dentro da faixa da patente — usa o valor do backend quando disponível.
   const progress =
@@ -49,7 +51,7 @@ export default function RankCard({
 
         <View className="flex-1">
           <Text className="text-[11px] font-semibold text-white/70 tracking-[3px] uppercase">
-            Sua patente
+            {t('rankCard.yourRank')}
           </Text>
           <View className="h-1" />
           <Text
@@ -85,9 +87,9 @@ export default function RankCard({
       <View className="h-2" />
 
       <View className="flex-row justify-between">
-        <Text className="text-[12px] text-white/80">{totalXp.toLocaleString('pt-BR')} XP</Text>
+        <Text className="text-[12px] text-white/80">{totalXp.toLocaleString()} {t('common.xp')}</Text>
         <Text className="text-[12px] text-white/80">
-          {isMaxRank ? 'Patente máxima' : `Faltam ${xpToNextRank.toLocaleString('pt-BR')} XP`}
+          {isMaxRank ? t('rankCard.maxRank') : t('rankCard.xpRemaining', { xp: xpToNextRank.toLocaleString() })}
         </Text>
       </View>
     </Wrapper>

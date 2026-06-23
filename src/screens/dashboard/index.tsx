@@ -1,5 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Image,
   Platform,
@@ -26,17 +27,18 @@ import { useChooseTrack } from './model/mutations/useChooseTrack';
 import { useTracks } from '../ranks/model/queries/useTracks';
 
 const MASTERIES = [
-  { key: 'Engineering', latin: 'Fabrorum', pt: 'Engenharia' },
-  { key: 'Strategy', latin: 'Strategica', pt: 'Estratégia' },
-  { key: 'Commerce', latin: 'Mercatorum', pt: 'Comércio' },
-  { key: 'Diplomacy', latin: 'Diplomatica', pt: 'Diplomacia' },
-  { key: 'Exploration', latin: 'Exploratorum', pt: 'Exploração' },
+  { key: 'Engineering', latin: 'Fabrorum' },
+  { key: 'Strategy', latin: 'Strategica' },
+  { key: 'Commerce', latin: 'Mercatorum' },
+  { key: 'Diplomacy', latin: 'Diplomatica' },
+  { key: 'Exploration', latin: 'Exploratorum' },
 ];
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<any>();
   const { user } = useAuth();
+  const { t } = useTranslation();
 
   const isTemporary = user?.is_temporary_password === true;
 
@@ -96,7 +98,7 @@ export default function DashboardScreen() {
   }, [isTemporary, legionDismissed, needsProvince, needsTrack, hasLegion, completedCount]);
 
   // ── Dados derivados ────────────────────────────────────────────────────────
-  const firstName = user?.name?.split(' ')[0] ?? 'Legionário';
+  const firstName = user?.name?.split(' ')[0] ?? t('dashboard.defaultName');
   const rankName = profile?.rank ?? user?.rank ?? '—';
   const totalXp = profile?.total_xp ?? user?.total_xp ?? 0;
   const currentLevel = currentRank?.level ?? 1;
@@ -148,7 +150,7 @@ export default function DashboardScreen() {
           <Text
             className="text-[26px] font-extrabold text-charcoal"
             style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-            Ave, {firstName}
+            {t('dashboard.greeting', { name: firstName })}
           </Text>
           <Text className="text-[13px] text-[#777] mt-0.5" numberOfLines={1}>
             {rankName}
@@ -161,7 +163,7 @@ export default function DashboardScreen() {
           <View className="flex-row items-center">
             <View className="flex-1">
               <Text className="text-[11px] font-bold text-white/70 tracking-[3px] uppercase">
-                Sua patente
+                {t('dashboard.yourRank')}
               </Text>
               <Text
                 className="text-[28px] font-extrabold text-white mt-1"
@@ -169,7 +171,7 @@ export default function DashboardScreen() {
                 {rankName}
               </Text>
               <Text className="text-[13px] text-white/80 mt-1">
-                {totalXp.toLocaleString('pt-BR')} XP
+                {totalXp.toLocaleString()} {t('common.xp')}
               </Text>
             </View>
 
@@ -194,24 +196,27 @@ export default function DashboardScreen() {
 
           <Text className="text-[12px] text-white/85 mt-2">
             {mustChooseTrack
-              ? 'Escolha uma trilha para avançar de patente'
+              ? t('dashboard.chooseTrackToAdvance')
               : isMaxRank
-                ? 'Patente máxima alcançada'
-                : `Faltam ${xpToNextRank} XP para ${nextRankName ?? 'a próxima patente'}`}
+                ? t('dashboard.maxRankReached')
+                : t('dashboard.xpToNextRank', {
+                    xp: xpToNextRank,
+                    rank: nextRankName ?? t('dashboard.nextRankFallback'),
+                  })}
           </Text>
 
           <TouchableOpacity
             onPress={() => navigation.navigate('Ranks')}
             activeOpacity={0.9}
             className="bg-white/15 rounded-[12px] py-2.5 items-center mt-4">
-            <Text className="text-[13px] font-bold text-white">Ver Requisitos</Text>
+            <Text className="text-[13px] font-bold text-white">{t('dashboard.viewRequirements')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* 3 — MISSÃO DO DIA */}
         <View className="bg-white border border-[#f0eded] rounded-[18px] p-5">
           <View className="flex-row items-center justify-between mb-3">
-            <Text className="text-[15px] font-extrabold text-charcoal">⚔️ Missão do Dia</Text>
+            <Text className="text-[15px] font-extrabold text-charcoal">⚔️ {t('dashboard.dailyMissionTitle')}</Text>
             {dailyReward > 0 && (
               <View className="bg-gold/20 rounded-full px-2.5 py-1">
                 <Text className="text-[12px] font-bold text-[#9a7b1f]">+{dailyReward} XP</Text>
@@ -221,7 +226,7 @@ export default function DashboardScreen() {
 
           {dailyMissions.length === 0 ? (
             <Text className="text-[13px] text-[#999]">
-              Nenhuma missão diária disponível agora.
+              {t('dashboard.noDailyMissions')}
             </Text>
           ) : (
             <View className="gap-2.5">
@@ -241,19 +246,22 @@ export default function DashboardScreen() {
             onPress={() => navigation.navigate('Missions')}
             activeOpacity={0.9}
             className="bg-primary rounded-[12px] py-3 items-center mt-4">
-            <Text className="text-[14px] font-bold text-white">Ver todas as missões</Text>
+            <Text className="text-[14px] font-bold text-white">{t('dashboard.viewAllMissions')}</Text>
           </TouchableOpacity>
         </View>
 
         {/* 4 — CAMPANHA ATUAL */}
         {activeCampaign && (
           <View className="bg-white border border-[#f0eded] rounded-[18px] p-5">
-            <Text className="text-[15px] font-extrabold text-charcoal mb-1">📖 Campanha Atual</Text>
+            <Text className="text-[15px] font-extrabold text-charcoal mb-1">📖 {t('dashboard.currentCampaignTitle')}</Text>
             <Text className="text-[14px] font-bold text-primary">
               {formatCampaignName(activeCampaign.campaign.name)}
             </Text>
             <Text className="text-[12px] text-[#888] mt-1">
-              {activeCampaign.done} de {activeCampaign.total} missões
+              {t('dashboard.missionsProgress', {
+                done: activeCampaign.done,
+                total: activeCampaign.total,
+              })}
             </Text>
             <View className="h-[6px] bg-[#f0eded] rounded-full overflow-hidden mt-2">
               <View
@@ -267,14 +275,14 @@ export default function DashboardScreen() {
               onPress={() => navigation.navigate('Missions')}
               activeOpacity={0.9}
               className="border border-[#e6dada] rounded-[12px] py-2.5 items-center mt-4">
-              <Text className="text-[13px] font-bold text-primary">Continuar Campanha</Text>
+              <Text className="text-[13px] font-bold text-primary">{t('dashboard.continueCampaign')}</Text>
             </TouchableOpacity>
           </View>
         )}
 
         {/* 5 — MAESTRIAS (horizontal) */}
         <View>
-          <Text className="text-[15px] font-extrabold text-charcoal mb-3">Maestrias</Text>
+          <Text className="text-[15px] font-extrabold text-charcoal mb-3">{t('dashboard.masteries')}</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -291,7 +299,7 @@ export default function DashboardScreen() {
                   className="w-[130px] bg-white border border-[#f0eded] rounded-[16px] p-3.5">
                   {Icon ? <Icon size={24} color={isMain ? '#9E1B32' : '#121212'} /> : null}
                   <Text className="text-[13px] font-extrabold text-charcoal mt-2">{spec.latin}</Text>
-                  <Text className="text-[11px] text-[#888]">{spec.pt}</Text>
+                  <Text className="text-[11px] text-[#888]">{t(`masteries.${spec.key}`)}</Text>
                   <View className="h-[5px] bg-[#f0eded] rounded-full overflow-hidden mt-2.5">
                     <View
                       className="h-full rounded-full"
@@ -311,9 +319,9 @@ export default function DashboardScreen() {
         {achievements.length > 0 && (
           <View>
             <View className="flex-row items-center justify-between mb-3">
-              <Text className="text-[15px] font-extrabold text-charcoal">🏅 Últimas Conquistas</Text>
+              <Text className="text-[15px] font-extrabold text-charcoal">🏅 {t('dashboard.latestAchievementsTitle')}</Text>
               <TouchableOpacity onPress={() => navigation.navigate('Achievements')} activeOpacity={0.7}>
-                <Text className="text-[12px] font-bold text-primary">Ver Todas</Text>
+                <Text className="text-[12px] font-bold text-primary">{t('dashboard.viewAll')}</Text>
               </TouchableOpacity>
             </View>
             <View className="gap-2.5">
@@ -325,7 +333,7 @@ export default function DashboardScreen() {
                   <Text className="flex-1 text-[14px] font-bold text-charcoal" numberOfLines={1}>
                     {a.name}
                   </Text>
-                  <Text className="text-[12px] font-bold text-gold">+{a.xp_reward} XP</Text>
+                  <Text className="text-[12px] font-bold text-gold">+{a.xp_reward} {t('common.xp')}</Text>
                 </View>
               ))}
             </View>
@@ -354,7 +362,9 @@ export default function DashboardScreen() {
             <View className="flex-1">
               <Text className="text-[14px] font-extrabold text-charcoal">{legion.name}</Text>
               <Text className="text-[12px] text-[#888]">
-                {legionMembers != null ? `${legionMembers} membros ativos` : 'Sua legião'}
+                {legionMembers != null
+                  ? t('dashboard.activeMembers', { count: legionMembers })
+                  : t('dashboard.yourLegionFallback')}
               </Text>
             </View>
             <Text className="text-[#bbb] text-[20px]">›</Text>

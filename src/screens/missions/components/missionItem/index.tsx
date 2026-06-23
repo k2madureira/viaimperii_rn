@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import { Mission } from '../../../../api/missions/missionsApi';
-import { parseBackendDate, formatBackendDateTime } from '../../../../utils/date';
+import { formatBackendDateTime } from '../../../../utils/date';
 import { useMissionStatus } from '../../model/queries/useMissionStatus';
 
 interface Props {
@@ -12,20 +13,6 @@ interface Props {
   onComplete: (mission: Mission) => void;
   pending: boolean;
 }
-
-const DIFFICULTY_LABEL: Record<string, string> = {
-  easy: 'Fácil',
-  medium: 'Médio',
-  hard: 'Difícil',
-};
-
-// Tipo de prova exigida para concluir a missão (exibido como badge no card).
-const PROOF_LABEL: Record<string, string> = {
-  link: 'Link',
-  image: 'Imagem',
-  text: 'Texto',
-  any: 'Evidência',
-};
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   easy: '#2F7A52',
@@ -47,25 +34,7 @@ function formatRemaining(totalSeconds: number): string {
 // Painel exibido enquanto a missão está em revisão (pending_review):
 // countdown até a finalização automática + progresso de aprovações de pares.
 function ReviewPanel({ mission }: { mission: Mission }) {
-  const targetMs = parseBackendDate(mission.completable_at)?.getTime() ?? null;
-
-  const computeRemaining = () => {
-    if (targetMs != null) return Math.max(0, Math.round((targetMs - Date.now()) / 1000));
-    return mission.remaining_seconds ?? 0;
-  };
-
-  const [remaining, setRemaining] = useState<number>(computeRemaining);
-
-  useEffect(() => {
-    setRemaining(computeRemaining());
-    if (targetMs == null) return;
-    const id = setInterval(() => {
-      setRemaining(Math.max(0, Math.round((targetMs - Date.now()) / 1000)));
-    }, 1000);
-    return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetMs, mission.remaining_seconds]);
-
+  const { t } = useTranslation();
   const needsApproval = mission.approvals_required > 0;
 
   // Polla GET /missions/{slug} enquanto a missão está em revisão (este painel só
@@ -74,6 +43,29 @@ function ReviewPanel({ mission }: { mission: Mission }) {
   const queryClient = useQueryClient();
   const statusQuery = useMissionStatus(mission.slug, true);
   const liveStatus = statusQuery.data?.status;
+
+  // Countdown ANCORADO no remaining_seconds do backend (fonte fresca = poll; fallback =
+  // prop da lista) e decrementado pelo tempo decorrido LOCAL. Não usa o relógio absoluto
+  // (completable_at) para não sofrer com skew do relógio do dispositivo — era isso que
+  // fazia o contador do front zerar antes do backend.
+  const backendRemaining = statusQuery.data?.remaining_seconds ?? mission.remaining_seconds ?? 0;
+  const anchorRef = useRef({ remaining: backendRemaining, at: Date.now() });
+  const [remaining, setRemaining] = useState<number>(Math.max(0, backendRemaining));
+
+  // Reancora sempre que o backend trouxer um remaining_seconds novo (cada poll).
+  useEffect(() => {
+    anchorRef.current = { remaining: backendRemaining, at: Date.now() };
+    setRemaining(Math.max(0, backendRemaining));
+  }, [backendRemaining]);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const a = anchorRef.current;
+      const elapsed = (Date.now() - a.at) / 1000;
+      setRemaining(Math.max(0, Math.round(a.remaining - elapsed)));
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
 
   // Ao virar status terminal, invalida as listas UMA vez para o card sair de "Ativas"
   // e refletir o novo estado (Histórico se completed / volta a iniciar se rejeitada).
@@ -87,12 +79,16 @@ function ReviewPanel({ mission }: { mission: Mission }) {
 
     if (liveStatus === 'completed') {
       const xp = statusQuery.data?.xp_earned ?? mission.xp_reward;
-      Toast.show({ type: 'success', text1: 'Missão concluída!', text2: `+${xp} XP creditados.` });
+      Toast.show({
+        type: 'success',
+        text1: t('missionItem.toastCompletedTitle'),
+        text2: t('missionItem.toastCompletedXp', { xp }),
+      });
     } else if (liveStatus === 'in_progress') {
       Toast.show({
         type: 'error',
-        text1: 'Evidência rejeitada',
-        text2: 'Refaça a missão e reenvie a comprovação.',
+        text1: t('missionItem.toastRejectedTitle'),
+        text2: t('missionItem.toastRejectedBody'),
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -106,7 +102,7 @@ function ReviewPanel({ mission }: { mission: Mission }) {
     return (
       <View className="mt-3 bg-laurel/10 border border-laurel/30 rounded-[12px] p-3 flex-row items-center gap-2">
         <ActivityIndicator size="small" color="#2F7A52" />
-        <Text className="text-[12px] font-bold text-laurel">Finalizando…</Text>
+        <Text className="text-[12px] font-bold text-laurel">{t('missionItem.finalizing')}</Text>
       </View>
     );
   }
@@ -115,7 +111,7 @@ function ReviewPanel({ mission }: { mission: Mission }) {
     <View className="mt-3 bg-gold/10 border border-gold/30 rounded-[12px] p-3 gap-2.5">
       <View className="flex-row items-center justify-between">
         <Text className="text-[11px] font-bold text-[#9a7b1f] uppercase tracking-[1px]">
-          ⏳ Em revisão
+          ⏳ {t('missionItem.reviewLabel')}
         </Text>
         <Text className="text-[13px] font-extrabold text-[#7a5b00]">
           {formatRemaining(remaining)}
@@ -124,14 +120,14 @@ function ReviewPanel({ mission }: { mission: Mission }) {
 
       <Text className="text-[11px] text-[#9a7b1f] leading-[15px]">
         {needsApproval
-          ? 'Conclui automaticamente quando o tempo acabar — ou na hora com 2 aprovações de pares.'
-          : 'Conclui automaticamente quando o tempo de revisão acabar.'}
+          ? t('missionItem.autoCompleteWithApproval')
+          : t('missionItem.autoComplete')}
       </Text>
 
       {needsApproval && (
         <View className="gap-1.5">
           <View className="flex-row items-center justify-between">
-            <Text className="text-[11px] font-semibold text-[#7a5b00]">Aprovações de pares</Text>
+            <Text className="text-[11px] font-semibold text-[#7a5b00]">{t('missionItem.peerApprovals')}</Text>
             <Text className="text-[12px] font-extrabold text-[#7a5b00]">
               {mission.approvals_count}/{mission.approvals_required}
             </Text>
@@ -153,6 +149,7 @@ function ReviewPanel({ mission }: { mission: Mission }) {
 }
 
 export default function MissionItem({ mission, onStart, onComplete, pending }: Props) {
+  const { t } = useTranslation();
   const isCompleted = mission.status === 'completed';
   const isInProgress = mission.status === 'in_progress';
   const isPendingReview = mission.status === 'pending_review';
@@ -182,20 +179,24 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
                 className="px-1.5 py-0.5 rounded-full"
                 style={{ backgroundColor: `${diffColor}18` }}>
                 <Text className="text-[10px] font-bold" style={{ color: diffColor }}>
-                  {DIFFICULTY_LABEL[mission.difficulty] ?? mission.difficulty}
+                  {t(`missionItem.difficulty.${mission.difficulty}`, { defaultValue: mission.difficulty })}
                 </Text>
               </View>
             )}
             {mission.type && (
               <Text className="text-[10px] text-[#bbb]">
-                {mission.type === 'daily' ? 'Diária' : 'Semanal'}
+                {mission.type === 'daily' ? t('missionItem.typeDaily') : t('missionItem.typeWeekly')}
               </Text>
             )}
             {mission.proof_type && mission.proof_type !== 'none' && (
               <View className="px-1.5 py-0.5 rounded-full bg-[#eef2f7] flex-row items-center gap-1">
                 <Text className="text-[9px]">📎</Text>
                 <Text className="text-[10px] font-bold text-[#5b6b7f]">
-                  Requer {PROOF_LABEL[mission.proof_type] ?? 'evidência'}
+                  {t('missionItem.requiresProof', {
+                    type: t(`missionItem.proof.${mission.proof_type}`, {
+                      defaultValue: t('missionItem.proofFallback'),
+                    }),
+                  })}
                 </Text>
               </View>
             )}
@@ -203,26 +204,26 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
 
           {isCompleted && completedAtLabel && (
             <Text className="text-[11px] text-laurel mt-1.5">
-              Concluída em {completedAtLabel}
+              {t('missionItem.completedAt', { date: completedAtLabel })}
             </Text>
           )}
         </View>
 
         <View className="items-end gap-1">
-          <Text className="text-[13px] font-extrabold text-gold">+{mission.xp_reward} XP</Text>
+          <Text className="text-[13px] font-extrabold text-gold">+{mission.xp_reward} {t('common.xp')}</Text>
           {isCompleted && (
             <View className="bg-laurel/15 rounded-full px-2 py-0.5">
-              <Text className="text-[10px] font-bold text-laurel">Concluída</Text>
+              <Text className="text-[10px] font-bold text-laurel">{t('missionItem.completed')}</Text>
             </View>
           )}
           {isInProgress && (
             <View className="bg-primary/10 rounded-full px-2 py-0.5">
-              <Text className="text-[10px] font-bold text-primary">Em andamento</Text>
+              <Text className="text-[10px] font-bold text-primary">{t('missionItem.inProgress')}</Text>
             </View>
           )}
           {isPendingReview && (
             <View className="bg-gold/20 rounded-full px-2 py-0.5">
-              <Text className="text-[10px] font-bold text-[#9a7b1f]">Em revisão</Text>
+              <Text className="text-[10px] font-bold text-[#9a7b1f]">{t('missionItem.inReview')}</Text>
             </View>
           )}
         </View>
@@ -240,7 +241,7 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
             {pending ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text className="text-[13px] font-bold text-white">Concluir missão</Text>
+              <Text className="text-[13px] font-bold text-white">{t('missionItem.completeMission')}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -256,7 +257,7 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
             {pending ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text className="text-[13px] font-bold text-white">Iniciar missão</Text>
+              <Text className="text-[13px] font-bold text-white">{t('missionItem.startMission')}</Text>
             )}
           </TouchableOpacity>
         </View>
