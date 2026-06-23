@@ -24,8 +24,10 @@ export interface Mission {
   remaining_seconds: number | null;
   approvals_count: number;
   approvals_required: number;
-  // Preenchido apenas quando status === 'completed' (data/hora da finalização, UTC).
+  // Preenchidos apenas quando status === 'completed' (creditados na finalização).
   completed_at: string | null;
+  xp_earned: number | null;
+  mastery_earned: number | null;
 }
 
 export interface RecommendedLegion {
@@ -100,6 +102,18 @@ export async function getMissions(
   return Array.isArray(data)
     ? { page: 1, perPage: data.length, totalItems: data.length, items: data }
     : data;
+}
+
+// Status ao vivo de UMA missão (finaliza na leitura se a janela já venceu).
+// Usado para pollar uma missão específica após o /complete.
+export async function getMission(slug: string): Promise<Mission> {
+  const response = await apiFetch(`/missions/${slug}`);
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao carregar a missão'));
+  }
+
+  return readContent<Mission>(response);
 }
 
 export type MissionDifficulty = 'easy' | 'medium' | 'hard';

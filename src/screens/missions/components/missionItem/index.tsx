@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import { useQueryClient } from '@tanstack/react-query';
+import Toast from 'react-native-toast-message';
 import { Mission } from '../../../../api/missions/missionsApi';
 import { parseBackendDate, formatBackendDateTime } from '../../../../utils/date';
+import { useMissionStatus } from '../../model/queries/useMissionStatus';
 
 interface Props {
   mission: Mission;
@@ -66,32 +68,39 @@ function ReviewPanel({ mission }: { mission: Mission }) {
 
   const needsApproval = mission.approvals_required > 0;
 
-  // Estado transitório: a janela acabou mas a lista ainda não trouxe `completed`.
-  // Evita exibir contador zerado — mostra "Finalizando…" até o próximo refresh.
-  const isFinalizing = remaining <= 0;
-
-  // Ao entrar em "Finalizando…": primeiro refresh após 2s e, se a missão ainda não
-  // finalizou (skew de relógio cliente↔servidor), tenta de novo a cada 3s — com teto
-  // de tentativas. O backend finaliza de forma LAZY na leitura de /missions, então o
-  // refetch é o gatilho. IMPORTANTE: invalida APENAS as queries de missões (refetchType
-  // 'active', deduplicadas pelo React Query) — nunca o app inteiro; era a invalidação
-  // global que travava a tela. O card desmonta ao virar `completed`, encerrando o ciclo.
+  // Polla GET /missions/{slug} enquanto a missão está em revisão (este painel só
+  // existe em pending_review). A leitura finaliza a missão no backend se a janela já
+  // venceu; também detecta aprovação (→ completed) ou rejeição (→ in_progress) por pares.
   const queryClient = useQueryClient();
+  const statusQuery = useMissionStatus(mission.slug, true);
+  const liveStatus = statusQuery.data?.status;
+
+  // Ao virar status terminal, invalida as listas UMA vez para o card sair de "Ativas"
+  // e refletir o novo estado (Histórico se completed / volta a iniciar se rejeitada).
   useEffect(() => {
-    if (!isFinalizing) return;
-    let attempts = 0;
-    let timer: ReturnType<typeof setTimeout>;
-    const tick = () => {
-      const opts = { refetchType: 'active' as const };
-      queryClient.invalidateQueries({ queryKey: ['missions'], ...opts });
-      queryClient.invalidateQueries({ queryKey: ['missions-available'], ...opts });
-      queryClient.invalidateQueries({ queryKey: ['user-stats'], ...opts });
-      attempts += 1;
-      if (attempts < 6) timer = setTimeout(tick, 3000);
-    };
-    timer = setTimeout(tick, 2000);
-    return () => clearTimeout(timer);
-  }, [isFinalizing, queryClient]);
+    if (!liveStatus || liveStatus === 'pending_review') return;
+    const opts = { refetchType: 'active' as const };
+    queryClient.invalidateQueries({ queryKey: ['missions'], ...opts });
+    queryClient.invalidateQueries({ queryKey: ['missions-available'], ...opts });
+    queryClient.invalidateQueries({ queryKey: ['user-stats'], ...opts });
+    queryClient.invalidateQueries({ queryKey: ['user-profile'], ...opts });
+
+    if (liveStatus === 'completed') {
+      const xp = statusQuery.data?.xp_earned ?? mission.xp_reward;
+      Toast.show({ type: 'success', text1: 'Missão concluída!', text2: `+${xp} XP creditados.` });
+    } else if (liveStatus === 'in_progress') {
+      Toast.show({
+        type: 'error',
+        text1: 'Evidência rejeitada',
+        text2: 'Refaça a missão e reenvie a comprovação.',
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveStatus, queryClient]);
+
+  // "Finalizando…": a janela acabou (remaining <= 0) mas ainda está em revisão —
+  // o próximo poll trará completed.
+  const isFinalizing = remaining <= 0 && (liveStatus ?? 'pending_review') === 'pending_review';
 
   if (isFinalizing) {
     return (
