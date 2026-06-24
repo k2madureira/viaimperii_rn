@@ -130,6 +130,10 @@ export default {
   specialtyFilter: {
     all: 'Todas',
   },
+  difficultyFilter: {
+    title: 'Filtrar por nível',
+    all: 'Todos os níveis',
+  },
   missionItem: {
     difficulty: {
       easy: 'Fácil',

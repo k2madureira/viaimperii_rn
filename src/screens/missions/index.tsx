@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useRewardedVideo } from './model/mutations/useRewardedVideo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionSelectModal, Navbar } from '../../components';
-import { Mission, MissionEvidence, ToReviewItem } from '../../api/missions/missionsApi';
+import { Mission, MissionDifficulty, MissionEvidence, ToReviewItem } from '../../api/missions/missionsApi';
 import { StatsPeriod } from '../../api/users/userApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { XP_PER_RANK } from '../../constants/game';
@@ -19,6 +19,7 @@ const sortByDifficulty = (list: Mission[]) =>
       (DIFFICULTY_ORDER[a.difficulty ?? ''] ?? 99) - (DIFFICULTY_ORDER[b.difficulty ?? ''] ?? 99),
   );
 import {
+  DifficultyFilter,
   LoadMoreButton,
   MissionItem,
   EvidenceModal,
@@ -41,6 +42,7 @@ import { useMissions } from './model/queries/useMissions';
 import { useMissionsToReview } from './model/queries/useMissionsToReview';
 import { useSpecialties } from './model/queries/useSpecialties';
 import { useUserStats } from './model/queries/useUserStats';
+import { useMissionEvents } from './model/hooks/useMissionEvents';
 
 type ViewMode = 'missions' | 'review';
 
@@ -54,6 +56,12 @@ export default function MissionsScreen() {
   const { t } = useTranslation();
   const { user } = useAuth();
 
+  // Keeps a persistent SSE connection open so mission status changes (approvals,
+  // completions, new reviews) are reflected in real time without polling.
+
+  console.log(user)
+  useMissionEvents(!!user); 
+
   const profileQuery = useUserProfile(user?.user_id);
   const userTrack = profileQuery.data?.track ?? null;
 
@@ -62,6 +70,7 @@ export default function MissionsScreen() {
   const [tab, setTab] = useState<MissionsTab>('available');
   const [missionType, setMissionType] = useState<'daily' | 'monthly'>('daily');
   const [specialtyId, setSpecialtyId] = useState<number | null>(null);
+  const [difficultyFilter, setDifficultyFilter] = useState<MissionDifficulty | null>(null);
   const [visible, setVisible] = useState(PAGE_SIZE);
   const isReview = viewMode === 'review';
 
@@ -71,14 +80,21 @@ export default function MissionsScreen() {
   // Abaixo de Recruta IV (nível 4 → 1500 XP), só missões de nível fácil.
   const isBelowRecruitIV = (user?.total_xp ?? 0) < XP_PER_RANK * 3;
   const forcedDifficulty = isBelowRecruitIV ? 'easy' : null;
+  // Filtro de nível escolhido pelo usuário; ignorado quando a dificuldade é forçada.
+  const effectiveDifficulty = forcedDifficulty ?? difficultyFilter;
   const unlockRankName = userTrack ? (FIRST_TRACK_RANK[userTrack.slug] ?? 'Legionary I / Discipulus I') : 'Legionary I / Discipulus I';
 
-  // Reinicia a paginação ao trocar de aba, tipo ou especialidade.
-  useEffect(() => setVisible(PAGE_SIZE), [tab, missionType, specialtyId]);
+  // Sem trilha definida ainda força fácil — não há sentido em manter um filtro de nível pendente.
+  useEffect(() => {
+    if (isBelowRecruitIV) setDifficultyFilter(null);
+  }, [isBelowRecruitIV]);
+
+  // Reinicia a paginação ao trocar de aba, tipo, especialidade ou nível.
+  useEffect(() => setVisible(PAGE_SIZE), [tab, missionType, specialtyId, difficultyFilter]);
 
   const statsQuery = useUserStats(user?.user_id, period);
   const specialtiesQuery = useSpecialties();
-  const availableQuery = useAvailableMissions(specialtyId, forcedDifficulty, !isHistory);
+  const availableQuery = useAvailableMissions(specialtyId, effectiveDifficulty, !isHistory);
   // Catálogo completo (já filtrado por trilha no backend) — usado para derivar
   // quais especialidades pertencem à trilha do usuário, sem o efeito da cota diária.
   const catalogQuery = useMissions(undefined, true);
@@ -105,15 +121,22 @@ export default function MissionsScreen() {
   const [evidenceMission, setEvidenceMission] = useState<Mission | null>(null);
   const rejectM = useRejectMission();
 
-  const submitComplete = (slug: string, evidence?: MissionEvidence) => {
+  const submitComplete = (mission: Mission, evidence?: MissionEvidence) => {
     completeM.mutate(
-      { slug, evidence },
+      { slug: mission.slug, evidence },
       {
         onSuccess: (result) => {
           setEvidenceMission(null);
           if (result.requires_legion_selection) {
             setRecommendedIds((result.recommended_legions ?? []).map((l) => l.id));
             setLegionModalVisible(true);
+          }
+        },
+        onError: (err: Error) => {
+          // Recuperação: se o backend exigir prova (proof_type desatualizado no cache
+          // da listagem), abre o modal de evidência em vez de só falhar.
+          if (!evidence && /eviden|proof|prova|comprov/i.test(err.message)) {
+            setEvidenceMission(mission);
           }
         },
       },
@@ -125,7 +148,7 @@ export default function MissionsScreen() {
     if (mission.proof_type && mission.proof_type !== 'none') {
       setEvidenceMission(mission);
     } else {
-      submitComplete(mission.slug);
+      submitComplete(mission);
     }
   };
 
@@ -334,13 +357,23 @@ export default function MissionsScreen() {
           <View className="p-3 gap-3">
             {tab === 'available' && (
               <>
-                {/* Filtro por especialidade (limitado às que têm missões disponíveis para a trilha do usuário) */}
-                {filteredSpecialties.length > 0 && (
-                  <SpecialtyFilter
-                    specialties={filteredSpecialties}
-                    value={specialtyId}
-                    onChange={setSpecialtyId}
-                  />
+                {/* Filtro por especialidade (limitado às que têm missões disponíveis para a trilha do usuário)
+                    + filtro por nível (dropdown) ao lado */}
+                {(filteredSpecialties.length > 0 || !isBelowRecruitIV) && (
+                  <View className="flex-row items-center gap-2">
+                    {filteredSpecialties.length > 0 && (
+                      <View className="flex-1">
+                        <SpecialtyFilter
+                          specialties={filteredSpecialties}
+                          value={specialtyId}
+                          onChange={setSpecialtyId}
+                        />
+                      </View>
+                    )}
+                    {!isBelowRecruitIV && (
+                      <DifficultyFilter value={difficultyFilter} onChange={setDifficultyFilter} />
+                    )}
+                  </View>
                 )}
 
                 {isBelowRecruitIV && (
@@ -420,7 +453,7 @@ export default function MissionsScreen() {
         mission={evidenceMission}
         submitting={completeM.isPending}
         onClose={() => setEvidenceMission(null)}
-        onSubmit={(evidence) => evidenceMission && submitComplete(evidenceMission.slug, evidence)}
+        onSubmit={(evidence) => evidenceMission && submitComplete(evidenceMission, evidence)}
       />
     </View>
   );
