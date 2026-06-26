@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, Linking, Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ToReviewItem } from '../../../../api/missions/missionsApi';
 import { parseBackendDate } from '../../../../utils/date';
 
@@ -10,20 +11,14 @@ interface Props {
   pending: boolean;
 }
 
-const DIFFICULTY_LABEL: Record<string, string> = {
-  easy: 'Fácil',
-  medium: 'Médio',
-  hard: 'Difícil',
-};
-
 const DIFFICULTY_COLOR: Record<string, string> = {
   easy: '#2F7A52',
   medium: '#D4AF37',
   hard: '#9E1B32',
 };
 
-function formatRemaining(totalSeconds: number): string {
-  if (totalSeconds <= 0) return 'Encerrando...';
+function formatRemaining(totalSeconds: number, closingLabel: string): string {
+  if (totalSeconds <= 0) return closingLabel;
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);
   const s = totalSeconds % 60;
@@ -33,6 +28,7 @@ function formatRemaining(totalSeconds: number): string {
 }
 
 export default function ReviewItem({ item, onApprove, onReject, pending }: Props) {
+  const { t } = useTranslation();
   const diffColor = DIFFICULTY_COLOR[item.difficulty ?? ''] ?? '#aaa';
   const targetMs = parseBackendDate(item.completable_at)?.getTime() ?? null;
   const avatarUrl = item.executor.active_avatar?.url ?? item.executor.image ?? null;
@@ -71,7 +67,7 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
                   className="px-1.5 py-0.5 rounded-full"
                   style={{ backgroundColor: `${diffColor}18` }}>
                   <Text className="text-[10px] font-bold" style={{ color: diffColor }}>
-                    {DIFFICULTY_LABEL[item.difficulty] ?? item.difficulty}
+                    {t(`missionItem.difficulty.${item.difficulty}`, { defaultValue: item.difficulty })}
                   </Text>
                 </View>
               )}
@@ -84,8 +80,8 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
         </View>
 
         <View className="items-end gap-1">
-          <Text className="text-[13px] font-extrabold text-gold">+{item.xp_reward} XP</Text>
-          <Text className="text-[11px] font-bold text-[#7a5b00]">⏳ {formatRemaining(remaining)}</Text>
+          <Text className="text-[13px] font-extrabold text-gold">+{item.xp_reward} {t('common.xp')}</Text>
+          <Text className="text-[11px] font-bold text-[#7a5b00]">⏳ {formatRemaining(remaining, t('reviewItem.closing'))}</Text>
         </View>
       </View>
 
@@ -93,7 +89,7 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
       {item.acceptance_criteria ? (
         <View className="mt-3 bg-[#f7f7f7] rounded-[10px] px-3 py-2">
           <Text className="text-[10px] font-bold text-[#999] uppercase tracking-[1px] mb-0.5">
-            Critério
+            {t('reviewItem.criterion')}
           </Text>
           <Text className="text-[12px] text-[#555] leading-[16px]">{item.acceptance_criteria}</Text>
         </View>
@@ -103,7 +99,7 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
       {item.submission ? (
         <View className="mt-3 border border-[#eee] rounded-[10px] p-3 gap-2">
           <Text className="text-[10px] font-bold text-primary uppercase tracking-[1px]">
-            Evidência ({item.submission.kind})
+            {t('reviewItem.evidence', { kind: item.submission.kind })}
           </Text>
           {item.submission.kind === 'image' && item.submission.image_url ? (
             <Image
@@ -120,7 +116,7 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
           ) : item.submission.content ? (
             <Text className="text-[13px] text-[#444] leading-[18px]">{item.submission.content}</Text>
           ) : (
-            <Text className="text-[12px] text-[#999]">Sem conteúdo.</Text>
+            <Text className="text-[12px] text-[#999]">{t('reviewItem.noContent')}</Text>
           )}
         </View>
       ) : null}
@@ -128,7 +124,7 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
       {/* Progresso de aprovações */}
       <View className="mt-3 gap-1.5">
         <View className="flex-row items-center justify-between">
-          <Text className="text-[11px] font-semibold text-[#888]">Aprovações</Text>
+          <Text className="text-[11px] font-semibold text-[#888]">{t('reviewItem.approvals')}</Text>
           <Text className="text-[12px] font-extrabold text-[#555]">
             {item.approvals_count}/{item.approvals_required}
           </Text>
@@ -154,7 +150,7 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
             pending ? 'border-primary/30' : 'border-primary'
           }`}>
           <Text className={`text-[13px] font-bold ${pending ? 'text-primary/40' : 'text-primary'}`}>
-            Rejeitar
+            {t('reviewItem.reject')}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -165,7 +161,7 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
           {pending ? (
             <ActivityIndicator color="#fff" size="small" />
           ) : (
-            <Text className="text-[13px] font-bold text-white">Aprovar</Text>
+            <Text className="text-[13px] font-bold text-white">{t('reviewItem.approve')}</Text>
           )}
         </TouchableOpacity>
       </View>

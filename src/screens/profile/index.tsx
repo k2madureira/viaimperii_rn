@@ -1,6 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { Image, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../contexts/AuthContext';
 import { ChangePasswordModal } from '../dashboard/components';
@@ -8,6 +9,7 @@ import { useUserProfile } from '../dashboard/model/queries/useUserProfile';
 
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const navigation = useNavigation();
   const { user, signOut } = useAuth();
   const profileQuery = useUserProfile(user?.user_id);
@@ -36,7 +38,7 @@ export default function ProfileScreen() {
         <Text
           className="text-sm font-semibold text-[#111] tracking-[3px]"
           style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-          PERFIL
+          {t('profile.title')}
         </Text>
       </View>
 
@@ -62,11 +64,11 @@ export default function ProfileScreen() {
 
         {/* Dados */}
         <View className="bg-white border border-[#f0eded] rounded-[16px] overflow-hidden">
-          <InfoRow label="Patente" value={rank} />
-          <InfoRow label="XP total" value={`${totalXp.toLocaleString('pt-BR')} XP`} />
-          <InfoRow label="Trilha" value={track} />
-          <InfoRow label="Legião" value={legion} />
-          <InfoRow label="Província" value={province} last />
+          <InfoRow label={t('profile.rank')} value={rank} />
+          <InfoRow label={t('profile.totalXp')} value={`${totalXp.toLocaleString()} ${t('common.xp')}`} />
+          <InfoRow label={t('profile.track')} value={track} />
+          <InfoRow label={t('profile.legion')} value={legion} />
+          <InfoRow label={t('profile.province')} value={province} last />
         </View>
 
         {/* Ações */}
@@ -74,14 +76,14 @@ export default function ProfileScreen() {
           onPress={() => setShowPassword(true)}
           activeOpacity={0.85}
           className="bg-white border border-[#f0eded] rounded-[14px] py-3.5 items-center">
-          <Text className="text-[14px] font-bold text-charcoal">Alterar senha</Text>
+          <Text className="text-[14px] font-bold text-charcoal">{t('profile.changePassword')}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={() => signOut()}
           activeOpacity={0.85}
           className="bg-primary rounded-[14px] py-3.5 items-center">
-          <Text className="text-[14px] font-bold text-white">Sair</Text>
+          <Text className="text-[14px] font-bold text-white">{t('profile.signOut')}</Text>
         </TouchableOpacity>
       </ScrollView>
 

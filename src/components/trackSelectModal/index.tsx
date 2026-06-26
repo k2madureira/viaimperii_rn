@@ -9,20 +9,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Track } from '../../api/ranks/ranksApi';
 
-const TRACK_FLAVOR: Record<string, { tagline: string; focus: string; missionType: string }> = {
-  legionarios: {
-    tagline: 'O caminho do guerreiro',
-    focus: 'Disciplina física, resistência e execução em campo.',
-    missionType: 'Missões voltadas para desafios físicos, hábitos de saúde, esporte e ação prática.',
-  },
-  patricios: {
-    tagline: 'O caminho do sábio',
-    focus: 'Conhecimento, estratégia e influência intelectual.',
-    missionType: 'Missões voltadas para estudo, leitura, produtividade acadêmica e desenvolvimento mental.',
-  },
-};
+const TRACK_FLAVOR_SLUGS = ['legionarios', 'patricios'];
 
 interface Props {
   visible: boolean;
@@ -41,11 +31,13 @@ export default function TrackSelectModal({
   onChoose,
   onClose,
 }: Props) {
+  const { t } = useTranslation();
   const [selectedIdx, setSelectedIdx] = useState(0);
   const [confirming, setConfirming] = useState(false);
 
   const track = tracks[selectedIdx] ?? null;
   const isChange = !!currentTrackSlug && currentTrackSlug !== track?.slug;
+  const hasFlavor = !!track && TRACK_FLAVOR_SLUGS.includes(track.slug);
 
   const handleChoose = () => setConfirming(true);
 
@@ -76,12 +68,12 @@ export default function TrackSelectModal({
             <Text
               className="text-[20px] font-extrabold text-[#111] text-center"
               style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-              Escolha sua Trilha
+              {t('trackSelect.title')}
             </Text>
             <Text className="text-[13px] text-[#888] text-center mt-1">
               {currentTrackSlug
-                ? 'Trocar de trilha custa 25% do seu XP atual.'
-                : 'Esta escolha define seu caminho no Império.'}
+                ? t('trackSelect.changeCost')
+                : t('trackSelect.firstChoice')}
             </Text>
           </View>
 
@@ -122,25 +114,25 @@ export default function TrackSelectModal({
                 )}
 
                 {/* Tagline + foco + tipo de missão */}
-                {TRACK_FLAVOR[track.slug] && (
+                {hasFlavor && (
                   <View className="items-center gap-1">
                     <Text
                       className="text-[13px] font-bold text-primary tracking-[1px] uppercase"
                       style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-                      {TRACK_FLAVOR[track.slug].tagline}
+                      {t(`trackSelect.flavor.${track.slug}.tagline`)}
                     </Text>
                     <Text className="text-[14px] text-[#333] text-center leading-[20px]">
-                      {TRACK_FLAVOR[track.slug].focus}
+                      {t(`trackSelect.flavor.${track.slug}.focus`)}
                     </Text>
                   </View>
                 )}
 
                 {/* Tipo de missão */}
-                {TRACK_FLAVOR[track.slug] && (
+                {hasFlavor && (
                   <View className="bg-[#f4eaea] border border-primary/15 rounded-[12px] px-4 py-3 flex-row items-start gap-2">
                     <Text className="text-[16px]">⚔️</Text>
                     <Text className="flex-1 text-[13px] text-[#5a1a26] leading-[19px]">
-                      {TRACK_FLAVOR[track.slug].missionType}
+                      {t(`trackSelect.flavor.${track.slug}.missionType`)}
                     </Text>
                   </View>
                 )}
@@ -162,8 +154,7 @@ export default function TrackSelectModal({
                   <View className="bg-gold/15 border border-gold/40 rounded-[12px] px-4 py-3 flex-row items-start gap-2">
                     <Text className="text-[16px]">⚠️</Text>
                     <Text className="flex-1 text-[12px] text-[#7a5b00] leading-[18px]">
-                      Você já possui uma trilha. Trocar para <Text className="font-bold">{track.name}</Text> custará{' '}
-                      <Text className="font-bold">25% do seu XP atual</Text>.
+                      {t('trackSelect.changeWarning', { name: track.name })}
                     </Text>
                   </View>
                 )}
@@ -172,21 +163,20 @@ export default function TrackSelectModal({
                 {confirming ? (
                   <View className="bg-[#fdf7f8] border border-primary/20 rounded-[14px] p-4 gap-3">
                     <Text className="text-[15px] font-extrabold text-[#111] text-center">
-                      Confirmar escolha?
+                      {t('trackSelect.confirmChoiceTitle')}
                     </Text>
                     <Text className="text-[13px] text-[#666] text-center leading-[18px]">
-                      Você escolherá a trilha{' '}
-                      <Text className="font-bold text-primary">{track.name}</Text>.
+                      {t('trackSelect.confirmChoiceIntro', { name: track.name })}
                       {isChange
-                        ? ' Esta troca terá custo de XP e não pode ser desfeita imediatamente.'
-                        : ' Esta é sua primeira escolha e é gratuita.'}
+                        ? t('trackSelect.confirmChange')
+                        : t('trackSelect.confirmFirst')}
                     </Text>
                     <View className="flex-row gap-3 mt-1">
                       <TouchableOpacity
                         activeOpacity={0.8}
                         onPress={() => setConfirming(false)}
                         className="flex-1 border border-[#ddd] rounded-[10px] py-3 items-center">
-                        <Text className="text-[14px] font-bold text-[#555]">Cancelar</Text>
+                        <Text className="text-[14px] font-bold text-[#555]">{t('common.cancel')}</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         activeOpacity={0.85}
@@ -195,7 +185,7 @@ export default function TrackSelectModal({
                         {isLoading ? (
                           <ActivityIndicator color="#fff" size="small" />
                         ) : (
-                          <Text className="text-[14px] font-bold text-white">Confirmar</Text>
+                          <Text className="text-[14px] font-bold text-white">{t('common.confirm')}</Text>
                         )}
                       </TouchableOpacity>
                     </View>
@@ -206,14 +196,14 @@ export default function TrackSelectModal({
                     onPress={handleChoose}
                     className="bg-primary rounded-[12px] py-3.5 items-center">
                     <Text className="text-[15px] font-bold text-white">
-                      Escolher {track.name}
+                      {t('trackSelect.chooseTrack', { name: track.name })}
                     </Text>
                   </TouchableOpacity>
                 )}
 
                 {canClose && !confirming && (
                   <TouchableOpacity activeOpacity={0.7} onPress={onClose} className="items-center py-1">
-                    <Text className="text-[13px] text-[#aaa]">Decidir depois</Text>
+                    <Text className="text-[13px] text-[#aaa]">{t('trackSelect.decideLater')}</Text>
                   </TouchableOpacity>
                 )}
               </>

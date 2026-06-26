@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
+import i18n from '../../../../i18n';
 import { rejectMission } from '../../../../api/missions/missionsApi';
 
 export function useRejectMission() {
@@ -11,13 +12,13 @@ export function useRejectMission() {
     onSuccess: () => {
       Toast.show({
         type: 'success',
-        text1: 'Evidência rejeitada',
-        text2: 'A missão voltou para o executor reenviar.',
+        text1: i18n.t('toasts.rejectTitle'),
+        text2: i18n.t('toasts.rejectBody'),
       });
       queryClient.invalidateQueries({ queryKey: ['missions-to-review'] });
     },
     onError: (error: Error) => {
-      Toast.show({ type: 'error', text1: 'Erro ao rejeitar missão', text2: error.message });
+      Toast.show({ type: 'error', text1: i18n.t('toasts.rejectError'), text2: error.message });
     },
   });
 }

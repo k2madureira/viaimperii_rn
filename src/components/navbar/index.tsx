@@ -1,6 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { Platform, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ChangePasswordModal } from '../../screens/dashboard/components';
 import LogoIcon from '../logoIcon';
 import UserMenu from '../userMenu';
@@ -11,6 +12,7 @@ import UserMenu from '../userMenu';
  * A navegação principal agora é a bottom tab bar — sem botão de menu/drawer.
  */
 export default function Navbar() {
+  const { t } = useTranslation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const navigation = useNavigation<any>();
 
@@ -22,7 +24,7 @@ export default function Navbar() {
           <Text
             className="text-sm font-semibold text-[#111] tracking-[3px] ml-2"
             style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-            VIA IMPERII
+            {t('common.appName')}
           </Text>
         </View>
         <UserMenu

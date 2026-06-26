@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Platform, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useRewardedVideo } from './model/mutations/useRewardedVideo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionSelectModal, Navbar } from '../../components';
-import { Mission, MissionEvidence, ToReviewItem } from '../../api/missions/missionsApi';
+import { Mission, MissionDifficulty, MissionEvidence, ToReviewItem } from '../../api/missions/missionsApi';
 import { StatsPeriod } from '../../api/users/userApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { XP_PER_RANK } from '../../constants/game';
@@ -18,6 +19,7 @@ const sortByDifficulty = (list: Mission[]) =>
       (DIFFICULTY_ORDER[a.difficulty ?? ''] ?? 99) - (DIFFICULTY_ORDER[b.difficulty ?? ''] ?? 99),
   );
 import {
+  DifficultyFilter,
   LoadMoreButton,
   MissionItem,
   EvidenceModal,
@@ -40,6 +42,7 @@ import { useMissions } from './model/queries/useMissions';
 import { useMissionsToReview } from './model/queries/useMissionsToReview';
 import { useSpecialties } from './model/queries/useSpecialties';
 import { useUserStats } from './model/queries/useUserStats';
+import { useMissionEvents } from './model/hooks/useMissionEvents';
 
 type ViewMode = 'missions' | 'review';
 
@@ -50,7 +53,14 @@ const FIRST_TRACK_RANK: Record<string, string> = {
 
 export default function MissionsScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const { user } = useAuth();
+
+  // Keeps a persistent SSE connection open so mission status changes (approvals,
+  // completions, new reviews) are reflected in real time without polling.
+
+  console.log(user)
+  useMissionEvents(!!user); 
 
   const profileQuery = useUserProfile(user?.user_id);
   const userTrack = profileQuery.data?.track ?? null;
@@ -60,6 +70,7 @@ export default function MissionsScreen() {
   const [tab, setTab] = useState<MissionsTab>('available');
   const [missionType, setMissionType] = useState<'daily' | 'monthly'>('daily');
   const [specialtyId, setSpecialtyId] = useState<number | null>(null);
+  const [difficultyFilter, setDifficultyFilter] = useState<MissionDifficulty | null>(null);
   const [visible, setVisible] = useState(PAGE_SIZE);
   const isReview = viewMode === 'review';
 
@@ -69,14 +80,21 @@ export default function MissionsScreen() {
   // Abaixo de Recruta IV (nível 4 → 1500 XP), só missões de nível fácil.
   const isBelowRecruitIV = (user?.total_xp ?? 0) < XP_PER_RANK * 3;
   const forcedDifficulty = isBelowRecruitIV ? 'easy' : null;
+  // Filtro de nível escolhido pelo usuário; ignorado quando a dificuldade é forçada.
+  const effectiveDifficulty = forcedDifficulty ?? difficultyFilter;
   const unlockRankName = userTrack ? (FIRST_TRACK_RANK[userTrack.slug] ?? 'Legionary I / Discipulus I') : 'Legionary I / Discipulus I';
 
-  // Reinicia a paginação ao trocar de aba, tipo ou especialidade.
-  useEffect(() => setVisible(PAGE_SIZE), [tab, missionType, specialtyId]);
+  // Sem trilha definida ainda força fácil — não há sentido em manter um filtro de nível pendente.
+  useEffect(() => {
+    if (isBelowRecruitIV) setDifficultyFilter(null);
+  }, [isBelowRecruitIV]);
+
+  // Reinicia a paginação ao trocar de aba, tipo, especialidade ou nível.
+  useEffect(() => setVisible(PAGE_SIZE), [tab, missionType, specialtyId, difficultyFilter]);
 
   const statsQuery = useUserStats(user?.user_id, period);
   const specialtiesQuery = useSpecialties();
-  const availableQuery = useAvailableMissions(specialtyId, forcedDifficulty, !isHistory);
+  const availableQuery = useAvailableMissions(specialtyId, effectiveDifficulty, !isHistory);
   // Catálogo completo (já filtrado por trilha no backend) — usado para derivar
   // quais especialidades pertencem à trilha do usuário, sem o efeito da cota diária.
   const catalogQuery = useMissions(undefined, true);
@@ -103,15 +121,22 @@ export default function MissionsScreen() {
   const [evidenceMission, setEvidenceMission] = useState<Mission | null>(null);
   const rejectM = useRejectMission();
 
-  const submitComplete = (slug: string, evidence?: MissionEvidence) => {
+  const submitComplete = (mission: Mission, evidence?: MissionEvidence) => {
     completeM.mutate(
-      { slug, evidence },
+      { slug: mission.slug, evidence },
       {
         onSuccess: (result) => {
           setEvidenceMission(null);
           if (result.requires_legion_selection) {
             setRecommendedIds((result.recommended_legions ?? []).map((l) => l.id));
             setLegionModalVisible(true);
+          }
+        },
+        onError: (err: Error) => {
+          // Recuperação: se o backend exigir prova (proof_type desatualizado no cache
+          // da listagem), abre o modal de evidência em vez de só falhar.
+          if (!evidence && /eviden|proof|prova|comprov/i.test(err.message)) {
+            setEvidenceMission(mission);
           }
         },
       },
@@ -123,7 +148,7 @@ export default function MissionsScreen() {
     if (mission.proof_type && mission.proof_type !== 'none') {
       setEvidenceMission(mission);
     } else {
-      submitComplete(mission.slug);
+      submitComplete(mission);
     }
   };
 
@@ -228,12 +253,12 @@ export default function MissionsScreen() {
         {/* ── Troca de abas: Minhas Missões | Revisão ─────────────────────── */}
         <View className="flex-row bg-[#efeaea] rounded-[12px] p-1">
           <ModeTab
-            label="Minhas Missões"
+            label={t('missions.tabMyMissions')}
             active={!isReview}
             onPress={() => setViewMode('missions')}
           />
           <ModeTab
-            label="Revisão"
+            label={t('missions.tabReview')}
             active={isReview}
             badge={toReviewQuery.data?.length}
             onPress={() => setViewMode('review')}
@@ -265,12 +290,12 @@ export default function MissionsScreen() {
           <View className="flex-row items-center justify-between">
             <View>
               <Text className="text-[10px] font-bold text-white/40 tracking-[2px] uppercase">
-                Tipo de missão
+                {t('missions.missionType')}
               </Text>
               <Text
                 className="text-[18px] font-extrabold text-white mt-0.5"
                 style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-                {missionType === 'daily' ? 'Missões Diárias' : 'Missões Semanais'}
+                {missionType === 'daily' ? t('missions.dailyMissions') : t('missions.weeklyMissions')}
               </Text>
             </View>
             {allowance && activeAllowanceCount != null && (
@@ -279,8 +304,8 @@ export default function MissionsScreen() {
               }`}>
                 <Text className={`text-[11px] font-bold ${activeAllowanceCount === 0 ? 'text-white/40' : 'text-white'}`}>
                   {activeAllowanceCount === 0
-                    ? 'Esgotado'
-                    : `${activeAllowanceCount} restante${activeAllowanceCount !== 1 ? 's' : ''}`}
+                    ? t('missions.exhausted')
+                    : t('missions.remaining', { count: activeAllowanceCount })}
                 </Text>
               </View>
             )}
@@ -289,7 +314,7 @@ export default function MissionsScreen() {
           {/* Abas de tipo */}
           <View className="flex-row bg-white/10 rounded-[10px] p-1">
             <TypeTab
-              label="Diárias"
+              label={t('missions.daily')}
               active={missionType === 'daily'}
               activeColor="#D4AF37"
               count={allowance?.daily}
@@ -297,7 +322,7 @@ export default function MissionsScreen() {
             />
             {!isBelowRecruitIV && (
               <TypeTab
-                label="Semanais"
+                label={t('missions.weekly')}
                 active={missionType === 'monthly'}
                 activeColor="#2F7A52"
                 count={allowance?.weekly}
@@ -312,7 +337,7 @@ export default function MissionsScreen() {
               remaining={0}
               max={missionType === 'daily' ? 10 : 2}
               resetAt={activeResetAt}
-              label={missionType === 'daily' ? 'missões diárias' : 'missões semanais'}
+              label={missionType === 'daily' ? t('missions.dailyMissionsLower') : t('missions.weeklyMissionsLower')}
               rewardedVideoAvailable={
                 missionType === 'daily' && (allowance.rewarded_video_available ?? false)
               }
@@ -332,20 +357,30 @@ export default function MissionsScreen() {
           <View className="p-3 gap-3">
             {tab === 'available' && (
               <>
-                {/* Filtro por especialidade (limitado às que têm missões disponíveis para a trilha do usuário) */}
-                {filteredSpecialties.length > 0 && (
-                  <SpecialtyFilter
-                    specialties={filteredSpecialties}
-                    value={specialtyId}
-                    onChange={setSpecialtyId}
-                  />
+                {/* Filtro por especialidade (limitado às que têm missões disponíveis para a trilha do usuário)
+                    + filtro por nível (dropdown) ao lado */}
+                {(filteredSpecialties.length > 0 || !isBelowRecruitIV) && (
+                  <View className="flex-row items-center gap-2">
+                    {filteredSpecialties.length > 0 && (
+                      <View className="flex-1">
+                        <SpecialtyFilter
+                          specialties={filteredSpecialties}
+                          value={specialtyId}
+                          onChange={setSpecialtyId}
+                        />
+                      </View>
+                    )}
+                    {!isBelowRecruitIV && (
+                      <DifficultyFilter value={difficultyFilter} onChange={setDifficultyFilter} />
+                    )}
+                  </View>
                 )}
 
                 {isBelowRecruitIV && (
                   <View className="bg-gold/15 border border-gold/40 rounded-[12px] px-4 py-3 flex-row items-center gap-2">
                     <Text className="text-[14px]">⚔️</Text>
                     <Text className="flex-1 text-[12px] text-[#7a5b00] leading-[18px]">
-                      Missões de nível médio e difícil são desbloqueadas ao alcançar {unlockRankName}.
+                      {t('missions.belowRecruitInfo', { rank: unlockRankName })}
                     </Text>
                   </View>
                 )}
@@ -355,9 +390,9 @@ export default function MissionsScreen() {
                     <ActivityIndicator color="#8B1A2B" />
                   </View>
                 ) : availableQuery.isError ? (
-                  <ErrorBox text="Não foi possível carregar as missões disponíveis." />
+                  <ErrorBox text={t('missions.errorAvailable')} />
                 ) : availableMissions.length === 0 ? (
-                  <EmptyBox text="Nenhuma missão disponível para este filtro." />
+                  <EmptyBox text={t('missions.emptyAvailable')} />
                 ) : (
                   renderList(availableMissions)
                 )}
@@ -371,9 +406,9 @@ export default function MissionsScreen() {
                     <ActivityIndicator color="#8B1A2B" />
                   </View>
                 ) : inProgressError ? (
-                  <ErrorBox text="Não foi possível carregar as missões em progresso." />
+                  <ErrorBox text={t('missions.errorInProgress')} />
                 ) : inProgressMissions.length === 0 ? (
-                  <EmptyBox text="Nenhuma missão ativa ou em revisão." />
+                  <EmptyBox text={t('missions.emptyInProgress')} />
                 ) : (
                   renderList(inProgressMissions)
                 )}
@@ -387,9 +422,9 @@ export default function MissionsScreen() {
                     <ActivityIndicator color="#8B1A2B" />
                   </View>
                 ) : historyError ? (
-                  <ErrorBox text="Não foi possível carregar o histórico." />
+                  <ErrorBox text={t('missions.errorHistory')} />
                 ) : historyMissions.length === 0 ? (
-                  <EmptyBox text="Você ainda não iniciou nenhuma missão." />
+                  <EmptyBox text={t('missions.emptyHistory')} />
                 ) : (
                   renderList(historyMissions)
                 )}
@@ -418,7 +453,7 @@ export default function MissionsScreen() {
         mission={evidenceMission}
         submitting={completeM.isPending}
         onClose={() => setEvidenceMission(null)}
-        onSubmit={(evidence) => evidenceMission && submitComplete(evidenceMission.slug, evidence)}
+        onSubmit={(evidence) => evidenceMission && submitComplete(evidenceMission, evidence)}
       />
     </View>
   );
@@ -475,6 +510,7 @@ function AllowanceBar({
   adState?: 'idle' | 'loading' | 'ready' | 'showing' | 'error';
   onWatchAd?: () => void;
 }) {
+  const { t } = useTranslation();
   const resetLabel = React.useMemo(() => {
     if (!resetAt) return null;
     const reset = parseBackendDate(resetAt);
@@ -486,16 +522,20 @@ function AllowanceBar({
     const diffM = Math.floor((diffMs % 3_600_000) / 60_000);
     if (diffH >= 24) {
       const days = Math.ceil(diffH / 24);
-      return `Renova em ${days} dia${days > 1 ? 's' : ''}`;
+      return t('missions.renewInDays', { count: days });
     }
-    if (diffH > 0) return `Renova em ${diffH}h${diffM > 0 ? ` ${diffM}min` : ''}`;
-    return `Renova em ${diffM}min`;
-  }, [resetAt]);
+    if (diffH > 0) {
+      return diffM > 0
+        ? t('missions.renewInHoursMinutes', { hours: diffH, minutes: diffM })
+        : t('missions.renewInHours', { hours: diffH });
+    }
+    return t('missions.renewInMinutes', { minutes: diffM });
+  }, [resetAt, t]);
 
   const adButtonLabel =
-    adState === 'loading' ? 'Carregando anúncio...'
-    : adState === 'showing' ? 'Assistindo...'
-    : '▶  Assistir anúncio (+2 missões)';
+    adState === 'loading' ? t('missions.adLoading')
+    : adState === 'showing' ? t('missions.adWatching')
+    : t('missions.adWatch');
 
   const adButtonDisabled = adState === 'loading' || adState === 'showing';
 
@@ -506,7 +546,7 @@ function AllowanceBar({
           <Text className="text-[11px] font-semibold text-white/40 uppercase tracking-[1px]">
             {label}
           </Text>
-          <Text className="text-[13px] font-bold text-white/50 mt-0.5">Cota esgotada</Text>
+          <Text className="text-[13px] font-bold text-white/50 mt-0.5">{t('missions.quotaExhausted')}</Text>
         </View>
         {resetLabel && (
           <View className="bg-white/15 rounded-[8px] px-3 py-1.5">
@@ -592,14 +632,14 @@ function ReviewSection({
   onReject: (slug: string, executorId: string) => void;
   pendingSlug: string | null;
 }) {
+  const { t } = useTranslation();
   const items = query.data ?? [];
   return (
     <View className="bg-white border border-[#f0eded] rounded-[20px] p-3 gap-3">
       <View className="px-1 pt-1">
-        <Text className="text-[14px] font-extrabold text-charcoal">Aguardando sua revisão</Text>
+        <Text className="text-[14px] font-extrabold text-charcoal">{t('missions.reviewWaiting')}</Text>
         <Text className="text-[11px] text-[#999] mt-0.5 leading-[15px]">
-          Valide missões médias/difíceis de companheiros da sua legião com patente abaixo da sua.
-          Duas aprovações concluem a missão.
+          {t('missions.reviewDescription')}
         </Text>
       </View>
 
@@ -608,9 +648,9 @@ function ReviewSection({
           <ActivityIndicator color="#8B1A2B" />
         </View>
       ) : query.isError ? (
-        <ErrorBox text="Não foi possível carregar as missões para revisão." />
+        <ErrorBox text={t('missions.errorReview')} />
       ) : items.length === 0 ? (
-        <EmptyBox text="Nenhuma missão aguardando sua revisão no momento." />
+        <EmptyBox text={t('missions.emptyReview')} />
       ) : (
         <View className="gap-3">
           {items.map((item) => (

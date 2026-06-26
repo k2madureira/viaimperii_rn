@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionAttributes, Navbar } from '../../components';
 import { Legion } from '../../api/legions/legionsApi';
@@ -22,6 +23,7 @@ const BOOK_HEIGHT = 420;
 
 export default function LegionsScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const { user } = useAuth();
 
   const profileQuery = useUserProfile(user?.user_id);
@@ -47,7 +49,7 @@ export default function LegionsScreen() {
 
         {/* Estante: bookmarks acima + livro aberto / lombadas */}
         <View>
-          <Text className="text-[15px] font-extrabold text-[#111] mb-3">Todas as legiões</Text>
+          <Text className="text-[15px] font-extrabold text-[#111] mb-3">{t('legions.allLegions')}</Text>
 
           {legionsQuery.isLoading ? (
             <View className="py-12 items-center">
@@ -151,6 +153,7 @@ function OpenBook({
   color: string;
   isUserLegion: boolean;
 }) {
+  const { t } = useTranslation();
   return (
     <View
       className="flex-1 bg-white rounded-[14px] border border-[#f0eded] overflow-hidden"
@@ -177,7 +180,7 @@ function OpenBook({
 
         {isUserLegion && (
           <View className="bg-laurel/15 rounded-full px-2.5 py-0.5 mt-1.5">
-            <Text className="text-[11px] font-bold text-laurel">Sua legião</Text>
+            <Text className="text-[11px] font-bold text-laurel">{t('legions.yourLegion')}</Text>
           </View>
         )}
       </View>

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
+import i18n from '../../../../i18n';
 import {
   completeMission,
   MissionEvidence,
@@ -16,7 +17,7 @@ export function useStartMission() {
       queryClient.invalidateQueries({ queryKey: ['missions-available'] });
     },
     onError: (error: Error) => {
-      Toast.show({ type: 'error', text1: 'Erro ao iniciar missão', text2: error.message });
+      Toast.show({ type: 'error', text1: i18n.t('toasts.startMissionError'), text2: error.message });
     },
   });
 }
@@ -31,18 +32,22 @@ export function useCompleteMission() {
       if (result.status === 'completed') {
         Toast.show({
           type: 'success',
-          text1: result.promoted ? `Promovido a ${result.current_rank}!` : 'Missão concluída!',
-          text2: `+${result.xp_earned} XP${result.medal_earned ? ` · Medalha: ${result.medal_earned}` : ''}`,
+          text1: result.promoted
+            ? i18n.t('toasts.completePromoted', { rank: result.current_rank })
+            : i18n.t('toasts.completeTitle'),
+          text2: result.medal_earned
+            ? i18n.t('toasts.completeXpWithMedal', { xp: result.xp_earned, medal: result.medal_earned })
+            : i18n.t('toasts.completeXp', { xp: result.xp_earned }),
         });
       } else {
         // pending_review — entra na janela de revisão antes de conceder XP.
         Toast.show({
           type: 'success',
-          text1: 'Conclusão solicitada!',
+          text1: i18n.t('toasts.completeRequestedTitle'),
           text2:
             result.approvals_required > 0
-              ? 'Aguardando o tempo de revisão ou aprovação de pares.'
-              : 'Sua missão está em revisão e será concluída em breve.',
+              ? i18n.t('toasts.completeRequestedWithApproval')
+              : i18n.t('toasts.completeRequestedNoApproval'),
         });
       }
       queryClient.invalidateQueries({ queryKey: ['missions'] });
@@ -52,7 +57,7 @@ export function useCompleteMission() {
       queryClient.invalidateQueries({ queryKey: ['user-stats'] });
     },
     onError: (error: Error) => {
-      Toast.show({ type: 'error', text1: 'Erro ao concluir missão', text2: error.message });
+      Toast.show({ type: 'error', text1: i18n.t('toasts.completeError'), text2: error.message });
     },
   });
 }

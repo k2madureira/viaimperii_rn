@@ -1,6 +1,8 @@
 import * as SecureStore from 'expo-secure-store';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { registerAuthHandlers } from '../api/config/authBridge';
+import { closeMissionEvents } from '../api/missions/missionEvents';
+import { closeFeedEvents } from '../api/feed/feedEvents';
 
 const ACCESS_KEY = 'access_token';
 const REFRESH_KEY = 'refresh_token';
@@ -86,6 +88,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
+    // Encerra a sessão SSE no servidor ANTES de apagar o token (o DELETE precisa
+    // do header de auth). Best-effort — não bloqueia o logout se falhar.
+    await Promise.all([closeMissionEvents(), closeFeedEvents()]);
     await Promise.all([
       SecureStore.deleteItemAsync(ACCESS_KEY),
       SecureStore.deleteItemAsync(REFRESH_KEY),
