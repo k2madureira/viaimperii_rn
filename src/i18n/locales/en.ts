@@ -303,6 +303,7 @@ export default {
   legions: {
     allLegions: 'All legions',
     yourLegion: 'Your legion',
+    joinHint: 'To join this legion, complete your first mission — the choice will appear automatically.',
   },
   achievements: {
     progress: '{{unlocked}} of {{total}} unlocked',

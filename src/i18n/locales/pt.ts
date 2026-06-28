@@ -303,6 +303,7 @@ export default {
   legions: {
     allLegions: 'Todas as legiões',
     yourLegion: 'Sua legião',
+    joinHint: 'Para ingressar nesta legião, conclua sua primeira missão — a escolha aparecerá automaticamente.',
   },
   achievements: {
     progress: '{{unlocked}} de {{total}} desbloqueadas',
