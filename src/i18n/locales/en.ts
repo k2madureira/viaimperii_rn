@@ -58,6 +58,7 @@ export default {
     yourRank: 'Your rank',
     viewRequirements: 'View Requirements',
     chooseTrackToAdvance: 'Choose a track to advance in rank',
+    chooseTrackCta: '⚔️ Choose my track now',
     maxRankReached: 'Maximum rank reached',
     xpToNextRank: '{{xp}} XP left to {{rank}}',
     nextRankFallback: 'the next rank',
@@ -345,6 +346,7 @@ export default {
   legionSelect: {
     chooseTitle: 'Choose your legion',
     recommended: 'Recommended',
+    benefit: 'In your legion you validate teammates\' missions, earn review XP, and access your unit\'s feed.',
     chooseThis: 'Choose this legion',
     lockNotice: 'This choice does not change your XP or rank, but is locked for 60 days.',
     confirmTitle: 'Confirm legion',

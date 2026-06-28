@@ -60,6 +60,9 @@ export default function LegionSelectModal({
           <Text className="text-[11px] font-bold text-[#999] tracking-[2px] uppercase">
             {t('legionSelect.chooseTitle')}
           </Text>
+          <Text className="text-[12px] text-[#888] text-center mt-1.5 leading-[17px]">
+            {t('legionSelect.benefit')}
+          </Text>
 
           {/* Carrossel: setas + imagem central */}
           <View className="flex-row items-center justify-between w-full mt-4">

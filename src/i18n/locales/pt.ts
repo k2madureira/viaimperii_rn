@@ -58,6 +58,7 @@ export default {
     yourRank: 'Sua patente',
     viewRequirements: 'Ver Requisitos',
     chooseTrackToAdvance: 'Escolha uma trilha para avançar de patente',
+    chooseTrackCta: '⚔️ Escolher minha trilha agora',
     maxRankReached: 'Patente máxima alcançada',
     xpToNextRank: 'Faltam {{xp}} XP para {{rank}}',
     nextRankFallback: 'a próxima patente',
@@ -345,6 +346,7 @@ export default {
   legionSelect: {
     chooseTitle: 'Escolha sua legião',
     recommended: 'Recomendada',
+    benefit: 'Na legião você valida missões de colegas, ganha XP de revisão e tem acesso ao feed da sua unidade.',
     chooseThis: 'Escolher esta legião',
     lockNotice: 'A escolha não altera seu XP nem sua patente, mas fica travada por 60 dias.',
     confirmTitle: 'Confirmar legião',
