@@ -365,7 +365,7 @@ function StatCard({ value, label, loading }: { value: number; label: string; loa
       className="bg-white border border-[#f0eded] rounded-[14px] py-3.5 px-2 items-center"
       style={{ width: '31.5%' }}>
       {loading ? (
-        <ActivityIndicator color="#9E1B32" />
+        <View className="h-7 w-10 bg-[#f0eded] rounded-[6px]" />
       ) : (
         <Text className="text-[20px] font-extrabold text-charcoal">{value.toLocaleString()}</Text>
       )}
