@@ -219,6 +219,7 @@ export default {
     startMission: 'Start mission',
     finalizing: 'Finalizing…',
     reviewLabel: 'Under review',
+    reviewSubmitted: 'Submission sent. Waiting for validation.',
     autoCompleteWithApproval:
       'Completes automatically when time runs out — or instantly with 2 peer approvals.',
     autoComplete: 'Completes automatically when the review window ends.',

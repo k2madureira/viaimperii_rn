@@ -219,6 +219,7 @@ export default {
     startMission: 'Iniciar missão',
     finalizing: 'Finalizando…',
     reviewLabel: 'Em revisão',
+    reviewSubmitted: 'Conclusão enviada. Aguardando validação.',
     autoCompleteWithApproval:
       'Conclui automaticamente quando o tempo acabar — ou na hora com 2 aprovações de pares.',
     autoComplete: 'Conclui automaticamente quando o tempo de revisão acabar.',

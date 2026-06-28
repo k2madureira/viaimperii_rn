@@ -109,6 +109,7 @@ function ReviewPanel({ mission }: { mission: Mission }) {
 
   return (
     <View className="mt-3 bg-accent-500/10 border border-accent-500/30 rounded-[12px] p-3 gap-2.5">
+      {/* Confirmação de envio + timer */}
       <View className="flex-row items-center justify-between">
         <Text className="text-[11px] font-bold text-[#9a7b1f] uppercase tracking-[1px]">
           ⏳ {t('missionItem.reviewLabel')}
@@ -117,6 +118,10 @@ function ReviewPanel({ mission }: { mission: Mission }) {
           {formatRemaining(remaining)}
         </Text>
       </View>
+
+      <Text className="text-[11px] text-[#7a5b00] leading-[16px]">
+        ✓ {t('missionItem.reviewSubmitted')}
+      </Text>
 
       <Text className="text-[11px] text-[#9a7b1f] leading-[15px]">
         {needsApproval
