@@ -71,6 +71,10 @@ export default {
     activeMembers_one: '{{count}} active member',
     activeMembers_other: '{{count}} active members',
     yourLegionFallback: 'Your legion',
+    streakDays_one: '{{count}} consecutive day',
+    streakDays_other: '{{count}} consecutive days',
+    streakBonus: '+{{pct}}% XP bonus — next milestone: {{next}} days',
+    streakMax: 'Maximum +{{pct}}% XP bonus reached!',
   },
   feed: {
     title: 'The Wall',

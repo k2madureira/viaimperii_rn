@@ -3,6 +3,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { registerAuthHandlers } from '../api/config/authBridge';
 import { closeMissionEvents } from '../api/missions/missionEvents';
 import { closeFeedEvents } from '../api/feed/feedEvents';
+import { LoginStreak } from '../api/auth/authApi';
 
 const ACCESS_KEY = 'access_token';
 const REFRESH_KEY = 'refresh_token';
@@ -20,6 +21,7 @@ export interface AuthUser {
   mastery: Record<string, number>;
   legion_id: number | null;
   province_id: number | null;
+  streak?: LoginStreak | null;
 }
 
 interface AuthState {

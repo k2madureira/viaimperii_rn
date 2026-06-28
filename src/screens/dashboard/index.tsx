@@ -110,6 +110,7 @@ export default function DashboardScreen() {
   }, [isTemporary, legionDismissed, needsProvince, needsTrack, hasLegion, completedCount]);
 
   // ── Dados derivados ────────────────────────────────────────────────────────
+  const streak = user?.streak ?? null;
   const firstName = user?.name?.split(' ')[0] ?? t('dashboard.defaultName');
   const rankName = profile?.rank ?? user?.rank ?? '—';
   const totalXp = profile?.total_xp ?? user?.total_xp ?? 0;
@@ -157,6 +158,34 @@ export default function DashboardScreen() {
           {legion ? ` • ${legion.name}` : ''}
         </Text>
       </View>
+
+      {/* 1.5 — LOGIN STREAK */}
+      {streak && streak.current_streak > 0 && (
+        <View className="bg-white border border-[#f0eded] rounded-[16px] p-4 flex-row items-center">
+          <View className="w-11 h-11 rounded-full bg-accent-500/15 items-center justify-center mr-3">
+            <Text className="text-[22px]">🔥</Text>
+          </View>
+          <View className="flex-1">
+            <Text className="text-[14px] font-extrabold text-charcoal">
+              {t('dashboard.streakDays', { count: streak.current_streak })}
+            </Text>
+            <Text className="text-[12px] text-[#888] mt-0.5">
+              {streak.is_max_bonus
+                ? t('dashboard.streakMax', { pct: streak.bonus_pct })
+                : t('dashboard.streakBonus', { pct: streak.bonus_pct, next: streak.next_milestone })}
+            </Text>
+          </View>
+          {/* Mini progress */}
+          <View className="items-center ml-2">
+            <Text className="text-[16px] font-extrabold text-accent-500">
+              +{streak.bonus_pct}%
+            </Text>
+            <Text className="text-[9px] text-[#aaa] uppercase tracking-[1px]">
+              {t('common.xp')}
+            </Text>
+          </View>
+        </View>
+      )}
 
       {/* 2 — PATENTE (70%) + MISSÕES (30%) lado a lado */}
       <View className="flex-row" style={{ gap: 12 }}>

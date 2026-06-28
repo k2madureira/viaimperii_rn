@@ -311,6 +311,30 @@ Regras:
 
 ---
 
+## 13.1 Login Streak (Ofensiva de Login)
+
+Dias consecutivos de login que concedem bônus progressivo de XP em toda atividade.
+
+- **Tabela `user_login_streaks`** (`user_id` unique): `current_streak`, `longest_streak`,
+  `last_login_date` (date), `timezone` (string, default `America/Sao_Paulo`).
+- **Registro automático** no `POST /auth/sign-in`: o login aceita `timezone` opcional no body
+  (fuso do dispositivo do usuário); o streak é calculado no fuso informado (ou SP se omitido).
+- **Escala linear**: +1 % de bônus por dia de streak, máximo **20 %** em 20 dias
+  (`STREAK_MAX_DAYS = 20`, `STREAK_BONUS_PER_DAY = 0.01`, `STREAK_MAX_BONUS = 0.20`).
+- **Decay 3×**: cada dia sem login desconta **3 dias** do streak
+  (`STREAK_DECAY_MULTIPLIER = 3`). Ex.: streak 15, ausência de 2 dias → 15 − (2×3) = 9, +1 (login) = 10.
+- **Bônus de XP aplicado** em:
+  - `finalize_pending_mission()` — missões (job, lazy-finalize, approve).
+  - `approve_service` — recompensa do revisor.
+  - O bônus é calculado via `apply_streak_bonus(base_xp, current_streak)` → `(total, bonus)`.
+  - Campanhas via porta (`User.gain_xp`) ainda sem bônus (domínio puro, sem sessão).
+- **Resposta do login** inclui objeto `streak` com: `current_streak`, `longest_streak`,
+  `last_login_date`, `timezone`, `bonus_pct` (0–20), `next_milestone`, `max_streak_days`,
+  `is_max_bonus`.
+- **Endpoint dedicado**: `GET /users/{id}/streak` — consulta independente do login.
+
+---
+
 ## 14. Legiões e Províncias
 
 - **Legiões são unidades mistas/abertas**: qualquer especialidade pode entrar em qualquer legião.

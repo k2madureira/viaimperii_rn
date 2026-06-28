@@ -71,6 +71,10 @@ export default {
     activeMembers_one: '{{count}} membro ativo',
     activeMembers_other: '{{count}} membros ativos',
     yourLegionFallback: 'Sua legião',
+    streakDays_one: '{{count}} dia consecutivo',
+    streakDays_other: '{{count}} dias consecutivos',
+    streakBonus: 'Bônus de +{{pct}}% XP — próximo marco: {{next}} dias',
+    streakMax: 'Bônus máximo de +{{pct}}% XP atingido!',
   },
   feed: {
     title: 'Mural',

@@ -1,6 +1,17 @@
 import { LoginFormData } from '../../screens/auth/login/model/contracts/loginSchema';
 import { apiFetch, readContent, readError } from '../config/defaultApi';
 
+export interface LoginStreak {
+  current_streak: number;
+  longest_streak: number;
+  last_login_date: string | null;
+  timezone: string;
+  bonus_pct: number;
+  next_milestone: number;
+  max_streak_days: number;
+  is_max_bonus: boolean;
+}
+
 export interface LoginResponse {
   access_token: string;
   refresh_token: string;
@@ -19,12 +30,14 @@ export interface LoginResponse {
   completed_campaigns: string[];
   legion_id: number | null;
   province_id: number | null;
+  streak?: LoginStreak | null;
 }
 
 export async function loginRequest(data: LoginFormData): Promise<LoginResponse> {
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone ?? 'America/Sao_Paulo';
   const response = await apiFetch('/auth/sign-in', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify({ ...data, timezone }),
   });
 
   if (!response.ok) {
