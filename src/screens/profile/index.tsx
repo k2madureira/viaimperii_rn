@@ -175,6 +175,7 @@ export default function ProfileScreen() {
               progressPct={cr?.progress_pct}
               imageUrl={cr?.image_url}
               trackName={data?.track?.name}
+              onPress={() => (navigation as any).navigate('Home', { screen: 'Ranks' })}
             />
             <LegionCard
               legion={data?.legion ?? null}
