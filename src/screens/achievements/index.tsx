@@ -54,24 +54,26 @@ export default function AchievementsScreen() {
 
       {/* Filtro por especialidade */}
       {specialties.length > 0 && (
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 10, gap: 8 }}>
-          <FilterChip
-            label={t('achievements.filterAll')}
-            active={filterSpecialtyId == null}
-            onPress={() => setFilterSpecialtyId(null)}
-          />
-          {specialties.map((s) => (
+        <View style={{ height: 48 }}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 20, alignItems: 'center', gap: 8, height: 48 }}>
             <FilterChip
-              key={s.id}
-              label={s.name}
-              active={filterSpecialtyId === s.id}
-              onPress={() => setFilterSpecialtyId(filterSpecialtyId === s.id ? null : s.id)}
+              label={t('achievements.filterAll')}
+              active={filterSpecialtyId == null}
+              onPress={() => setFilterSpecialtyId(null)}
             />
-          ))}
-        </ScrollView>
+            {specialties.map((s) => (
+              <FilterChip
+                key={s.id}
+                label={s.name}
+                active={filterSpecialtyId === s.id}
+                onPress={() => setFilterSpecialtyId(filterSpecialtyId === s.id ? null : s.id)}
+              />
+            ))}
+          </ScrollView>
+        </View>
       )}
 
       {profileQuery.isLoading ? (
@@ -125,14 +127,16 @@ function FilterChip({ label, active, onPress }: { label: string; active: boolean
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
-      className="px-3 py-1.5 rounded-full border"
       style={{
+        alignSelf: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 999,
+        borderWidth: 1,
         backgroundColor: active ? '#9E1B32' : '#fff',
         borderColor: active ? '#9E1B32' : '#e0dada',
       }}>
-      <Text
-        className="text-[12px] font-bold"
-        style={{ color: active ? '#fff' : '#666' }}>
+      <Text style={{ fontSize: 12, fontWeight: '700', color: active ? '#fff' : '#666' }}>
         {label}
       </Text>
     </TouchableOpacity>
