@@ -471,5 +471,6 @@ export default {
     feedPostUpdateError: 'Error editing post',
     feedPostDeleted: 'Post deleted.',
     feedPostDeleteError: 'Error deleting post',
+    error: 'Error',
   },
 };

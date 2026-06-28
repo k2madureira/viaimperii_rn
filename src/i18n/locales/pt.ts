@@ -473,5 +473,6 @@ export default {
     feedPostUpdateError: 'Erro ao editar publicação',
     feedPostDeleted: 'Publicação excluída.',
     feedPostDeleteError: 'Erro ao excluir publicação',
+    error: 'Erro',
   },
 };

@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { AuthNavigationProp } from '../../../../../navigation/types';
 import { useVerifyTokenMutation } from '../../model/mutations/useVerifyTokenMutation';
+import { useResendTestCodeMutation } from '../../model/mutations/useResendTestCodeMutation';
 
 interface Props {
   email: string;
@@ -33,6 +34,7 @@ export default function Step3Token({ email: initialEmail, onBack }: Props) {
 
   const queryClient = useQueryClient();
 
+  const { mutate: resend, isPending: isResending } = useResendTestCodeMutation();
   const { mutate: verify, isPending } = useVerifyTokenMutation(async ({ user_id }) => {
     const testCode = token.trim().toUpperCase();
     await queryClient.prefetchQuery({
@@ -119,7 +121,21 @@ export default function Step3Token({ email: initialEmail, onBack }: Props) {
 
       <View className="h-4" />
 
-      <TouchableOpacity onPress={onBack} className="items-center">
+      {email && (
+        <TouchableOpacity
+          className="items-center py-2"
+          activeOpacity={0.7}
+          disabled={isResending}
+          onPress={() => resend(email)}>
+          {isResending ? (
+            <ActivityIndicator size="small" color="#9E1B32" />
+          ) : (
+            <Text className="text-[13px] text-[#888]">{t('auth.signup.resendCode')}</Text>
+          )}
+        </TouchableOpacity>
+      )}
+
+      <TouchableOpacity onPress={onBack} className="items-center py-1">
         <Text className="text-[13px] text-[#888]">{t('auth.signup.backToEmail')}</Text>
       </TouchableOpacity>
     </View>
