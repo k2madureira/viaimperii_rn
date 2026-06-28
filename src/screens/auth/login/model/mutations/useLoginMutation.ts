@@ -22,6 +22,7 @@ export function useLoginMutation(onIncompleteSignup?: (email: string) => void) {
         mastery: data.mastery,
         legion_id: data.legion_id,
         province_id: data.province_id,
+        streak: data.streak ?? null,
       });
     },
     onError: (error: Error, variables) => {
