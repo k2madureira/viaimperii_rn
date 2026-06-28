@@ -1,6 +1,8 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useRef, useState } from 'react';
 import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { HomeNavigationProp } from '../../../../../navigation/HomeStack';
 import { FeedItem, ReactionType } from '../../../../../api/feed/feedApi';
 import { parseBackendDate } from '../../../../../utils/date';
 import { CommentIcon } from '../../../../../components/icons';
@@ -50,9 +52,17 @@ export default function FeedCard({
   onOpenComments,
 }: Props) {
   const { t } = useTranslation();
+  const navigation = useNavigation<HomeNavigationProp>();
   const { author } = item;
   const avatarUrl = author.active_avatar?.url ?? author.image ?? null;
   const deleteM = useDeletePost();
+
+  // Só usuários reais têm perfil navegável (eventos de sistema não).
+  const canViewProfile = item.source === 'user' && !!author.id;
+  const goToProfile = () => {
+    setUserAnchor(null);
+    if (canViewProfile) navigation.navigate('Profile', { userId: author.id });
+  };
 
   const avatarRef = useRef<View>(null);
   const menuRef = useRef<View>(null);
@@ -276,6 +286,14 @@ export default function FeedCard({
                 {legionName}
               </Text>
             </View>
+          ) : null}
+          {canViewProfile ? (
+            <TouchableOpacity
+              onPress={goToProfile}
+              activeOpacity={0.8}
+              className="mt-3 bg-primary-500 rounded-[10px] py-2 items-center">
+              <Text className="text-[12px] font-bold text-white">{t('feed.viewProfile')}</Text>
+            </TouchableOpacity>
           ) : null}
         </View>
       </AnchoredPopover>

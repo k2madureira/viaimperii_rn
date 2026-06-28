@@ -75,11 +75,19 @@ export interface UserLegion {
   specialty_id: number | null;
 }
 
+export interface UserCountry {
+  id: number;
+  name: string;
+  icon_url: string | null;
+}
+
 export interface UserProvince {
   id: number;
   name: string;
   abbreviation: string | null;
   country_id: number | null;
+  // O detalhe do usuário aninha o country (com ícone) — opcional p/ segurança.
+  country?: UserCountry | null;
 }
 
 export interface GetUserResponse {

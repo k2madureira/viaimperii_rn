@@ -1,4 +1,3 @@
-import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { Platform, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -14,7 +13,6 @@ import UserMenu from '../userMenu';
 export default function Navbar() {
   const { t } = useTranslation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const navigation = useNavigation<any>();
 
   return (
     <>
@@ -27,10 +25,7 @@ export default function Navbar() {
             {t('common.appName')}
           </Text>
         </View>
-        <UserMenu
-          onChangePassword={() => setShowPasswordModal(true)}
-          onEdit={() => navigation.navigate('Home', { screen: 'Profile' })}
-        />
+        <UserMenu onChangePassword={() => setShowPasswordModal(true)} />
       </View>
 
       {/* Modal de troca de senha (acionado manualmente pelo UserMenu) */}

@@ -357,18 +357,17 @@ export default function MissionsScreen() {
           <View className="p-3 gap-3">
             {tab === 'available' && (
               <>
-                {/* Filtro por especialidade (limitado às que têm missões disponíveis para a trilha do usuário)
-                    + filtro por nível (dropdown) ao lado */}
+                {/* Filtros empilhados: especialidade (chips) + nível (chips visíveis).
+                    O nível antes era um ícone de funil escondido — usuários não o
+                    encontravam; agora é uma linha de chips rotulada e clara. */}
                 {(filteredSpecialties.length > 0 || !isBelowRecruitIV) && (
-                  <View className="flex-row items-center gap-2">
+                  <View className="gap-3">
                     {filteredSpecialties.length > 0 && (
-                      <View className="flex-1">
-                        <SpecialtyFilter
-                          specialties={filteredSpecialties}
-                          value={specialtyId}
-                          onChange={setSpecialtyId}
-                        />
-                      </View>
+                      <SpecialtyFilter
+                        specialties={filteredSpecialties}
+                        value={specialtyId}
+                        onChange={setSpecialtyId}
+                      />
                     )}
                     {!isBelowRecruitIV && (
                       <DifficultyFilter value={difficultyFilter} onChange={setDifficultyFilter} />

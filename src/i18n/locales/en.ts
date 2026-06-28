@@ -73,6 +73,7 @@ export default {
     deleteConfirmBody: 'Are you sure you want to delete this post?',
     react: 'React',
     comment: 'Comment',
+    viewProfile: 'View profile',
     reactions: {
       like: 'Like',
       clap: 'Clap',
@@ -179,6 +180,8 @@ export default {
   difficultyFilter: {
     title: 'Filter by level',
     all: 'All levels',
+    label: 'Level',
+    any: 'All',
   },
   missionItem: {
     difficulty: {
@@ -259,6 +262,29 @@ export default {
     province: 'Province',
     changePassword: 'Change password',
     signOut: 'Sign out',
+    memberSince: 'Member since',
+    nextRank: 'Next rank',
+    toNextRank: '{{xp}} XP to {{rank}}',
+    maxRank: 'Top rank reached',
+    statsTitle: 'Statistics',
+    masteryTitle: 'Mastery',
+    detailsTitle: 'Details',
+    locationTitle: 'Origin',
+    country: 'Country',
+    noLegion: 'No legion',
+    noTrack: 'No track',
+    privateSection: 'Account (only you)',
+    loadError: 'Could not load profile.',
+    retry: 'Try again',
+    stats: {
+      missionsCompleted: 'Missions completed',
+      missionsInProgress: 'In progress',
+      achievements: 'Achievements',
+      medals: 'Medals',
+      campaigns: 'Campaigns',
+      ranksGained: 'Ranks gained',
+      activeDays: 'Active days',
+    },
   },
   legions: {
     allLegions: 'All legions',
@@ -283,7 +309,6 @@ export default {
     toastSubmitError: 'Error submitting answers',
   },
   userMenu: {
-    edit: 'Edit',
     changePassword: 'Change password',
     signOut: 'Sign out',
   },

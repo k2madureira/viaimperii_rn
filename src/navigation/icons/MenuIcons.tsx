@@ -103,6 +103,17 @@ export function RanksIcon({ size = 22, color = '#111' }: IconProps) {
   );
 }
 
+export function KeyIcon({ size = 20, color = '#111' }: IconProps) {
+  return (
+    <Svg {...base(size)}>
+      <Circle cx={7.5} cy={15.5} r={4.5} {...s(color)} />
+      <Path d="M10.7 12.3 21 2" {...s(color)} />
+      <Path d="M16 7l3 3" {...s(color)} />
+      <Path d="M18.5 4.5l3 3" {...s(color)} />
+    </Svg>
+  );
+}
+
 export function LogoutIcon({ size = 20, color = '#ef4444' }: IconProps) {
   return (
     <Svg {...base(size)}>
