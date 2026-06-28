@@ -23,7 +23,7 @@ import { useJoinLegion } from '../missions/model/mutations/useJoinLegion';
 import { legionColorByIndex } from '../../utils/legionColors';
 import { LegionNavigationProp } from '../../navigation/LegionStack';
 
-const TRACK_CHANGE_PENALTY_PCT = 0.25;
+const TRACK_CHANGE_PENALTY_PCT = 0.05;
 
 export default function LegionsScreen() {
   const insets = useSafeAreaInsets();
