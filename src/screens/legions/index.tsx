@@ -323,7 +323,7 @@ function LegionExpandedCard({
               className="mt-4 rounded-[12px] py-3 items-center"
               style={{ backgroundColor: color }}>
               <Text className="text-[14px] font-bold text-white">
-                ⚔️  {t('legions.enterWarRoom')}
+                ⚔️  {t('legions.enterHeadquarters')}
               </Text>
             </TouchableOpacity>
           ) : userHasLegion ? (

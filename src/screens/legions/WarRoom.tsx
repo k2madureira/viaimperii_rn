@@ -10,12 +10,12 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { useRoute, RouteProp } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LegionAttributes } from '../../components';
+import { LegionAttributes, Navbar } from '../../components';
 import { useLegionDetail } from '../dashboard/model/queries/useLegionDetail';
 import { LegionCountry } from '../../api/legion/legionApi';
-import { LegionStackParamList, LegionNavigationProp } from '../../navigation/LegionStack';
+import { LegionStackParamList } from '../../navigation/LegionStack';
 import { legionColorById } from '../../utils/legionColors';
 import { useLegions } from '../missions/model/queries/useLegions';
 
@@ -24,7 +24,6 @@ type WarRoomRoute = RouteProp<LegionStackParamList, 'WarRoom'>;
 export default function WarRoomScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
-  const navigation = useNavigation<LegionNavigationProp>();
   const { params } = useRoute<WarRoomRoute>();
   const { legionId } = params;
 
@@ -36,17 +35,7 @@ export default function WarRoomScreen() {
 
   return (
     <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
-      {/* Header */}
-      <View className="flex-row items-center px-4 pt-5 pb-3 bg-white border-b border-[#f0f0f0]">
-        <TouchableOpacity onPress={() => navigation.goBack()} hitSlop={12} className="mr-3">
-          <Text className="text-[22px]" style={{ color }}>←</Text>
-        </TouchableOpacity>
-        <Text
-          className="text-sm font-semibold text-[#111] tracking-[3px] flex-1"
-          style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-          {t('legions.warRoom').toUpperCase()}
-        </Text>
-      </View>
+      <Navbar />
 
       {detailQuery.isLoading ? (
         <WarRoomSkeleton />
