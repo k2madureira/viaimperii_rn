@@ -137,7 +137,7 @@ function ReviewPanel({ mission }: { mission: Mission }) {
               <View
                 key={i}
                 className={`flex-1 h-1.5 rounded-full ${
-                  i < mission.approvals_count ? 'accent-500' : 'accent-500/25'
+                  i < mission.approvals_count ? 'bg-accent-500' : 'bg-accent-500/25'
                 }`}
               />
             ))}

@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Image,
   Platform,
+  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -71,7 +72,14 @@ export default function RanksScreen() {
 
       <ScrollView
         contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 32, gap: 20 }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={ranksQuery.isFetching || profileQuery.isFetching}
+            onRefresh={() => { ranksQuery.refetch(); profileQuery.refetch(); }}
+            tintColor="#9E1B32"
+          />
+        }>
         {/* Patente atual (igual à home) + trilha do usuário */}
         <RankCard
           rank={rank}
@@ -131,7 +139,7 @@ export default function RanksScreen() {
                   <View
                     key={r.id}
                     className={`px-4 py-3 ${idx > 0 ? 'border-t border-[#f4f1f1]' : ''} ${
-                      isChoiceRank ? 'accent-500/10' : isCurrent ? 'bg-[#f4eaea]' : isLocked ? 'bg-[#f8f8f8]' : ''
+                      isChoiceRank ? 'bg-accent-500/10' : isCurrent ? 'bg-[#f4eaea]' : isLocked ? 'bg-[#f8f8f8]' : ''
                     }`}>
                     <View className="flex-row items-center">
                       {/* Imagem da patente */}

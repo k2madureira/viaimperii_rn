@@ -59,8 +59,7 @@ export default function MissionsScreen() {
   // Keeps a persistent SSE connection open so mission status changes (approvals,
   // completions, new reviews) are reflected in real time without polling.
 
-  console.log(user)
-  useMissionEvents(!!user); 
+  useMissionEvents(!!user);
 
   const profileQuery = useUserProfile(user?.user_id);
   const userTrack = profileQuery.data?.track ?? null;
@@ -300,7 +299,7 @@ export default function MissionsScreen() {
             </View>
             {allowance && activeAllowanceCount != null && (
               <View className={`px-3 py-1.5 rounded-full ${
-                activeAllowanceCount === 0 ? 'bg-white/10' : missionType === 'daily' ? 'accent-500' : 'bg-laurel'
+                activeAllowanceCount === 0 ? 'bg-white/10' : missionType === 'daily' ? 'bg-accent-500' : 'bg-laurel'
               }`}>
                 <Text className={`text-[11px] font-bold ${activeAllowanceCount === 0 ? 'text-white/40' : 'text-white'}`}>
                   {activeAllowanceCount === 0

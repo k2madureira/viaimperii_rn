@@ -1,6 +1,7 @@
 import { BottomTabNavigationProp, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
 import { Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeIcon from './icons/HomeIcon';
 import MissionsIcon from './icons/MissionsIcon';
@@ -39,16 +40,17 @@ const TAB_ICON: Record<keyof BottomTabParamList, IconComponent> = {
   Profile: ProfileIcon,
 };
 
-const TAB_LABEL: Record<keyof BottomTabParamList, string> = {
-  Home: 'Início',
-  Missions: 'Missões',
-  Legion: 'Legião',
-  Achievements: 'Conquistas',
-  Profile: 'Perfil',
-};
-
 export default function BottomTabs() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
+
+  const TAB_LABEL: Record<keyof BottomTabParamList, string> = {
+    Home: t('nav.home'),
+    Missions: t('nav.missions'),
+    Legion: t('nav.legion'),
+    Achievements: t('nav.achievements'),
+    Profile: t('nav.profile'),
+  };
   // Eleva a barra acima da área de gestos do sistema (home indicator / nav bar).
   const bottomInset = Math.max(insets.bottom, Platform.OS === 'android' ? 16 : 12);
 

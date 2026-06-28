@@ -4,6 +4,7 @@ import {
   Animated,
   Image,
   Platform,
+  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -43,7 +44,14 @@ export default function LegionsScreen() {
           paddingBottom: insets.bottom + 32,
           gap: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={legionsQuery.isFetching || profileQuery.isFetching}
+            onRefresh={() => { legionsQuery.refetch(); profileQuery.refetch(); }}
+            tintColor="#9E1B32"
+          />
+        }>
         {/* Legião do usuário no topo — mesma cor da listagem */}
         <LegionCard legion={userLegion} color={legionColorById(legions, userLegion?.id)} />
 

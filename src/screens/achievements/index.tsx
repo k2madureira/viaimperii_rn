@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, Image, ScrollView, Text, View } from 'react-native';
+import { ActivityIndicator, Image, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { SvgUri } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Navbar } from '../../components';
@@ -37,7 +38,14 @@ export default function AchievementsScreen() {
       ) : (
         <ScrollView
           contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 24, gap: 10 }}
-          showsVerticalScrollIndicator={false}>
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={profileQuery.isFetching}
+              onRefresh={() => profileQuery.refetch()}
+              tintColor="#9E1B32"
+            />
+          }>
           {unlocked.map((a) => (
             <AchievementRow key={a.id} achievement={a} unlocked t={t} />
           ))}
@@ -69,11 +77,20 @@ function AchievementRow({
       className={`flex-row items-center rounded-[14px] border p-3.5 ${unlocked ? 'bg-white border-[#f0eded]' : 'bg-[#f6f6f6] border-[#eee]'}`}>
       <View className="w-12 h-12 rounded-full bg-[#faf7f7] items-center justify-center overflow-hidden mr-3">
         {achievement.icon_url ? (
-          <Image
-            source={{ uri: achievement.icon_url }}
-            style={{ width: 36, height: 36, opacity: unlocked ? 1 : 0.3 }}
-            resizeMode="contain"
-          />
+          achievement.icon_url.endsWith('.svg') ? (
+            <SvgUri
+              uri={achievement.icon_url}
+              width={36}
+              height={36}
+              style={{ opacity: unlocked ? 1 : 0.3 }}
+            />
+          ) : (
+            <Image
+              source={{ uri: achievement.icon_url }}
+              style={{ width: 36, height: 36, opacity: unlocked ? 1 : 0.3 }}
+              resizeMode="contain"
+            />
+          )
         ) : (
           <Text className="text-[20px]" style={{ opacity: unlocked ? 1 : 0.3 }}>
             🏅

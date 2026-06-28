@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Image,
   Platform,
+  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -44,9 +45,9 @@ const MASTERY_ICONS: Record<string, React.FC<{ size?: number; color?: string }>>
 export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const { t, i18n } = useTranslation();
-  const navigation = useNavigation();
   const route = useRoute<RouteProp<HomeStackParamList, 'Profile'>>();
   const { user, signOut } = useAuth();
+  const navigation = useNavigation();
   const [showPassword, setShowPassword] = useState(false);
 
   // Perfil próprio quando não vem userId no params (ou é o id do logado).
@@ -86,19 +87,23 @@ export default function ProfileScreen() {
 
   return (
     <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
-      {/* Mesma navbar das demais telas internas */}
-      <Navbar />
-
-      {/* Barra de voltar — só ao visualizar o perfil de outro usuário */}
-      {!isOwnProfile && (
-        <View className="flex-row items-center px-4 py-2.5 bg-white border-b border-[#f0f0f0]">
+      {/* Navbar com seta de voltar quando visualizando perfil de outro usuário */}
+      {isOwnProfile ? (
+        <Navbar />
+      ) : (
+        <View className="flex-row items-center px-4 pt-5 pb-3 bg-white border-b border-[#f0f0f0]">
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-            className="flex-row items-center">
-            <Text className="text-[22px] text-[#333] leading-none mr-1">‹</Text>
-            <Text className="text-[13px] font-semibold text-[#555]">{t('profile.title')}</Text>
+            className="pr-3"
+            accessibilityLabel={t('common.back')}>
+            <Text className="text-[24px] text-[#333] leading-none">‹</Text>
           </TouchableOpacity>
+          <Text
+            className="text-sm font-semibold text-[#111] tracking-[3px]"
+            style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
+            {t('nav.profile')}
+          </Text>
         </View>
       )}
 
@@ -120,7 +125,14 @@ export default function ProfileScreen() {
       ) : (
         <ScrollView
           contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 24, gap: 16 }}
-          showsVerticalScrollIndicator={false}>
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={profileQuery.isFetching || statsQuery.isFetching}
+              onRefresh={() => { profileQuery.refetch(); statsQuery.refetch(); }}
+              tintColor="#9E1B32"
+            />
+          }>
           {/* Cabeçalho do perfil */}
           <View className="items-center pt-2">
             <View className="w-20 h-20 rounded-full bg-primary-500 items-center justify-center overflow-hidden">

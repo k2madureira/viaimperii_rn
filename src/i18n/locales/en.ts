@@ -1,4 +1,11 @@
 export default {
+  nav: {
+    home: 'Home',
+    missions: 'Missions',
+    legion: 'Legion',
+    achievements: 'Achievements',
+    profile: 'Profile',
+  },
   common: {
     appName: 'VIA IMPERII',
     copyright: '© {{year}} Via Imperii. All rights reserved.',
@@ -6,6 +13,7 @@ export default {
     confirm: 'Confirm',
     xp: 'XP',
     genericError: 'Something went wrong. Please try again.',
+    back: 'Back',
   },
   auth: {
     login: {
