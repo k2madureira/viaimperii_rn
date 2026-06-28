@@ -6,9 +6,11 @@ import HomeIcon from './icons/HomeIcon';
 import MissionsIcon from './icons/MissionsIcon';
 import LegionIcon from './icons/LegionIcon';
 import AchievementsIcon from './icons/AchievementsIcon';
+import ProfileIcon from './icons/ProfileIcon';
 import MissionsScreen from '../screens/missions';
 import LegionsScreen from '../screens/legions';
 import AchievementsScreen from '../screens/achievements';
+import ProfileScreen from '../screens/profile';
 import HomeStack from './HomeStack';
 
 export type BottomTabParamList = {
@@ -16,6 +18,7 @@ export type BottomTabParamList = {
   Missions: undefined;
   Legion: undefined;
   Achievements: undefined;
+  Profile: undefined;
 };
 
 export type BottomTabNavProp = BottomTabNavigationProp<BottomTabParamList>;
@@ -33,6 +36,7 @@ const TAB_ICON: Record<keyof BottomTabParamList, IconComponent> = {
   Missions: MissionsIcon,
   Legion: LegionIcon,
   Achievements: AchievementsIcon,
+  Profile: ProfileIcon,
 };
 
 const TAB_LABEL: Record<keyof BottomTabParamList, string> = {
@@ -40,6 +44,7 @@ const TAB_LABEL: Record<keyof BottomTabParamList, string> = {
   Missions: 'Missões',
   Legion: 'Legião',
   Achievements: 'Conquistas',
+  Profile: 'Perfil',
 };
 
 export default function BottomTabs() {
@@ -78,6 +83,7 @@ export default function BottomTabs() {
       <Tab.Screen name="Missions" component={MissionsScreen} />
       <Tab.Screen name="Legion" component={LegionsScreen} />
       <Tab.Screen name="Achievements" component={AchievementsScreen} />
+      <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }

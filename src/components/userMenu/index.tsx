@@ -9,15 +9,14 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
-import { UserIcon } from '../../navigation/icons/MenuIcons';
+import { KeyIcon, LogoutIcon, UserIcon } from '../../navigation/icons/MenuIcons';
 import { useUserProfile } from '../../screens/dashboard/model/queries/useUserProfile';
 
 interface Props {
   onChangePassword: () => void;
-  onEdit?: () => void;
 }
 
-export default function UserMenu({ onChangePassword, onEdit }: Props) {
+export default function UserMenu({ onChangePassword }: Props) {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const profileQuery = useUserProfile(user?.user_id);
@@ -75,28 +74,21 @@ export default function UserMenu({ onChangePassword, onEdit }: Props) {
                 </View>
               )}
 
-              {onEdit && (
-                <TouchableOpacity
-                  className="px-4 py-3"
-                  activeOpacity={0.7}
-                  onPress={() => { close(); onEdit(); }}>
-                  <Text className="text-[14px] font-medium text-[#111]">{t('userMenu.edit')}</Text>
-                </TouchableOpacity>
-              )}
-
               <TouchableOpacity
-                className="px-4 py-3"
+                className="flex-row items-center gap-3 px-4 py-3"
                 activeOpacity={0.7}
                 onPress={() => { close(); onChangePassword(); }}>
+                <KeyIcon size={18} color="#111" />
                 <Text className="text-[14px] font-medium text-[#111]">{t('userMenu.changePassword')}</Text>
               </TouchableOpacity>
 
               <View className="h-px bg-[#f0f0f0]" />
 
               <TouchableOpacity
-                className="px-4 py-3"
+                className="flex-row items-center gap-3 px-4 py-3"
                 activeOpacity={0.7}
                 onPress={async () => { close(); await signOut(); }}>
+                <LogoutIcon size={18} color="#ef4444" />
                 <Text className="text-[14px] font-medium text-red-500">{t('userMenu.signOut')}</Text>
               </TouchableOpacity>
             </View>

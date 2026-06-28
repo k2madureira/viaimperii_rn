@@ -73,6 +73,7 @@ export default {
     deleteConfirmBody: 'Tem certeza que deseja excluir esta publicação?',
     react: 'Reagir',
     comment: 'Comentar',
+    viewProfile: 'Ver perfil',
     reactions: {
       like: 'Gostei',
       clap: 'Aplausos',
@@ -179,6 +180,8 @@ export default {
   difficultyFilter: {
     title: 'Filtrar por nível',
     all: 'Todos os níveis',
+    label: 'Nível',
+    any: 'Todos',
   },
   missionItem: {
     difficulty: {
@@ -259,6 +262,29 @@ export default {
     province: 'Província',
     changePassword: 'Alterar senha',
     signOut: 'Sair',
+    memberSince: 'Membro desde',
+    nextRank: 'Próxima patente',
+    toNextRank: '{{xp}} XP para {{rank}}',
+    maxRank: 'Patente máxima alcançada',
+    statsTitle: 'Estatísticas',
+    masteryTitle: 'Maestria',
+    detailsTitle: 'Detalhes',
+    locationTitle: 'Origem',
+    country: 'País',
+    noLegion: 'Sem legião',
+    noTrack: 'Sem trilha',
+    privateSection: 'Conta (somente você)',
+    loadError: 'Não foi possível carregar o perfil.',
+    retry: 'Tentar novamente',
+    stats: {
+      missionsCompleted: 'Missões concluídas',
+      missionsInProgress: 'Em andamento',
+      achievements: 'Conquistas',
+      medals: 'Medalhas',
+      campaigns: 'Campanhas',
+      ranksGained: 'Patentes ganhas',
+      activeDays: 'Dias ativos',
+    },
   },
   legions: {
     allLegions: 'Todas as legiões',
@@ -283,7 +309,6 @@ export default {
     toastSubmitError: 'Erro ao enviar respostas',
   },
   userMenu: {
-    edit: 'Editar',
     changePassword: 'Alterar senha',
     signOut: 'Sair',
   },

@@ -10,7 +10,7 @@ export type HomeStackParamList = {
   Dashboard: undefined;
   Ranks: undefined;
   Legions: undefined;
-  Profile: undefined;
+  Profile: { userId?: string } | undefined;
 };
 
 export type HomeNavigationProp = NativeStackNavigationProp<HomeStackParamList>;
