@@ -1,7 +1,8 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
+import { useResendTestCodeMutation } from '../../model/mutations/useResendTestCodeMutation';
 
 interface Props {
   email: string;
@@ -33,6 +34,7 @@ function MailSentIcon() {
 
 export default function Step2Info({ email, onContinue }: Props) {
   const { t } = useTranslation();
+  const { mutate: resend, isPending: isResending } = useResendTestCodeMutation();
 
   return (
     <View className="items-center">
@@ -65,6 +67,20 @@ export default function Step2Info({ email, onContinue }: Props) {
         <Text className="text-white text-[15px] font-bold tracking-[0.4px]">
           {t('auth.signup.step2Continue')}
         </Text>
+      </TouchableOpacity>
+
+      <View className="h-3" />
+
+      <TouchableOpacity
+        className="items-center py-2"
+        activeOpacity={0.7}
+        disabled={isResending}
+        onPress={() => resend(email)}>
+        {isResending ? (
+          <ActivityIndicator size="small" color="#9E1B32" />
+        ) : (
+          <Text className="text-[13px] text-[#888]">{t('auth.signup.resendCode')}</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
