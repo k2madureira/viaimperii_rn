@@ -317,6 +317,11 @@ export default {
     provinces: 'províncias',
     users: 'usuários',
     detailError: 'Não foi possível carregar os detalhes.',
+    changeLegion: 'Alterar para esta legião',
+    changeConfirmTitle: 'Alterar legião',
+    changeConfirmDesc: 'Tem certeza que deseja trocar para a {{name}}?',
+    penaltyTitle: 'Penalidade de troca',
+    penaltyDetail: 'Você perderá {{pct}}% do seu XP atual (−{{xpLoss}} XP). Seu XP ficará em {{xpAfter}} XP.',
   },
   achievements: {
     progress: '{{unlocked}} de {{total}} desbloqueadas',

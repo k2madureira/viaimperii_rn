@@ -317,6 +317,11 @@ export default {
     provinces: 'provinces',
     users: 'users',
     detailError: 'Could not load details.',
+    changeLegion: 'Switch to this legion',
+    changeConfirmTitle: 'Change legion',
+    changeConfirmDesc: 'Are you sure you want to switch to {{name}}?',
+    penaltyTitle: 'Switch penalty',
+    penaltyDetail: 'You will lose {{pct}}% of your current XP (−{{xpLoss}} XP). Your XP will be {{xpAfter}} XP.',
   },
   achievements: {
     progress: '{{unlocked}} of {{total}} unlocked',
