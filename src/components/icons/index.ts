@@ -1,6 +1,17 @@
 // Ícone de cadeado
 export { default as LockIcon } from './lock';
 
+// Ícone de imagem
+export { default as ImageIcon } from './image';
+
+// Emblema do rank Primus Pilus I (identidade do Mural / feed)
+export { default as PrimusPilusEmblem } from './primusPilus';
+
+// Ícones do feed
+export { default as ThumbsUpIcon } from './thumbsUp';
+export { default as CommentIcon } from './comment';
+export { default as PlusCircleIcon } from './plusCircle';
+
 // Ícones de navegação (bottom tabs)
 export { default as HomeIcon } from '../../navigation/icons/HomeIcon';
 export { default as MissionsIcon } from '../../navigation/icons/MissionsIcon';

@@ -1,5 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Image,
@@ -23,6 +24,7 @@ const CHOICE_RANK_LEVEL = 4;
 
 export default function RanksScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const navigation = useNavigation<HomeNavigationProp>();
   const { user } = useAuth();
 
@@ -63,7 +65,7 @@ export default function RanksScreen() {
         <Text
           className="text-sm font-semibold text-[#111] tracking-[3px]"
           style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-          PATENTES
+          {t('ranks.title')}
         </Text>
       </View>
 
@@ -92,7 +94,7 @@ export default function RanksScreen() {
                   onPress={() => setTrackId(t.id)}
                   className={`flex-1 py-2.5 rounded-[9px] items-center ${active ? 'bg-white' : ''}`}>
                   <Text
-                    className={`text-[13px] font-bold ${active ? 'text-primary' : 'text-[#888]'}`}>
+                    className={`text-[13px] font-bold ${active ? 'text-primary-500' : 'text-[#888]'}`}>
                     {t.name}
                   </Text>
                 </TouchableOpacity>
@@ -103,7 +105,7 @@ export default function RanksScreen() {
 
         {/* Lista de todas as patentes da trilha */}
         <View>
-          <Text className="text-[15px] font-extrabold text-[#111] mb-3">Todas as patentes</Text>
+          <Text className="text-[15px] font-extrabold text-[#111] mb-3">{t('ranks.allRanks')}</Text>
 
           {ranksQuery.isLoading ? (
             <View className="py-12 items-center">
@@ -129,7 +131,7 @@ export default function RanksScreen() {
                   <View
                     key={r.id}
                     className={`px-4 py-3 ${idx > 0 ? 'border-t border-[#f4f1f1]' : ''} ${
-                      isChoiceRank ? 'bg-gold/10' : isCurrent ? 'bg-[#f4eaea]' : isLocked ? 'bg-[#f8f8f8]' : ''
+                      isChoiceRank ? 'accent-500/10' : isCurrent ? 'bg-[#f4eaea]' : isLocked ? 'bg-[#f8f8f8]' : ''
                     }`}>
                     <View className="flex-row items-center">
                       {/* Imagem da patente */}
@@ -148,14 +150,14 @@ export default function RanksScreen() {
                       <View className="flex-1 ml-3">
                         <Text
                           className={`text-[14px] font-semibold ${
-                            isLocked ? 'text-[#ccc]' : isCurrent ? 'text-primary' : isAchieved ? 'text-[#222]' : 'text-[#999]'
+                            isLocked ? 'text-[#ccc]' : isCurrent ? 'text-primary-500' : isAchieved ? 'text-[#222]' : 'text-[#999]'
                           }`}>
                           {r.name}
-                          {isCurrent ? ' · atual' : ''}
+                          {isCurrent ? t('ranks.currentSuffix') : ''}
                         </Text>
                         <Text className={`text-[11px] ${isLocked ? 'text-[#ddd]' : 'text-[#aaa]'}`}>
-                          Nível {r.level}
-                          {isLocked && !userTrack ? ' · escolha uma trilha' : ''}
+                          {t('ranks.level', { level: r.level })}
+                          {isLocked && !userTrack ? t('ranks.chooseTrackSuffix') : ''}
                         </Text>
                       </View>
 
@@ -163,15 +165,15 @@ export default function RanksScreen() {
                         {isLocked ? (
                           <LockIcon size={16} color="#ccc" strokeWidth={2} />
                         ) : isTopSecret ? (
-                          <Text className="text-[15px] font-bold text-[#ccc]">? XP</Text>
+                          <Text className="text-[15px] font-bold text-[#ccc]">{t('ranks.secretXp')}</Text>
                         ) : (
                           <>
                             <Text
                               className={`text-[13px] font-bold ${isAchieved ? 'text-[#333]' : 'text-[#bbb]'}`}>
-                              {xpRequired.toLocaleString('pt-BR')} XP
+                              {xpRequired.toLocaleString()} {t('common.xp')}
                             </Text>
                             {isAchieved && !isCurrent && (
-                              <Text className="text-[10px] text-primary font-semibold">conquistada</Text>
+                              <Text className="text-[10px] text-primary-500 font-semibold">{t('ranks.conquered')}</Text>
                             )}
                           </>
                         )}
@@ -180,15 +182,14 @@ export default function RanksScreen() {
 
                     {/* Banner de escolha de trilha — só aparece se o usuário ainda não tem trilha */}
                     {isChoiceRank && !userTrack && (
-                      <View className="flex-row items-center mt-2.5 bg-gold/20 rounded-[10px] px-3 py-2">
+                      <View className="flex-row items-center mt-2.5 bg-accent-500/20 rounded-[10px] px-3 py-2">
                         <Text className="text-[14px] mr-2">⚔️</Text>
                         <View className="flex-1">
                           <Text className="text-[12px] font-extrabold text-[#7a5b00]">
-                            Escolha da trilha
+                            {t('ranks.trackChoiceTitle')}
                           </Text>
                           <Text className="text-[11px] text-[#9a7b1f] leading-[15px]">
-                            Ao alcançar esta patente, você decide entre Legionários e Patrícios — um
-                            marco que define o seu caminho.
+                            {t('ranks.trackChoiceDescription')}
                           </Text>
                         </View>
                       </View>

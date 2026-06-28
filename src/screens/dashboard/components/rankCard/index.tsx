@@ -1,5 +1,6 @@
 import React from 'react';
 import { Image, Platform, Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   rank: string;
@@ -20,6 +21,7 @@ export default function RankCard({
   trackName,
   onPress,
 }: Props) {
+  const { t } = useTranslation();
   const isMaxRank = xpToNextRank <= 0;
   // Progresso dentro da faixa da patente — usa o valor do backend quando disponível.
   const progress =
@@ -33,7 +35,7 @@ export default function RankCard({
 
   return (
     <Wrapper
-      className="bg-primary rounded-[16px] p-5"
+      className="bg-primary-500 rounded-[16px] p-5"
       {...(onPress ? { onPress, activeOpacity: 0.9 } : {})}>
       <View className="flex-row items-center">
         {/* Insígnia da patente */}
@@ -49,7 +51,7 @@ export default function RankCard({
 
         <View className="flex-1">
           <Text className="text-[11px] font-semibold text-white/70 tracking-[3px] uppercase">
-            Sua patente
+            {t('rankCard.yourRank')}
           </Text>
           <View className="h-1" />
           <Text
@@ -61,9 +63,9 @@ export default function RankCard({
           {/* Trilha selecionada — vazio enquanto o usuário não escolher */}
           {trackName ? (
             <View className="flex-row mt-1.5">
-              <View className="flex-row items-center bg-gold/20 rounded-full px-2.5 py-0.5">
-                <View className="w-1.5 h-1.5 rounded-full bg-gold mr-1.5" />
-                <Text className="text-[11px] font-bold text-gold">{trackName}</Text>
+              <View className="flex-row items-center bg-accent-500/20 rounded-full px-2.5 py-0.5">
+                <View className="w-1.5 h-1.5 rounded-full bg-accent-500 mr-1.5" />
+                <Text className="text-[11px] font-bold text-accent-500">{trackName}</Text>
               </View>
             </View>
           ) : null}
@@ -77,7 +79,7 @@ export default function RankCard({
       {/* Barra de progresso da patente */}
       <View className="h-[6px] bg-white/25 rounded-full overflow-hidden">
         <View
-          className="h-full rounded-full bg-gold"
+          className="h-full rounded-full bg-accent-500"
           style={{ width: `${progress * 100}%` }}
         />
       </View>
@@ -85,9 +87,9 @@ export default function RankCard({
       <View className="h-2" />
 
       <View className="flex-row justify-between">
-        <Text className="text-[12px] text-white/80">{totalXp.toLocaleString('pt-BR')} XP</Text>
+        <Text className="text-[12px] text-white/80">{totalXp.toLocaleString()} {t('common.xp')}</Text>
         <Text className="text-[12px] text-white/80">
-          {isMaxRank ? 'Patente máxima' : `Faltam ${xpToNextRank.toLocaleString('pt-BR')} XP`}
+          {isMaxRank ? t('rankCard.maxRank') : t('rankCard.xpRemaining', { xp: xpToNextRank.toLocaleString() })}
         </Text>
       </View>
     </Wrapper>

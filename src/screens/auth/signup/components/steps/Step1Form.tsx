@@ -94,7 +94,7 @@ export default function Step1Form({ onSuccess, onHasCode }: Props) {
       <form.Subscribe selector={(state) => state.isSubmitting}>
         {(isSubmitting) => (
           <TouchableOpacity
-            className="bg-primary rounded-[10px] py-[15px] items-center"
+            className="bg-primary-500 rounded-[10px] py-[15px] items-center"
             activeOpacity={0.85}
             disabled={isSubmitting || isPending}
             onPress={form.handleSubmit}>
@@ -124,7 +124,7 @@ export default function Step1Form({ onSuccess, onHasCode }: Props) {
       <View className="flex-row justify-center items-center">
         <Text className="text-[13px] text-[#555]">{t('auth.signup.hasAccount')} </Text>
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text className="text-[13px] text-primary font-semibold">{t('auth.signup.signin')}</Text>
+          <Text className="text-[13px] text-primary-500 font-semibold">{t('auth.signup.signin')}</Text>
         </TouchableOpacity>
       </View>
     </View>

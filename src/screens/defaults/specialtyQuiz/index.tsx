@@ -1,6 +1,7 @@
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Platform,
@@ -25,6 +26,7 @@ type QuizStep = 'loading' | 'questions' | 'submitting' | 'result';
 
 export default function SpecialtyQuizScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const navigation = useNavigation<AuthNavigationProp>();
   const { params } = useRoute<QuizRoute>();
   const { testCode, userId } = params;
@@ -48,7 +50,7 @@ export default function SpecialtyQuizScreen() {
 
   useEffect(() => {
     if (quizError) {
-      Toast.show({ type: 'error', text1: 'Erro ao carregar o quiz. Tente novamente.' });
+      Toast.show({ type: 'error', text1: t('quiz.toastLoadError') });
     }
   }, [quizError]);
 
@@ -66,7 +68,7 @@ export default function SpecialtyQuizScreen() {
     onError: (error: Error) => {
       Toast.show({
         type: 'error',
-        text1: 'Erro ao enviar respostas',
+        text1: t('quiz.toastSubmitError'),
         text2: error.message,
       });
       setStep('questions');
@@ -106,7 +108,7 @@ export default function SpecialtyQuizScreen() {
         className="flex-1 bg-white items-center justify-center"
         style={{ paddingTop: insets.top }}>
         <ActivityIndicator size="large" color="#8B1A2B" />
-        <Text className="text-[13px] text-[#888] mt-4">Carregando quiz...</Text>
+        <Text className="text-[13px] text-[#888] mt-4">{t('quiz.loading')}</Text>
       </View>
     );
   }
@@ -118,13 +120,13 @@ export default function SpecialtyQuizScreen() {
         className="flex-1 bg-white items-center justify-center px-6"
         style={{ paddingTop: insets.top }}>
         <Text className="text-[16px] font-bold text-[#111] text-center">
-          Não foi possível carregar o quiz.
+          {t('quiz.loadError')}
         </Text>
         <View className="h-4" />
         <TouchableOpacity
-          className="bg-primary rounded-[10px] py-[14px] px-8"
+          className="bg-primary-500 rounded-[10px] py-[14px] px-8"
           onPress={() => navigation.navigate('Login')}>
-          <Text className="text-white font-bold">Ir para o login</Text>
+          <Text className="text-white font-bold">{t('quiz.goToLogin')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -137,7 +139,7 @@ export default function SpecialtyQuizScreen() {
         className="flex-1 bg-white items-center justify-center"
         style={{ paddingTop: insets.top }}>
         <ActivityIndicator size="large" color="#8B1A2B" />
-        <Text className="text-[13px] text-[#888] mt-4">Calculando sua especialidade...</Text>
+        <Text className="text-[13px] text-[#888] mt-4">{t('quiz.calculating')}</Text>
       </View>
     );
   }
@@ -148,8 +150,8 @@ export default function SpecialtyQuizScreen() {
       <View
         className="flex-1 bg-white px-6"
         style={{ paddingTop: insets.top + 40, paddingBottom: insets.bottom + 24 }}>
-        <Text className="text-[13px] font-semibold text-center text-primary tracking-[3px] uppercase">
-          Sua especialidade
+        <Text className="text-[13px] font-semibold text-center text-primary-500 tracking-[3px] uppercase">
+          {t('quiz.yourSpecialty')}
         </Text>
 
         <View className="h-4" />
@@ -177,11 +179,11 @@ export default function SpecialtyQuizScreen() {
         <View className="flex-1" />
 
         <TouchableOpacity
-          className="bg-primary rounded-[10px] py-[15px] items-center"
+          className="bg-primary-500 rounded-[10px] py-[15px] items-center"
           activeOpacity={0.85}
           onPress={() => navigation.navigate('Login')}>
           <Text className="text-white text-[15px] font-bold tracking-[0.4px]">
-            Ralizar login
+            {t('quiz.doLogin')}
           </Text>
         </TouchableOpacity>
       </View>
@@ -201,13 +203,13 @@ export default function SpecialtyQuizScreen() {
         <Text className="text-[12px] text-[#999]">
           {currentIndex + 1} / {total}
         </Text>
-        <Text className="text-[12px] text-primary font-semibold">Quiz de Especialidade</Text>
+        <Text className="text-[12px] text-primary-500 font-semibold">{t('quiz.quizTitle')}</Text>
       </View>
 
       {/* Barra de progresso */}
       <View className="h-[4px] bg-[#f0eded] rounded-full mb-8">
         <View
-          className="h-full bg-primary rounded-full"
+          className="h-full bg-primary-500 rounded-full"
           style={{ width: `${progress * 100}%` }}
         />
       </View>
@@ -230,7 +232,7 @@ export default function SpecialtyQuizScreen() {
               onPress={() => handleSelectOption(option.id)}
               className={`rounded-[12px] px-4 py-4 border ${
                 isSelected
-                  ? 'bg-primary border-primary'
+                  ? 'bg-primary-500 border-primary-500'
                   : 'bg-white border-[#e0e0e0]'
               }`}>
               <Text
@@ -249,13 +251,13 @@ export default function SpecialtyQuizScreen() {
       {/* Botão avançar */}
       <TouchableOpacity
         className={`rounded-[10px] py-[15px] items-center mt-6 ${
-          selectedOption ? 'bg-primary' : 'bg-[#ccc]'
+          selectedOption ? 'bg-primary-500' : 'bg-[#ccc]'
         }`}
         activeOpacity={0.85}
         disabled={!selectedOption}
         onPress={handleNext}>
         <Text className="text-white text-[15px] font-bold tracking-[0.4px]">
-          {currentIndex + 1 < total ? 'Próxima' : 'Finalizar'}
+          {currentIndex + 1 < total ? t('quiz.next') : t('quiz.finish')}
         </Text>
       </TouchableOpacity>
     </View>

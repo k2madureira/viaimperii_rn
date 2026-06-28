@@ -7,6 +7,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../contexts/AuthContext';
 import { UserIcon } from '../../navigation/icons/MenuIcons';
 import { useUserProfile } from '../../screens/dashboard/model/queries/useUserProfile';
@@ -17,6 +18,7 @@ interface Props {
 }
 
 export default function UserMenu({ onChangePassword, onEdit }: Props) {
+  const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const profileQuery = useUserProfile(user?.user_id);
   const avatarUrl = profileQuery.data?.active_avatar?.url ?? null;
@@ -48,7 +50,7 @@ export default function UserMenu({ onChangePassword, onEdit }: Props) {
           )}
         </View>
         {/* Indicador de que abre opções */}
-        <View className="w-4 h-4 rounded-full bg-primary items-center justify-center -ml-2 mt-5 border border-white">
+        <View className="w-4 h-4 rounded-full bg-primary-500 items-center justify-center -ml-2 mt-5 border border-white">
           <Text className="text-[8px] text-white leading-none">▾</Text>
         </View>
       </TouchableOpacity>
@@ -78,7 +80,7 @@ export default function UserMenu({ onChangePassword, onEdit }: Props) {
                   className="px-4 py-3"
                   activeOpacity={0.7}
                   onPress={() => { close(); onEdit(); }}>
-                  <Text className="text-[14px] font-medium text-[#111]">Editar</Text>
+                  <Text className="text-[14px] font-medium text-[#111]">{t('userMenu.edit')}</Text>
                 </TouchableOpacity>
               )}
 
@@ -86,7 +88,7 @@ export default function UserMenu({ onChangePassword, onEdit }: Props) {
                 className="px-4 py-3"
                 activeOpacity={0.7}
                 onPress={() => { close(); onChangePassword(); }}>
-                <Text className="text-[14px] font-medium text-[#111]">Alterar senha</Text>
+                <Text className="text-[14px] font-medium text-[#111]">{t('userMenu.changePassword')}</Text>
               </TouchableOpacity>
 
               <View className="h-px bg-[#f0f0f0]" />
@@ -95,7 +97,7 @@ export default function UserMenu({ onChangePassword, onEdit }: Props) {
                 className="px-4 py-3"
                 activeOpacity={0.7}
                 onPress={async () => { close(); await signOut(); }}>
-                <Text className="text-[14px] font-medium text-red-500">Sair</Text>
+                <Text className="text-[14px] font-medium text-red-500">{t('userMenu.signOut')}</Text>
               </TouchableOpacity>
             </View>
           </View>

@@ -1,5 +1,6 @@
 import { useForm } from '@tanstack/react-form';
 import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   Animated,
@@ -73,6 +74,7 @@ function PasswordField({
 }
 
 export default function ChangePasswordModal({ visible, isTemporary = false, onClose }: Props) {
+  const { t } = useTranslation();
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
   useEffect(() => {
@@ -124,11 +126,11 @@ export default function ChangePasswordModal({ visible, isTemporary = false, onCl
             <View className="flex-row items-center justify-between mb-5">
               <View className="flex-1 pr-4">
                 <Text className="text-[18px] font-extrabold text-[#111]">
-                  {isTemporary ? 'Defina sua senha' : 'Alterar senha'}
+                  {isTemporary ? t('changePassword.setTitle') : t('changePassword.changeTitle')}
                 </Text>
                 {isTemporary && (
                   <Text className="text-[12px] text-[#888] mt-1 leading-[18px]">
-                    Você está com uma senha temporária. Crie uma senha permanente para continuar.
+                    {t('changePassword.temporaryNotice')}
                   </Text>
                 )}
               </View>
@@ -144,7 +146,7 @@ export default function ChangePasswordModal({ visible, isTemporary = false, onCl
             <form.Field name="current_password">
               {(field) => (
                 <PasswordField
-                  label={isTemporary ? 'Senha temporária' : 'Senha atual'}
+                  label={isTemporary ? t('changePassword.temporaryPasswordLabel') : t('changePassword.currentPasswordLabel')}
                   placeholder="••••••••"
                   value={field.state.value}
                   onChangeText={field.handleChange}
@@ -157,7 +159,7 @@ export default function ChangePasswordModal({ visible, isTemporary = false, onCl
             <form.Field name="new_password">
               {(field) => (
                 <PasswordField
-                  label="Nova senha"
+                  label={t('changePassword.newPasswordLabel')}
                   placeholder="••••••••"
                   value={field.state.value}
                   onChangeText={field.handleChange}
@@ -170,7 +172,7 @@ export default function ChangePasswordModal({ visible, isTemporary = false, onCl
             <form.Field name="confirm_password">
               {(field) => (
                 <PasswordField
-                  label="Confirmar nova senha"
+                  label={t('changePassword.confirmNewPasswordLabel')}
                   placeholder="••••••••"
                   value={field.state.value}
                   onChangeText={field.handleChange}
@@ -185,7 +187,7 @@ export default function ChangePasswordModal({ visible, isTemporary = false, onCl
             <form.Subscribe selector={(s) => s.isSubmitting}>
               {(isSubmitting) => (
                 <TouchableOpacity
-                  className="bg-primary rounded-[10px] py-[15px] items-center"
+                  className="bg-primary-500 rounded-[10px] py-[15px] items-center"
                   activeOpacity={0.85}
                   disabled={isSubmitting || isPending}
                   onPress={form.handleSubmit}>
@@ -193,7 +195,7 @@ export default function ChangePasswordModal({ visible, isTemporary = false, onCl
                     <ActivityIndicator color="#fff" />
                   ) : (
                     <Text className="text-white text-[15px] font-bold tracking-[0.4px]">
-                      {isTemporary ? 'Definir senha' : 'Atualizar senha'}
+                      {isTemporary ? t('changePassword.setButton') : t('changePassword.updateButton')}
                     </Text>
                   )}
                 </TouchableOpacity>

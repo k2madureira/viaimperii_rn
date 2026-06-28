@@ -1,5 +1,6 @@
 import React from 'react';
 import { ActivityIndicator, Image, ScrollView, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Navbar } from '../../components';
 import { Achievement } from '../../api/users/userApi';
@@ -8,6 +9,7 @@ import { useUserProfile } from '../dashboard/model/queries/useUserProfile';
 
 export default function AchievementsScreen() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   const { user } = useAuth();
   const profileQuery = useUserProfile(user?.user_id);
 
@@ -21,7 +23,10 @@ export default function AchievementsScreen() {
 
       <View className="px-5 pt-4 pb-1">
         <Text className="text-[13px] text-[#888]">
-          {unlocked.length} de {achievements.length} desbloqueadas
+          {t('achievements.progress', {
+            unlocked: unlocked.length,
+            total: achievements.length,
+          })}
         </Text>
       </View>
 
@@ -34,15 +39,15 @@ export default function AchievementsScreen() {
           contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 24, gap: 10 }}
           showsVerticalScrollIndicator={false}>
           {unlocked.map((a) => (
-            <AchievementRow key={a.id} achievement={a} unlocked />
+            <AchievementRow key={a.id} achievement={a} unlocked t={t} />
           ))}
           {locked.length > 0 && (
             <Text className="text-[12px] font-bold text-[#aaa] uppercase tracking-[1px] mt-3 mb-1">
-              A conquistar
+              {t('achievements.toUnlock')}
             </Text>
           )}
           {locked.map((a) => (
-            <AchievementRow key={a.id} achievement={a} unlocked={false} />
+            <AchievementRow key={a.id} achievement={a} unlocked={false} t={t} />
           ))}
         </ScrollView>
       )}
@@ -53,9 +58,11 @@ export default function AchievementsScreen() {
 function AchievementRow({
   achievement,
   unlocked,
+  t,
 }: {
   achievement: Achievement;
   unlocked: boolean;
+  t: (key: string) => string;
 }) {
   return (
     <View
@@ -86,10 +93,10 @@ function AchievementRow({
         ) : null}
       </View>
       <View className="items-end ml-2">
-        <Text className={`text-[12px] font-bold ${unlocked ? 'text-gold' : 'text-[#bbb]'}`}>
-          +{achievement.xp_reward} XP
+        <Text className={`text-[12px] font-bold ${unlocked ? 'text-accent-500' : 'text-[#bbb]'}`}>
+          +{achievement.xp_reward} {t('common.xp')}
         </Text>
-        {unlocked && <Text className="text-[10px] text-laurel font-semibold mt-0.5">obtida</Text>}
+        {unlocked && <Text className="text-[10px] text-laurel font-semibold mt-0.5">{t('achievements.obtained')}</Text>}
       </View>
     </View>
   );

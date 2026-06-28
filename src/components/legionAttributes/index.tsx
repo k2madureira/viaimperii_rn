@@ -1,5 +1,6 @@
 import React from 'react';
 import { Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { parseLegionDescription } from '../../utils/legionDescription';
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 
 // Renderiza a descrição da legião: um texto de introdução + Perfil / Missões.
 export default function LegionAttributes({ description, variant = 'boxes' }: Props) {
+  const { t } = useTranslation();
   const { intro, perfil, missoes } = parseLegionDescription(description);
 
   if (!intro && perfil.length === 0 && missoes.length === 0) return null;
@@ -24,19 +26,19 @@ export default function LegionAttributes({ description, variant = 'boxes' }: Pro
         (variant === 'rows' ? (
           <View className="w-full mt-3 gap-2.5">
             {perfil.length > 0 && (
-              <TagRow label="Perfil" items={perfil} color="#8B1A2B" bg="bg-primary/10" />
+              <TagRow label={t('legionAttributes.profile')} items={perfil} color="#8B1A2B" bg="bg-primary-500/10" />
             )}
             {missoes.length > 0 && (
-              <TagRow label="Missões" items={missoes} color="#9a7b1f" bg="bg-gold/20" />
+              <TagRow label={t('legionAttributes.missions')} items={missoes} color="#9a7b1f" bg="bg-accent-500/20" />
             )}
           </View>
         ) : (
           <View className="flex-row gap-2.5 w-full mt-3">
             {perfil.length > 0 && (
-              <TagBox label="Perfil" items={perfil} color="#8B1A2B" bg="bg-primary/10" />
+              <TagBox label={t('legionAttributes.profile')} items={perfil} color="#8B1A2B" bg="bg-primary-500/10" />
             )}
             {missoes.length > 0 && (
-              <TagBox label="Missões" items={missoes} color="#9a7b1f" bg="bg-gold/20" />
+              <TagBox label={t('legionAttributes.missions')} items={missoes} color="#9a7b1f" bg="bg-accent-500/20" />
             )}
           </View>
         ))}
