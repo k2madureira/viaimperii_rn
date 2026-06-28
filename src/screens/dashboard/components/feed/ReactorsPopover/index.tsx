@@ -1,7 +1,9 @@
+import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { Reactor, ReactionType } from '../../../../../api/feed/feedApi';
+import { HomeNavigationProp } from '../../../../../navigation/HomeStack';
 import { useReactors } from '../../../model/queries/useReactors';
 import AnchoredPopover, { Anchor } from '../AnchoredPopover';
 import { REACTIONS, ReactionGlyph } from '../FeedReactions';
@@ -47,11 +49,14 @@ function Chip({
   );
 }
 
-function ReactorRow({ reactor }: { reactor: Reactor }) {
+function ReactorRow({ reactor, onPress }: { reactor: Reactor; onPress: (userId: string) => void }) {
   const u = reactor.user;
   const avatarUrl = u.active_avatar?.url ?? u.image ?? null;
   return (
-    <View className="flex-row items-center px-3 py-2">
+    <TouchableOpacity
+      activeOpacity={0.6}
+      onPress={() => onPress(u.id)}
+      className="flex-row items-center px-3 py-2">
       <View className="w-8 h-8 rounded-full bg-[#efeaea] items-center justify-center overflow-hidden mr-2.5">
         {avatarUrl ? (
           <Image source={{ uri: avatarUrl }} style={{ width: 32, height: 32 }} resizeMode="cover" />
@@ -72,7 +77,7 @@ function ReactorRow({ reactor }: { reactor: Reactor }) {
         ) : null}
       </View>
       <ReactionGlyph type={reactor.type} size={16} />
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -83,9 +88,16 @@ function ReactorRow({ reactor }: { reactor: Reactor }) {
  */
 export default function ReactorsPopover({ eventId, anchor, onClose }: Props) {
   const { t } = useTranslation();
+  const navigation = useNavigation<HomeNavigationProp>();
   const [filter, setFilter] = useState<ReactionType | null>(null);
   const open = anchor != null;
   const q = useReactors(open ? eventId : null, filter, open);
+
+  // Abre o perfil do usuário clicado (fecha o popover antes de navegar).
+  const goToProfile = (userId: string) => {
+    onClose();
+    navigation.navigate('Profile', { userId });
+  };
 
   useEffect(() => {
     if (!open) setFilter(null);
@@ -127,7 +139,7 @@ export default function ReactorsPopover({ eventId, anchor, onClose }: Props) {
           <FlatList
             data={reactors}
             keyExtractor={(r, i) => `${r.user.id}-${i}`}
-            renderItem={({ item: r }) => <ReactorRow reactor={r} />}
+            renderItem={({ item: r }) => <ReactorRow reactor={r} onPress={goToProfile} />}
             keyboardShouldPersistTaps="handled"
             onEndReachedThreshold={0.4}
             onEndReached={() => {
