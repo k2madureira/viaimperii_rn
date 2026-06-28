@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { SvgUri } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -135,16 +136,19 @@ function CountryCard({ country, color }: { country: LegionCountry; color: string
     <View className="bg-white rounded-[14px] border border-[#f0eded] overflow-hidden">
       {/* Country header */}
       <View className="flex-row items-center px-4 py-3 border-b border-[#f5f2f2]">
+        <Text className="text-[14px] font-bold text-[#111]">{country.name}</Text>
         {country.icon_url ? (
-          <Image
-            source={{ uri: country.icon_url }}
-            style={{ width: 24, height: 24, marginRight: 10 }}
-            resizeMode="contain"
-          />
-        ) : (
-          <Text className="text-[16px] mr-2.5">🏛</Text>
-        )}
-        <Text className="text-[14px] font-bold text-[#111] flex-1">{country.name}</Text>
+          country.icon_url.toLowerCase().endsWith('.svg') ? (
+            <SvgUri uri={country.icon_url} width={20} height={20} style={{ marginLeft: 6 }} />
+          ) : (
+            <Image
+              source={{ uri: country.icon_url }}
+              style={{ width: 20, height: 20, marginLeft: 6 }}
+              resizeMode="contain"
+            />
+          )
+        ) : null}
+        <View className="flex-1" />
         <Text className="text-[11px] text-[#888]">
           {country.provinces.length} {country.provinces.length === 1 ? t('legions.province') : t('legions.provinces')}
         </Text>
