@@ -4,6 +4,7 @@ import {
   Animated,
   Image,
   Platform,
+  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -43,7 +44,14 @@ export default function LegionsScreen() {
           paddingBottom: insets.bottom + 32,
           gap: 20,
         }}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={legionsQuery.isFetching || profileQuery.isFetching}
+            onRefresh={() => { legionsQuery.refetch(); profileQuery.refetch(); }}
+            tintColor="#9E1B32"
+          />
+        }>
         {/* Legião do usuário no topo — mesma cor da listagem */}
         <LegionCard legion={userLegion} color={legionColorById(legions, userLegion?.id)} />
 
@@ -54,6 +62,15 @@ export default function LegionsScreen() {
           {legionsQuery.isLoading ? (
             <View className="py-12 items-center">
               <ActivityIndicator color="#8B1A2B" />
+            </View>
+          ) : legionsQuery.isError ? (
+            <View className="py-10 items-center gap-3">
+              <Text className="text-[13px] text-[#888] text-center">{t('legions.loadError')}</Text>
+              <TouchableOpacity
+                onPress={() => legionsQuery.refetch()}
+                className="bg-primary-500 rounded-[12px] px-5 py-2.5">
+                <Text className="text-[13px] font-bold text-white">{t('profile.retry')}</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <LegionBookshelf legions={legions} userLegionId={userLegion?.id} />
@@ -128,6 +145,9 @@ function Spine({
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={onPress}
+      hitSlop={{ top: 4, bottom: 4, left: 6, right: 6 }}
+      accessibilityRole="button"
+      accessibilityLabel={legion.name}
       className="rounded-[5px] mx-[3px] items-center justify-center overflow-hidden"
       style={{ width: 38, height: BOOK_HEIGHT, backgroundColor: color }}>
       <Text className="text-[15px] mb-2" style={{ position: 'absolute', top: 10 }}>
@@ -191,6 +211,16 @@ function OpenBook({
         contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16 }}
         showsVerticalScrollIndicator={false}>
         <LegionAttributes description={legion.description} variant="rows" />
+
+        {/* Hint de ingresso — só para legiões que não são a do usuário */}
+        {!isUserLegion && (
+          <View className="mt-3 bg-[#f4eaea] border border-primary-500/20 rounded-[12px] px-3 py-2.5 flex-row items-start gap-2">
+            <Text className="text-[14px]">⚔️</Text>
+            <Text className="flex-1 text-[12px] text-[#7a1a2b] leading-[17px]">
+              {t('legions.joinHint')}
+            </Text>
+          </View>
+        )}
       </ScrollView>
     </View>
   );

@@ -121,7 +121,7 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
   return (
     <Modal transparent visible={mission != null} animationType="fade" onRequestClose={onClose}>
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         className="flex-1">
         <View className="flex-1 bg-black/60 items-center justify-center px-6">
           <View className="w-full bg-white rounded-[20px] p-5" style={{ maxHeight: '85%' }}>

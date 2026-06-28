@@ -1,4 +1,11 @@
 export default {
+  nav: {
+    home: 'Home',
+    missions: 'Missions',
+    legion: 'Legion',
+    achievements: 'Achievements',
+    profile: 'Profile',
+  },
   common: {
     appName: 'VIA IMPERII',
     copyright: '© {{year}} Via Imperii. All rights reserved.',
@@ -6,6 +13,7 @@ export default {
     confirm: 'Confirm',
     xp: 'XP',
     genericError: 'Something went wrong. Please try again.',
+    back: 'Back',
   },
   auth: {
     login: {
@@ -36,6 +44,9 @@ export default {
       tokenPlaceholder: 'ABC1234',
       verifyToken: 'Verify',
       backToEmail: 'Go back',
+      stepProgress: 'Step {{step}} of {{total}}',
+      resendCode: 'Resend code',
+      resendCodeSent: 'New code sent!',
     },
     forgotPassword: {
       tagline: 'Forgot your password?',
@@ -50,6 +61,7 @@ export default {
     yourRank: 'Your rank',
     viewRequirements: 'View Requirements',
     chooseTrackToAdvance: 'Choose a track to advance in rank',
+    chooseTrackCta: '⚔️ Choose my track now',
     maxRankReached: 'Maximum rank reached',
     xpToNextRank: '{{xp}} XP left to {{rank}}',
     nextRankFallback: 'the next rank',
@@ -207,6 +219,7 @@ export default {
     startMission: 'Start mission',
     finalizing: 'Finalizing…',
     reviewLabel: 'Under review',
+    reviewSubmitted: 'Submission sent. Waiting for validation.',
     autoCompleteWithApproval:
       'Completes automatically when time runs out — or instantly with 2 peer approvals.',
     autoComplete: 'Completes automatically when the review window ends.',
@@ -243,12 +256,14 @@ export default {
   },
   ranks: {
     title: 'RANKS',
+    loadError: 'Could not load ranks.',
     allRanks: 'All ranks',
     level: 'Level {{level}}',
     currentSuffix: ' · current',
     chooseTrackSuffix: ' · choose a track',
     conquered: 'achieved',
     secretXp: '? XP',
+    secretXpHint: 'revealed at the top',
     trackChoiceTitle: 'Track choice',
     trackChoiceDescription:
       'When you reach this rank, you choose between Legionaries and Patricians — a milestone that defines your path.',
@@ -288,12 +303,17 @@ export default {
   },
   legions: {
     allLegions: 'All legions',
+    loadError: 'Could not load legions.',
     yourLegion: 'Your legion',
+    joinHint: 'To join this legion, complete your first mission — the choice will appear automatically.',
   },
   achievements: {
     progress: '{{unlocked}} of {{total}} unlocked',
+    loadError: 'Could not load achievements.',
     toUnlock: 'To unlock',
     obtained: 'obtained',
+    filterAll: 'All',
+    emptyFilter: 'No achievements in this specialty.',
   },
   quiz: {
     loading: 'Loading quiz...',
@@ -311,6 +331,7 @@ export default {
   userMenu: {
     changePassword: 'Change password',
     signOut: 'Sign out',
+    openMenu: 'Open user menu',
   },
   changePassword: {
     setTitle: 'Set your password',
@@ -337,6 +358,7 @@ export default {
   legionSelect: {
     chooseTitle: 'Choose your legion',
     recommended: 'Recommended',
+    benefit: 'In your legion you validate teammates\' missions, earn review XP, and access your unit\'s feed.',
     chooseThis: 'Choose this legion',
     lockNotice: 'This choice does not change your XP or rank, but is locked for 60 days.',
     confirmTitle: 'Confirm legion',

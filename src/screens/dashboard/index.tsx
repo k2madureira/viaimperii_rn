@@ -36,6 +36,7 @@ import { useTracks } from '../ranks/model/queries/useTracks';
 import { useFeed } from './model/queries/useFeed';
 import { useReactFeed } from './model/mutations/useReactFeed';
 import { useFeedEvents } from './model/hooks/useFeedEvents';
+import { usePersistedFlag } from '../../hooks/usePersistedFlag';
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
@@ -79,11 +80,11 @@ export default function DashboardScreen() {
   const tracksQuery = useTracks();
 
   const [provinceModalVisible, setProvinceModalVisible] = useState(false);
-  const [provinceDismissed, setProvinceDismissed] = useState(false);
+  const [provinceDismissed, markProvinceDismissed] = usePersistedFlag('modal_dismissed_province');
   const [trackModalVisible, setTrackModalVisible] = useState(false);
-  const [trackDismissed, setTrackDismissed] = useState(false);
+  const [trackDismissed, markTrackDismissed] = usePersistedFlag('modal_dismissed_track');
   const [legionModalVisible, setLegionModalVisible] = useState(false);
-  const [legionDismissed, setLegionDismissed] = useState(false);
+  const [legionDismissed, markLegionDismissed] = usePersistedFlag('modal_dismissed_legion');
   const [recommendedIds] = useState<number[]>([]);
   // Modal de comentários do feed.
   const [commentsItem, setCommentsItem] = useState<FeedItem | null>(null);
@@ -194,23 +195,36 @@ export default function DashboardScreen() {
             />
           </View>
 
-          <Text className="text-[11px] text-white/85 mt-2" numberOfLines={2}>
-            {mustChooseTrack
-              ? t('dashboard.chooseTrackToAdvance')
-              : isMaxRank
-                ? t('dashboard.maxRankReached')
-                : t('dashboard.xpToNextRank', {
-                    xp: xpToNextRank,
-                    rank: nextRankName ?? t('dashboard.nextRankFallback'),
-                  })}
-          </Text>
-
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Ranks')}
-            activeOpacity={0.9}
-            className="bg-white/15 rounded-[12px] py-2.5 items-center mt-3">
-            <Text className="text-[12px] font-bold text-white">{t('dashboard.viewRequirements')}</Text>
-          </TouchableOpacity>
+          {mustChooseTrack ? (
+            <>
+              <Text className="text-[11px] text-white/85 mt-2" numberOfLines={2}>
+                {t('dashboard.chooseTrackToAdvance')}
+              </Text>
+              <TouchableOpacity
+                onPress={() => setTrackModalVisible(true)}
+                activeOpacity={0.9}
+                className="bg-white rounded-[12px] py-2.5 items-center mt-3">
+                <Text className="text-[12px] font-bold text-primary-500">{t('dashboard.chooseTrackCta')}</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <Text className="text-[11px] text-white/85 mt-2" numberOfLines={2}>
+                {isMaxRank
+                  ? t('dashboard.maxRankReached')
+                  : t('dashboard.xpToNextRank', {
+                      xp: xpToNextRank,
+                      rank: nextRankName ?? t('dashboard.nextRankFallback'),
+                    })}
+              </Text>
+              <TouchableOpacity
+                onPress={() => navigation.navigate('Ranks')}
+                activeOpacity={0.9}
+                className="bg-white/15 rounded-[12px] py-2.5 items-center mt-3">
+                <Text className="text-[12px] font-bold text-white">{t('dashboard.viewRequirements')}</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
 
         <View className="flex-[3]">
@@ -367,7 +381,7 @@ export default function DashboardScreen() {
         pending={updateProvinceM.isPending}
         onClose={() => {
           setProvinceModalVisible(false);
-          setProvinceDismissed(true);
+          markProvinceDismissed();
         }}
         onConfirm={(provinceId) =>
           updateProvinceM.mutate(provinceId, {
@@ -390,7 +404,7 @@ export default function DashboardScreen() {
         }
         onClose={() => {
           setTrackModalVisible(false);
-          setTrackDismissed(true);
+          markTrackDismissed();
         }}
       />
 
@@ -401,7 +415,7 @@ export default function DashboardScreen() {
         pending={joinLegionM.isPending}
         onClose={() => {
           setLegionModalVisible(false);
-          setLegionDismissed(true);
+          markLegionDismissed();
         }}
         onConfirm={(legionId) =>
           joinLegionM.mutate(legionId, {

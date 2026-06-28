@@ -1,4 +1,11 @@
 export default {
+  nav: {
+    home: 'Início',
+    missions: 'Missões',
+    legion: 'Legião',
+    achievements: 'Conquistas',
+    profile: 'Perfil',
+  },
   common: {
     appName: 'VIA IMPERII',
     copyright: '© {{year}} Via Imperii. Todos os direitos reservados.',
@@ -6,6 +13,7 @@ export default {
     confirm: 'Confirmar',
     xp: 'XP',
     genericError: 'Ocorreu um erro. Tente novamente.',
+    back: 'Voltar',
   },
   auth: {
     login: {
@@ -36,6 +44,9 @@ export default {
       tokenPlaceholder: 'ABC1234',
       verifyToken: 'Verificar',
       backToEmail: 'Voltar',
+      stepProgress: 'Passo {{step}} de {{total}}',
+      resendCode: 'Reenviar código',
+      resendCodeSent: 'Novo código enviado!',
     },
     forgotPassword: {
       tagline: 'Esqueceu sua senha?',
@@ -50,6 +61,7 @@ export default {
     yourRank: 'Sua patente',
     viewRequirements: 'Ver Requisitos',
     chooseTrackToAdvance: 'Escolha uma trilha para avançar de patente',
+    chooseTrackCta: '⚔️ Escolher minha trilha agora',
     maxRankReached: 'Patente máxima alcançada',
     xpToNextRank: 'Faltam {{xp}} XP para {{rank}}',
     nextRankFallback: 'a próxima patente',
@@ -207,6 +219,7 @@ export default {
     startMission: 'Iniciar missão',
     finalizing: 'Finalizando…',
     reviewLabel: 'Em revisão',
+    reviewSubmitted: 'Conclusão enviada. Aguardando validação.',
     autoCompleteWithApproval:
       'Conclui automaticamente quando o tempo acabar — ou na hora com 2 aprovações de pares.',
     autoComplete: 'Conclui automaticamente quando o tempo de revisão acabar.',
@@ -243,12 +256,14 @@ export default {
   },
   ranks: {
     title: 'PATENTES',
+    loadError: 'Não foi possível carregar as patentes.',
     allRanks: 'Todas as patentes',
     level: 'Nível {{level}}',
     currentSuffix: ' · atual',
     chooseTrackSuffix: ' · escolha uma trilha',
     conquered: 'conquistada',
     secretXp: '? XP',
+    secretXpHint: 'revelado no topo',
     trackChoiceTitle: 'Escolha da trilha',
     trackChoiceDescription:
       'Ao alcançar esta patente, você decide entre Legionários e Patrícios — um marco que define o seu caminho.',
@@ -288,12 +303,17 @@ export default {
   },
   legions: {
     allLegions: 'Todas as legiões',
+    loadError: 'Não foi possível carregar as legiões.',
     yourLegion: 'Sua legião',
+    joinHint: 'Para ingressar nesta legião, conclua sua primeira missão — a escolha aparecerá automaticamente.',
   },
   achievements: {
     progress: '{{unlocked}} de {{total}} desbloqueadas',
+    loadError: 'Não foi possível carregar as conquistas.',
     toUnlock: 'A conquistar',
     obtained: 'obtida',
+    filterAll: 'Todas',
+    emptyFilter: 'Nenhuma conquista nesta especialidade.',
   },
   quiz: {
     loading: 'Carregando quiz...',
@@ -311,6 +331,7 @@ export default {
   userMenu: {
     changePassword: 'Alterar senha',
     signOut: 'Sair',
+    openMenu: 'Abrir menu do usuário',
   },
   changePassword: {
     setTitle: 'Defina sua senha',
@@ -337,6 +358,7 @@ export default {
   legionSelect: {
     chooseTitle: 'Escolha sua legião',
     recommended: 'Recomendada',
+    benefit: 'Na legião você valida missões de colegas, ganha XP de revisão e tem acesso ao feed da sua unidade.',
     chooseThis: 'Escolher esta legião',
     lockNotice: 'A escolha não altera seu XP nem sua patente, mas fica travada por 60 dias.',
     confirmTitle: 'Confirmar legião',
