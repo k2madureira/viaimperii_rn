@@ -1,5 +1,13 @@
-import React from 'react';
-import { ActivityIndicator, Image, RefreshControl, ScrollView, Text, View } from 'react-native';
+import React, { useState } from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { SvgUri } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,16 +15,29 @@ import { Navbar } from '../../components';
 import { Achievement } from '../../api/users/userApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { useUserProfile } from '../dashboard/model/queries/useUserProfile';
+import { useSpecialties } from '../missions/model/queries/useSpecialties';
 
 export default function AchievementsScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
   const { user } = useAuth();
   const profileQuery = useUserProfile(user?.user_id);
+  const specialtiesQuery = useSpecialties();
 
   const achievements = profileQuery.data?.achievements ?? [];
+  const specialties = specialtiesQuery.data ?? [];
+
   const unlocked = achievements.filter((a) => a.achieved_at);
-  const locked = achievements.filter((a) => !a.achieved_at);
+  // null = todas as especialidades; number = filtrada
+  const [filterSpecialtyId, setFilterSpecialtyId] = useState<number | null>(null);
+
+  const visibleAchievements =
+    filterSpecialtyId == null
+      ? achievements
+      : achievements.filter((a) => a.specialty_id === filterSpecialtyId);
+
+  const visibleUnlocked = visibleAchievements.filter((a) => a.achieved_at);
+  const visibleLocked = visibleAchievements.filter((a) => !a.achieved_at);
 
   return (
     <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
@@ -30,6 +51,37 @@ export default function AchievementsScreen() {
           })}
         </Text>
       </View>
+
+      {/* Filtro por especialidade */}
+      {specialties.length > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 10, gap: 8 }}>
+          <TouchableOpacity
+            onPress={() => setFilterSpecialtyId(null)}
+            activeOpacity={0.8}
+            className={`px-3 py-1.5 rounded-full border ${filterSpecialtyId == null ? 'bg-primary-500 border-primary-500' : 'bg-white border-[#e0dada]'}`}>
+            <Text className={`text-[12px] font-bold ${filterSpecialtyId == null ? 'text-white' : 'text-[#666]'}`}>
+              {t('achievements.filterAll')}
+            </Text>
+          </TouchableOpacity>
+          {specialties.map((s) => {
+            const active = filterSpecialtyId === s.id;
+            return (
+              <TouchableOpacity
+                key={s.id}
+                onPress={() => setFilterSpecialtyId(active ? null : s.id)}
+                activeOpacity={0.8}
+                className={`px-3 py-1.5 rounded-full border ${active ? 'bg-primary-500 border-primary-500' : 'bg-white border-[#e0dada]'}`}>
+                <Text className={`text-[12px] font-bold ${active ? 'text-white' : 'text-[#666]'}`}>
+                  {s.name}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      )}
 
       {profileQuery.isLoading ? (
         <View className="py-16 items-center">
@@ -46,17 +98,22 @@ export default function AchievementsScreen() {
               tintColor="#9E1B32"
             />
           }>
-          {unlocked.map((a) => (
+          {visibleUnlocked.map((a) => (
             <AchievementRow key={a.id} achievement={a} unlocked t={t} />
           ))}
-          {locked.length > 0 && (
+          {visibleLocked.length > 0 && (
             <Text className="text-[12px] font-bold text-[#aaa] uppercase tracking-[1px] mt-3 mb-1">
               {t('achievements.toUnlock')}
             </Text>
           )}
-          {locked.map((a) => (
+          {visibleLocked.map((a) => (
             <AchievementRow key={a.id} achievement={a} unlocked={false} t={t} />
           ))}
+          {visibleAchievements.length === 0 && (
+            <View className="py-12 items-center">
+              <Text className="text-[14px] text-[#bbb]">{t('achievements.emptyFilter')}</Text>
+            </View>
+          )}
         </ScrollView>
       )}
     </View>

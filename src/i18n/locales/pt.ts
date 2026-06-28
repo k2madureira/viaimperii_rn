@@ -309,6 +309,8 @@ export default {
     progress: '{{unlocked}} de {{total}} desbloqueadas',
     toUnlock: 'A conquistar',
     obtained: 'obtida',
+    filterAll: 'Todas',
+    emptyFilter: 'Nenhuma conquista nesta especialidade.',
   },
   quiz: {
     loading: 'Carregando quiz...',

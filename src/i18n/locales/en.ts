@@ -309,6 +309,8 @@ export default {
     progress: '{{unlocked}} of {{total}} unlocked',
     toUnlock: 'To unlock',
     obtained: 'obtained',
+    filterAll: 'All',
+    emptyFilter: 'No achievements in this specialty.',
   },
   quiz: {
     loading: 'Loading quiz...',
