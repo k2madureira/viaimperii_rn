@@ -44,6 +44,9 @@ export default {
       tokenPlaceholder: 'ABC1234',
       verifyToken: 'Verificar',
       backToEmail: 'Voltar',
+      stepProgress: 'Passo {{step}} de {{total}}',
+      resendCode: 'Reenviar código',
+      resendCodeSent: 'Novo código enviado!',
     },
     forgotPassword: {
       tagline: 'Esqueceu sua senha?',
