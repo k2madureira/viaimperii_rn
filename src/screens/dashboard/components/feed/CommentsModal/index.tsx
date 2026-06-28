@@ -49,7 +49,7 @@ function CommentRow({ comment }: { comment: FeedComment }) {
         {avatarUrl ? (
           <Image source={{ uri: avatarUrl }} style={{ width: 32, height: 32 }} resizeMode="cover" />
         ) : (
-          <Text className="text-[11px] font-bold text-bg-primary-500">{initials(comment.author.name)}</Text>
+          <Text className="text-[11px] font-bold text-primary-500">{initials(comment.author.name)}</Text>
         )}
       </View>
       <View className="flex-1 bg-[#f7f4f4] rounded-[12px] px-3 py-2">
@@ -64,7 +64,7 @@ function CommentRow({ comment }: { comment: FeedComment }) {
     </View>
   );
 }
-
+ 
 export default function CommentsModal({ item, onClose }: Props) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
@@ -179,7 +179,7 @@ export default function CommentsModal({ item, onClose }: Props) {
                 disabled={!text.trim() || createM.isPending}
                 activeOpacity={0.85}
                 className={`rounded-full w-11 h-11 items-center justify-center ${
-                  text.trim() && !createM.isPending ? 'bg-bg-primary-500' : 'bg-bg-primary-500/40'
+                  text.trim() && !createM.isPending ? 'bg-primary-500' : 'bg-primary-500/40'
                 }`}>
                 {createM.isPending ? (
                   <ActivityIndicator color="#fff" size="small" />

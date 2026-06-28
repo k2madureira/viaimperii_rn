@@ -108,7 +108,7 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
         <View className="w-full bg-white rounded-[20px] p-6" style={{ maxHeight: '80%' }}>
           {/* Cabeçalho */}
           <View className="items-center">
-            <View className="w-12 h-12 rounded-full bg-primary/10 items-center justify-center mb-3">
+            <View className="w-12 h-12 rounded-full bg-primary-500/10 items-center justify-center mb-3">
               <Text className="text-[22px]">📍</Text>
             </View>
             <Text
@@ -127,7 +127,7 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
               <TouchableOpacity
                 onPress={locate}
                 activeOpacity={0.9}
-                className="w-full bg-primary rounded-[12px] py-3.5 items-center mt-5">
+                className="w-full bg-primary-500 rounded-[12px] py-3.5 items-center mt-5">
                 <Text className="text-[15px] font-bold text-white">{t('provinceSetup.allowLocation')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
@@ -153,8 +153,8 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
               <Text className="text-[13px] text-[#555] text-center mt-3">
                 {t('provinceSetup.detectedYouAt')}
               </Text>
-              <View className="bg-primary/10 rounded-[12px] px-4 py-3 mt-2 items-center">
-                <Text className="text-[17px] font-extrabold text-primary">
+              <View className="bg-primary-500/10 rounded-[12px] px-4 py-3 mt-2 items-center">
+                <Text className="text-[17px] font-extrabold text-primary-500">
                   {detected.name}
                   {detected.abbreviation ? ` · ${detected.abbreviation}` : ''}
                 </Text>
@@ -163,7 +163,7 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
                 onPress={() => onConfirm(detected.id)}
                 disabled={pending}
                 activeOpacity={0.9}
-                className="w-full bg-primary rounded-[12px] py-3.5 items-center mt-5">
+                className="w-full bg-primary-500 rounded-[12px] py-3.5 items-center mt-5">
                 {pending ? (
                   <ActivityIndicator color="#fff" />
                 ) : (

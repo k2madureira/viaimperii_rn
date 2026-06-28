@@ -187,7 +187,7 @@ export default function ChangePasswordModal({ visible, isTemporary = false, onCl
             <form.Subscribe selector={(s) => s.isSubmitting}>
               {(isSubmitting) => (
                 <TouchableOpacity
-                  className="bg-primary rounded-[10px] py-[15px] items-center"
+                  className="bg-primary-500 rounded-[10px] py-[15px] items-center"
                   activeOpacity={0.85}
                   disabled={isSubmitting || isPending}
                   onPress={form.handleSubmit}>

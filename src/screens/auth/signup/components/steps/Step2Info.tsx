@@ -59,7 +59,7 @@ export default function Step2Info({ email, onContinue }: Props) {
       <View className="h-8" />
 
       <TouchableOpacity
-        className="bg-primary rounded-[10px] py-[15px] items-center w-full"
+        className="bg-primary-500 rounded-[10px] py-[15px] items-center w-full"
         activeOpacity={0.85}
         onPress={onContinue}>
         <Text className="text-white text-[15px] font-bold tracking-[0.4px]">

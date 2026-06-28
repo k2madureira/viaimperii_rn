@@ -108,7 +108,7 @@ function ReviewPanel({ mission }: { mission: Mission }) {
   }
 
   return (
-    <View className="mt-3 bg-gold/10 border border-gold/30 rounded-[12px] p-3 gap-2.5">
+    <View className="mt-3 bg-accent-500/10 border border-accent-500/30 rounded-[12px] p-3 gap-2.5">
       <View className="flex-row items-center justify-between">
         <Text className="text-[11px] font-bold text-[#9a7b1f] uppercase tracking-[1px]">
           ⏳ {t('missionItem.reviewLabel')}
@@ -137,7 +137,7 @@ function ReviewPanel({ mission }: { mission: Mission }) {
               <View
                 key={i}
                 className={`flex-1 h-1.5 rounded-full ${
-                  i < mission.approvals_count ? 'bg-gold' : 'bg-gold/25'
+                  i < mission.approvals_count ? 'accent-500' : 'accent-500/25'
                 }`}
               />
             ))}
@@ -160,9 +160,9 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
     <View
       className={`border rounded-[14px] p-4 ${
         isPendingReview
-          ? 'border-gold/40 bg-[#fffdf5]'
+          ? 'border-accent-500/40 bg-[#fffdf5]'
           : isInProgress
-            ? 'border-primary bg-[#fdf7f8]'
+            ? 'border-primary-500 bg-[#fdf7f8]'
             : isCompleted
               ? 'border-laurel/30 bg-[#f4faf6]'
               : 'border-[#f0eded] bg-white'
@@ -210,19 +210,19 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
         </View>
 
         <View className="items-end gap-1">
-          <Text className="text-[13px] font-extrabold text-gold">+{mission.xp_reward} {t('common.xp')}</Text>
+          <Text className="text-[13px] font-extrabold text-accent-500">+{mission.xp_reward} {t('common.xp')}</Text>
           {isCompleted && (
             <View className="bg-laurel/15 rounded-full px-2 py-0.5">
               <Text className="text-[10px] font-bold text-laurel">{t('missionItem.completed')}</Text>
             </View>
           )}
           {isInProgress && (
-            <View className="bg-primary/10 rounded-full px-2 py-0.5">
-              <Text className="text-[10px] font-bold text-primary">{t('missionItem.inProgress')}</Text>
+            <View className="bg-primary-500/10 rounded-full px-2 py-0.5">
+              <Text className="text-[10px] font-bold text-primary-500">{t('missionItem.inProgress')}</Text>
             </View>
           )}
           {isPendingReview && (
-            <View className="bg-gold/20 rounded-full px-2 py-0.5">
+            <View className="bg-accent-500/20 rounded-full px-2 py-0.5">
               <Text className="text-[10px] font-bold text-[#9a7b1f]">{t('missionItem.inReview')}</Text>
             </View>
           )}
@@ -237,7 +237,7 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
             disabled={pending}
             activeOpacity={0.85}
             onPress={() => onComplete(mission)}
-            className="rounded-[10px] py-2.5 items-center bg-primary">
+            className="rounded-[10px] py-2.5 items-center bg-primary-500">
             {pending ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (

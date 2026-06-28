@@ -55,7 +55,7 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
             {avatarUrl ? (
               <Image source={{ uri: avatarUrl }} style={{ width: 40, height: 40 }} resizeMode="cover" />
             ) : (
-              <Text className="text-[15px] font-extrabold text-primary">{initial}</Text>
+              <Text className="text-[15px] font-extrabold text-primary-500">{initial}</Text>
             )}
           </View>
 
@@ -80,7 +80,7 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
         </View>
 
         <View className="items-end gap-1">
-          <Text className="text-[13px] font-extrabold text-gold">+{item.xp_reward} {t('common.xp')}</Text>
+          <Text className="text-[13px] font-extrabold text-accent-500">+{item.xp_reward} {t('common.xp')}</Text>
           <Text className="text-[11px] font-bold text-[#7a5b00]">⏳ {formatRemaining(remaining, t('reviewItem.closing'))}</Text>
         </View>
       </View>
@@ -98,7 +98,7 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
       {/* Evidência submetida */}
       {item.submission ? (
         <View className="mt-3 border border-[#eee] rounded-[10px] p-3 gap-2">
-          <Text className="text-[10px] font-bold text-primary uppercase tracking-[1px]">
+          <Text className="text-[10px] font-bold text-primary-500 uppercase tracking-[1px]">
             {t('reviewItem.evidence', { kind: item.submission.kind })}
           </Text>
           {item.submission.kind === 'image' && item.submission.image_url ? (
@@ -109,7 +109,7 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
             />
           ) : item.submission.kind === 'link' && item.submission.content ? (
             <TouchableOpacity onPress={() => Linking.openURL(item.submission!.content!)} activeOpacity={0.7}>
-              <Text className="text-[13px] text-primary underline" numberOfLines={2}>
+              <Text className="text-[13px] text-primary-500 underline" numberOfLines={2}>
                 {item.submission.content}
               </Text>
             </TouchableOpacity>
@@ -147,9 +147,9 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
           activeOpacity={0.85}
           onPress={() => onReject(item.mission_slug, item.executor.id)}
           className={`flex-1 rounded-[10px] py-2.5 items-center border ${
-            pending ? 'border-primary/30' : 'border-primary'
+            pending ? 'border-primary-500/30' : 'border-primary-500'
           }`}>
-          <Text className={`text-[13px] font-bold ${pending ? 'text-primary/40' : 'text-primary'}`}>
+          <Text className={`text-[13px] font-bold ${pending ? 'text-primary-500/40' : 'text-primary-500'}`}>
             {t('reviewItem.reject')}
           </Text>
         </TouchableOpacity>

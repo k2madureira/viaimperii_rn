@@ -144,7 +144,7 @@ export default function EditPostModal({ item, onClose }: Props) {
                 activeOpacity={0.8}
                 className="flex-row items-center gap-2 mt-3 px-1 py-2">
                 <ImageIcon size={20} color="#9E1B32" />
-                <Text className="text-[13px] font-bold text-bg-primary-500">{t('feed.addImage')}</Text>
+                <Text className="text-[13px] font-bold text-primary-500">{t('feed.addImage')}</Text>
               </TouchableOpacity>
             )}
 
@@ -160,7 +160,7 @@ export default function EditPostModal({ item, onClose }: Props) {
                 onPress={handleSave}
                 disabled={!canSave}
                 activeOpacity={0.85}
-                className={`flex-1 rounded-[12px] py-3 items-center ${canSave ? 'bg-bg-primary-500' : 'bg-bg-primary-500/40'}`}>
+                className={`flex-1 rounded-[12px] py-3 items-center ${canSave ? 'bg-primary-500' : 'bg-primary-500/40'}`}>
                 {busy ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (

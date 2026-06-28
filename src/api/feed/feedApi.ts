@@ -175,6 +175,39 @@ export async function unreactFeed(eventId: number): Promise<ReactResponse> {
   return readContent<ReactResponse>(response);
 }
 
+// ── Quem reagiu ─────────────────────────────────────────────────────────────────
+
+export interface Reactor {
+  user: FeedAuthor;
+  type: ReactionType;
+  reacted_at: string;
+}
+
+export interface ReactorsResponse {
+  total: number;
+  by_type: Partial<Record<ReactionType, number>>;
+  items: Reactor[];
+  nextCursor: number | null;
+}
+
+export async function getReactors(
+  eventId: number,
+  type?: ReactionType | null,
+  cursor?: number | null,
+  perPage = 20,
+): Promise<ReactorsResponse> {
+  const parts = [`perPage=${perPage}`];
+  if (type) parts.push(`type=${type}`);
+  if (cursor != null) parts.push(`cursor=${cursor}`);
+  const response = await apiFetch(`/feed/${eventId}/reactions?${parts.join('&')}`);
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao carregar reações'));
+  }
+
+  return readContent<ReactorsResponse>(response);
+}
+
 // ── Comentários ─────────────────────────────────────────────────────────────────
 
 export async function getFeedComments(

@@ -104,7 +104,7 @@ export default function Step3Token({ email: initialEmail, onBack }: Props) {
       <View className="h-5" />
 
       <TouchableOpacity
-        className={`rounded-[10px] py-[15px] items-center ${canSubmit ? 'bg-primary' : 'bg-[#ccc]'}`}
+        className={`rounded-[10px] py-[15px] items-center ${canSubmit ? 'bg-primary-500' : 'bg-[#ccc]'}`}
         activeOpacity={0.85}
         disabled={isPending || !canSubmit}
         onPress={handleVerify}>

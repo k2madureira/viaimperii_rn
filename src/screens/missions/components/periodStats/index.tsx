@@ -31,7 +31,7 @@ export default function PeriodStats({ stats, isLoading }: Props) {
         </View>
       ) : (
         <>
-          <Text className="text-[30px] font-extrabold text-gold mt-1">
+          <Text className="text-[30px] font-extrabold text-accent-500 mt-1">
             {stats.xp_in_period.toLocaleString()}
             <Text className="text-[14px] font-bold text-white/30"> {t('common.xp')}</Text>
           </Text>

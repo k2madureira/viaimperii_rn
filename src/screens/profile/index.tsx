@@ -47,7 +47,7 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}>
         {/* Cabeçalho do perfil */}
         <View className="items-center pt-2">
-          <View className="w-20 h-20 rounded-full bg-primary items-center justify-center overflow-hidden">
+          <View className="w-20 h-20 rounded-full bg-primary-500 items-center justify-center overflow-hidden">
             {avatarUrl ? (
               <Image source={{ uri: avatarUrl }} style={{ width: 80, height: 80 }} resizeMode="cover" />
             ) : (
@@ -82,7 +82,7 @@ export default function ProfileScreen() {
         <TouchableOpacity
           onPress={() => signOut()}
           activeOpacity={0.85}
-          className="bg-primary rounded-[14px] py-3.5 items-center">
+          className="bg-primary-500 rounded-[14px] py-3.5 items-center">
           <Text className="text-[14px] font-bold text-white">{t('profile.signOut')}</Text>
         </TouchableOpacity>
       </ScrollView>

@@ -6,3 +6,4 @@ export { default as MissionsSummaryCard } from './MissionsSummaryCard';
 export { default as ImageViewerModal } from './ImageViewerModal';
 export { default as EditPostModal } from './EditPostModal';
 export { default as AnchoredPopover } from './AnchoredPopover';
+export { default as ReactorsPopover } from './ReactorsPopover';

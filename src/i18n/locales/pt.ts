@@ -81,6 +81,8 @@ export default {
     },
     commentsCount_one: '{{count}} comentário',
     commentsCount_other: '{{count}} comentários',
+    allReactions: 'Tudo',
+    noReactions: 'Ninguém reagiu ainda.',
     commentsTitle: 'Comentários',
     commentPlaceholder: 'Escreva um comentário...',
     noComments: 'Seja o primeiro a comentar.',

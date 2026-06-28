@@ -149,9 +149,9 @@ export default function FeedComposer({ avatarUrl, canLegion, canProvince }: Prop
             onPress={() => setScope(s)}
             activeOpacity={0.8}
             className={`rounded-full px-3 py-1.5 border ${
-              scope === s ? 'bg-bg-primary-500/10 border-bg-primary-500/40' : 'bg-[#faf7f7] border-[#f0eded]'
+              scope === s ? 'bg-primary-500/10 border-primary-500/40' : 'bg-[#faf7f7] border-[#f0eded]'
             }`}>
-            <Text className={`text-[12px] font-bold ${scope === s ? 'text-bg-primary-500' : 'text-[#888]'}`}>
+            <Text className={`text-[12px] font-bold ${scope === s ? 'text-primary-500' : 'text-[#888]'}`}>
               {t(`feed.scope.${s}`)}
             </Text>
           </TouchableOpacity>
@@ -166,7 +166,7 @@ export default function FeedComposer({ avatarUrl, canLegion, canProvince }: Prop
           activeOpacity={0.7}
           className="flex-row items-center gap-2 px-2 py-1.5">
           <ImageIcon size={20} color="#9E1B32" />
-          <Text className="text-[13px] font-bold text-bg-primary-500">{t('feed.addImage')}</Text>
+          <Text className="text-[13px] font-bold text-primary-500">{t('feed.addImage')}</Text>
         </TouchableOpacity>
 
         <View className="flex-row items-center gap-2">
@@ -181,7 +181,7 @@ export default function FeedComposer({ avatarUrl, canLegion, canProvince }: Prop
             onPress={handlePost}
             disabled={!canPost}
             activeOpacity={0.85}
-            className={`rounded-[12px] px-5 py-2.5 items-center ${canPost ? 'bg-bg-primary-500' : 'bg-bg-primary-500/40'}`}>
+            className={`rounded-[12px] px-5 py-2.5 items-center ${canPost ? 'bg-primary-500' : 'bg-primary-500/40'}`}>
             {busy ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (

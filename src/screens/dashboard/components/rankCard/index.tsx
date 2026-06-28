@@ -35,7 +35,7 @@ export default function RankCard({
 
   return (
     <Wrapper
-      className="bg-primary rounded-[16px] p-5"
+      className="bg-primary-500 rounded-[16px] p-5"
       {...(onPress ? { onPress, activeOpacity: 0.9 } : {})}>
       <View className="flex-row items-center">
         {/* Insígnia da patente */}
@@ -63,9 +63,9 @@ export default function RankCard({
           {/* Trilha selecionada — vazio enquanto o usuário não escolher */}
           {trackName ? (
             <View className="flex-row mt-1.5">
-              <View className="flex-row items-center bg-gold/20 rounded-full px-2.5 py-0.5">
-                <View className="w-1.5 h-1.5 rounded-full bg-gold mr-1.5" />
-                <Text className="text-[11px] font-bold text-gold">{trackName}</Text>
+              <View className="flex-row items-center bg-accent-500/20 rounded-full px-2.5 py-0.5">
+                <View className="w-1.5 h-1.5 rounded-full bg-accent-500 mr-1.5" />
+                <Text className="text-[11px] font-bold text-accent-500">{trackName}</Text>
               </View>
             </View>
           ) : null}
@@ -79,7 +79,7 @@ export default function RankCard({
       {/* Barra de progresso da patente */}
       <View className="h-[6px] bg-white/25 rounded-full overflow-hidden">
         <View
-          className="h-full rounded-full bg-gold"
+          className="h-full rounded-full bg-accent-500"
           style={{ width: `${progress * 100}%` }}
         />
       </View>

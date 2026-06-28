@@ -159,7 +159,7 @@ export default function DashboardScreen() {
 
       {/* 2 — PATENTE (70%) + MISSÕES (30%) lado a lado */}
       <View className="flex-row" style={{ gap: 12 }}>
-        <View className="bg-primary rounded-[20px] p-4 flex-[7]">
+        <View className="bg-primary-500 rounded-[20px] p-4 flex-[7]">
           <View className="flex-row items-center">
             <View className="flex-1">
               <Text className="text-[10px] font-bold text-white/70 tracking-[2px] uppercase">
@@ -189,7 +189,7 @@ export default function DashboardScreen() {
 
           <View className="h-[7px] bg-white/25 rounded-full overflow-hidden mt-3">
             <View
-              className="h-full rounded-full bg-gold"
+              className="h-full rounded-full bg-accent-500"
               style={{ width: `${rankProgress * 100}%` }}
             />
           </View>
@@ -226,7 +226,7 @@ export default function DashboardScreen() {
       {activeCampaign && (
         <View className="bg-white border border-[#f0eded] rounded-[18px] p-5">
           <Text className="text-[15px] font-extrabold text-charcoal mb-1">📖 {t('dashboard.currentCampaignTitle')}</Text>
-          <Text className="text-[14px] font-bold text-bg-primary-500">
+          <Text className="text-[14px] font-bold text-primary-500">
             {formatCampaignName(activeCampaign.campaign.name)}
           </Text>
           <Text className="text-[12px] text-[#888] mt-1">
@@ -247,7 +247,7 @@ export default function DashboardScreen() {
             onPress={() => navigation.navigate('Missions')}
             activeOpacity={0.9}
             className="border border-[#e6dada] rounded-[12px] py-2.5 items-center mt-4">
-            <Text className="text-[13px] font-bold text-bg-primary-500">{t('dashboard.continueCampaign')}</Text>
+            <Text className="text-[13px] font-bold text-primary-500">{t('dashboard.continueCampaign')}</Text>
           </TouchableOpacity>
         </View>
       )}

@@ -9,6 +9,15 @@ Mantenha-o atualizado ao alterar comportamento.
 
 ---
 
+## 0. Estilo de Resposta (obrigatório)
+
+- **Toda resposta** ao usuário deve ser **em tópicos** (bullets), **curta e enxuta**.
+- Sem parágrafos longos, preâmbulos ou repetição de contexto já conhecido.
+- Ir direto ao ponto: o que foi feito / o que falta / decisão necessária.
+- Mostrar código só quando pedido ou essencial.
+
+---
+
 ## 1. Arquitetura e Convenções
 
 - **Clean Architecture** em 4 camadas: `domain → application → infrastructure → presentation`.

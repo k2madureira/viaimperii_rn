@@ -8,6 +8,7 @@ import FeedReactions, { ReactionCluster } from '../FeedReactions';
 import AnchoredPopover, { Anchor } from '../AnchoredPopover';
 import ImageViewerModal from '../ImageViewerModal';
 import EditPostModal from '../EditPostModal';
+import ReactorsPopover from '../ReactorsPopover';
 import { useDeletePost } from '../../../model/mutations/useDeletePost';
 
 interface LegionMini {
@@ -40,7 +41,7 @@ function initials(name: string) {
     .map((p) => p[0]?.toUpperCase())
     .join('');
 }
-
+ 
 export default function FeedCard({
   item,
   currentUserId,
@@ -55,8 +56,10 @@ export default function FeedCard({
 
   const avatarRef = useRef<View>(null);
   const menuRef = useRef<View>(null);
+  const reactorsRef = useRef<View>(null);
   const [userAnchor, setUserAnchor] = useState<Anchor | null>(null);
   const [menuAnchor, setMenuAnchor] = useState<Anchor | null>(null);
+  const [reactorsAnchor, setReactorsAnchor] = useState<Anchor | null>(null);
   const [imageViewer, setImageViewer] = useState(false);
   const [editing, setEditing] = useState(false);
 
@@ -73,6 +76,10 @@ export default function FeedCard({
   const openMenu = () =>
     menuRef.current?.measureInWindow((x, y, w, h) =>
       setMenuAnchor({ x, y, width: w, height: h }),
+    );
+  const openReactors = () =>
+    reactorsRef.current?.measureInWindow((x, y, w, h) =>
+      setReactorsAnchor({ x, y, width: w, height: h }),
     );
 
   const confirmDelete = () => {
@@ -131,7 +138,7 @@ export default function FeedCard({
               {avatarUrl ? (
                 <Image source={{ uri: avatarUrl }} style={{ width: 40, height: 40 }} resizeMode="cover" />
               ) : (
-                <Text className="text-[14px] font-bold text-bg-primary-500">{initials(author.name)}</Text>
+                <Text className="text-[14px] font-bold text-primary-500">{initials(author.name)}</Text>
               )}
             </View>
           </TouchableOpacity>
@@ -168,7 +175,7 @@ export default function FeedCard({
           <View className="flex-1">
             <Text className="text-[13px] text-[#333] leading-[19px]">{systemLine()}</Text>
             {item.verb === 'mission_completed' && (item.payload?.xp_earned ?? 0) > 0 && (
-              <Text className="text-[12px] font-bold text-gold mt-1">
+              <Text className="text-[12px] font-bold text-accent-500 mt-1">
                 +{item.payload?.xp_earned} {t('common.xp')}
               </Text>
             )}
@@ -194,7 +201,15 @@ export default function FeedCard({
       {/* Resumo (reações + comentários), estilo LinkedIn */}
       {(item.reactions.total > 0 || item.comments_count > 0) && (
         <View className="flex-row items-center justify-between mt-3">
-          <ReactionCluster reactions={item.reactions} />
+          {item.reactions.total > 0 ? (
+            <View ref={reactorsRef} collapsable={false}>
+              <TouchableOpacity onPress={openReactors} activeOpacity={0.7}>
+                <ReactionCluster reactions={item.reactions} />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View />
+          )}
           {item.comments_count > 0 ? (
             <TouchableOpacity onPress={() => onOpenComments(item)} activeOpacity={0.7}>
               <Text className="text-[12px] text-[#888]">
@@ -231,7 +246,7 @@ export default function FeedCard({
               {avatarUrl ? (
                 <Image source={{ uri: avatarUrl }} style={{ width: 48, height: 48 }} resizeMode="cover" />
               ) : (
-                <Text className="text-[16px] font-bold text-bg-primary-500">{initials(author.name)}</Text>
+                <Text className="text-[16px] font-bold text-primary-500">{initials(author.name)}</Text>
               )}
             </View>
             <View className="flex-1">
@@ -286,6 +301,13 @@ export default function FeedCard({
           <Text className="text-[14px] font-bold text-[#c0392b]">{t('feed.delete')}</Text>
         </TouchableOpacity>
       </AnchoredPopover>
+
+      {/* Popover: quem reagiu (usuários + reações) */}
+      <ReactorsPopover
+        eventId={item.id}
+        anchor={reactorsAnchor}
+        onClose={() => setReactorsAnchor(null)}
+      />
 
       <ImageViewerModal
         uri={imageViewer ? item.image_url : null}

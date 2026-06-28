@@ -34,8 +34,8 @@ export default function MissionsSummaryCard({ count, xp, onPress }: Props) {
       </Text>
 
       {xp > 0 && (
-        <View className="bg-gold/25 rounded-full px-2.5 py-0.5 mt-1.5">
-          <Text className="text-[11px] font-bold text-gold">+{xp} XP</Text>
+        <View className="bg-accent-500/25 rounded-full px-2.5 py-0.5 mt-1.5">
+          <Text className="text-[11px] font-bold text-accent-500">+{xp} XP</Text>
         </View>
       )}
 

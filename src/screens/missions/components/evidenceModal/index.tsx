@@ -133,7 +133,7 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
               <Text className="text-[13px] text-[#555]">{mission?.name}</Text>
 
               {mission?.acceptance_criteria ? (
-            <View className="bg-gold/10 border border-gold/30 rounded-[12px] px-3 py-2.5">
+            <View className="bg-accent-500/10 border border-accent-500/30 rounded-[12px] px-3 py-2.5">
               <Text className="text-[11px] font-bold text-[#9a7b1f] uppercase tracking-[1px] mb-1">
                 {t('evidenceModal.acceptanceCriterion')}
               </Text>
@@ -195,7 +195,7 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
                   activeOpacity={0.85}
                   className="border border-dashed border-[#cbbcbc] rounded-[12px] py-6 items-center flex-row justify-center gap-2">
                   <ImageIcon size={18} color="#9E1B32" />
-                  <Text className="text-[13px] font-bold text-primary">{t('evidenceModal.chooseImage')}</Text>
+                  <Text className="text-[13px] font-bold text-primary-500">{t('evidenceModal.chooseImage')}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -214,7 +214,7 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
               disabled={!canSubmit || busy}
               activeOpacity={0.85}
               className={`flex-1 rounded-[12px] py-3 items-center ${
-                !canSubmit || busy ? 'bg-primary/40' : 'bg-primary'
+                !canSubmit || busy ? 'bg-primary-500/40' : 'bg-primary-500'
               }`}>
               {busy ? (
                 <ActivityIndicator color="#fff" size="small" />

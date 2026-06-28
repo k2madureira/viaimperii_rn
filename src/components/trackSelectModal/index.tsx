@@ -88,7 +88,7 @@ export default function TrackSelectModal({
                     activeOpacity={0.85}
                     onPress={() => { setSelectedIdx(i); setConfirming(false); }}
                     className={`flex-1 py-2.5 rounded-[9px] items-center ${active ? 'bg-white' : ''}`}>
-                    <Text className={`text-[13px] font-bold ${active ? 'text-primary' : 'text-[#888]'}`}>
+                    <Text className={`text-[13px] font-bold ${active ? 'text-primary-500' : 'text-[#888]'}`}>
                       {t.name}
                     </Text>
                   </TouchableOpacity>
@@ -117,7 +117,7 @@ export default function TrackSelectModal({
                 {hasFlavor && (
                   <View className="items-center gap-1">
                     <Text
-                      className="text-[13px] font-bold text-primary tracking-[1px] uppercase"
+                      className="text-[13px] font-bold text-primary-500 tracking-[1px] uppercase"
                       style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
                       {t(`trackSelect.flavor.${track.slug}.tagline`)}
                     </Text>
@@ -129,7 +129,7 @@ export default function TrackSelectModal({
 
                 {/* Tipo de missão */}
                 {hasFlavor && (
-                  <View className="bg-[#f4eaea] border border-primary/15 rounded-[12px] px-4 py-3 flex-row items-start gap-2">
+                  <View className="bg-[#f4eaea] border border-primary-500/15 rounded-[12px] px-4 py-3 flex-row items-start gap-2">
                     <Text className="text-[16px]">⚔️</Text>
                     <Text className="flex-1 text-[13px] text-[#5a1a26] leading-[19px]">
                       {t(`trackSelect.flavor.${track.slug}.missionType`)}
@@ -142,7 +142,7 @@ export default function TrackSelectModal({
                   <View className="bg-[#fafafa] border border-[#f0eded] rounded-[14px] p-4 gap-2">
                     {track.attributes.map((attr, i) => (
                       <View key={i} className="flex-row items-start gap-2">
-                        <Text className="text-primary text-[14px] leading-[20px]">·</Text>
+                        <Text className="text-primary-500 text-[14px] leading-[20px]">·</Text>
                         <Text className="flex-1 text-[13px] text-[#444] leading-[20px]">{attr}</Text>
                       </View>
                     ))}
@@ -151,7 +151,7 @@ export default function TrackSelectModal({
 
                 {/* Aviso de penalidade (troca) */}
                 {isChange && (
-                  <View className="bg-gold/15 border border-gold/40 rounded-[12px] px-4 py-3 flex-row items-start gap-2">
+                  <View className="bg-accent-500/15 border border-accent-500/40 rounded-[12px] px-4 py-3 flex-row items-start gap-2">
                     <Text className="text-[16px]">⚠️</Text>
                     <Text className="flex-1 text-[12px] text-[#7a5b00] leading-[18px]">
                       {t('trackSelect.changeWarning', { name: track.name })}
@@ -161,7 +161,7 @@ export default function TrackSelectModal({
 
                 {/* Overlay de confirmação */}
                 {confirming ? (
-                  <View className="bg-[#fdf7f8] border border-primary/20 rounded-[14px] p-4 gap-3">
+                  <View className="bg-[#fdf7f8] border border-primary-500/20 rounded-[14px] p-4 gap-3">
                     <Text className="text-[15px] font-extrabold text-[#111] text-center">
                       {t('trackSelect.confirmChoiceTitle')}
                     </Text>
@@ -181,7 +181,7 @@ export default function TrackSelectModal({
                       <TouchableOpacity
                         activeOpacity={0.85}
                         onPress={handleConfirm}
-                        className="flex-1 bg-primary rounded-[10px] py-3 items-center">
+                        className="flex-1 bg-primary-500 rounded-[10px] py-3 items-center">
                         {isLoading ? (
                           <ActivityIndicator color="#fff" size="small" />
                         ) : (
@@ -194,7 +194,7 @@ export default function TrackSelectModal({
                   <TouchableOpacity
                     activeOpacity={0.85}
                     onPress={handleChoose}
-                    className="bg-primary rounded-[12px] py-3.5 items-center">
+                    className="bg-primary-500 rounded-[12px] py-3.5 items-center">
                     <Text className="text-[15px] font-bold text-white">
                       {t('trackSelect.chooseTrack', { name: track.name })}
                     </Text>

@@ -32,7 +32,7 @@ function leaf(angleDeg: number, key: string) {
   const rotation = 90 - angleDeg;
   return (
     <G key={key} transform={`rotate(${rotation}, ${x}, ${y})`}>
-      <Ellipse cx={x} cy={y} rx={2.4} ry={5.4} fill="url(#pp-gold)" />
+      <Ellipse cx={x} cy={y} rx={2.4} ry={5.4} fill="url(#pp-border-accent-500)" />
       <Ellipse cx={x} cy={y} rx={0.9} ry={4} fill="#F4D77A" opacity={0.65} />
     </G>
   );
@@ -47,7 +47,7 @@ export default function PrimusPilusEmblem({ size = 40 }: Props) {
   return (
     <Svg width={size} height={size} viewBox="0 0 64 64" fill="none">
       <Defs>
-        <LinearGradient id="pp-gold" x1="0" y1="0" x2="0" y2="1">
+        <LinearGradient id="pp-border-accent-500" x1="0" y1="0" x2="0" y2="1">
           <Stop offset="0" stopColor="#F6D778" />
           <Stop offset="0.5" stopColor="#D4AF37" />
           <Stop offset="1" stopColor="#9A7B1F" />

@@ -93,7 +93,7 @@ function AchievementRow({
         ) : null}
       </View>
       <View className="items-end ml-2">
-        <Text className={`text-[12px] font-bold ${unlocked ? 'text-gold' : 'text-[#bbb]'}`}>
+        <Text className={`text-[12px] font-bold ${unlocked ? 'text-accent-500' : 'text-[#bbb]'}`}>
           +{achievement.xp_reward} {t('common.xp')}
         </Text>
         {unlocked && <Text className="text-[10px] text-laurel font-semibold mt-0.5">{t('achievements.obtained')}</Text>}

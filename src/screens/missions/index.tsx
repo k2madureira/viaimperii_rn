@@ -300,7 +300,7 @@ export default function MissionsScreen() {
             </View>
             {allowance && activeAllowanceCount != null && (
               <View className={`px-3 py-1.5 rounded-full ${
-                activeAllowanceCount === 0 ? 'bg-white/10' : missionType === 'daily' ? 'bg-gold' : 'bg-laurel'
+                activeAllowanceCount === 0 ? 'bg-white/10' : missionType === 'daily' ? 'accent-500' : 'bg-laurel'
               }`}>
                 <Text className={`text-[11px] font-bold ${activeAllowanceCount === 0 ? 'text-white/40' : 'text-white'}`}>
                   {activeAllowanceCount === 0
@@ -377,7 +377,7 @@ export default function MissionsScreen() {
                 )}
 
                 {isBelowRecruitIV && (
-                  <View className="bg-gold/15 border border-gold/40 rounded-[12px] px-4 py-3 flex-row items-center gap-2">
+                  <View className="bg-accent-500/15 border border-accent-500/40 rounded-[12px] px-4 py-3 flex-row items-center gap-2">
                     <Text className="text-[14px]">⚔️</Text>
                     <Text className="flex-1 text-[12px] text-[#7a5b00] leading-[18px]">
                       {t('missions.belowRecruitInfo', { rank: unlockRankName })}
@@ -609,11 +609,11 @@ function ModeTab({
       onPress={onPress}
       className={`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-[9px] ${active ? 'bg-white' : ''}`}
       style={active ? { shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 } : undefined}>
-      <Text className={`text-[13px] font-bold ${active ? 'text-primary' : 'text-[#888]'}`}>
+      <Text className={`text-[13px] font-bold ${active ? 'text-primary-500' : 'text-[#888]'}`}>
         {label}
       </Text>
       {badge != null && badge > 0 && (
-        <View className="bg-primary rounded-full px-1.5 py-0.5 min-w-[18px] items-center">
+        <View className="bg-primary-500 rounded-full px-1.5 py-0.5 min-w-[18px] items-center">
           <Text className="text-[10px] font-bold text-white">{badge}</Text>
         </View>
       )}

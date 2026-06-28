@@ -14,7 +14,7 @@ export const REACTIONS: { type: ReactionType; emoji: string }[] = [
 const LIKE_YELLOW = '#F4C20D';
 
 // Glifo de uma reação: 'like' usa o SVG amarelo; as demais usam emoji.
-function ReactionGlyph({ type, size }: { type: ReactionType | null; size: number }) {
+export function ReactionGlyph({ type, size }: { type: ReactionType | null; size: number }) {
   if (type == null || type === 'like') {
     return <ThumbsUpIcon size={size + 2} color={LIKE_YELLOW} />;
   }
@@ -102,7 +102,7 @@ export default function FeedReactions({ reactions, onReact }: Props) {
                 onPress={() => pick(type)}
                 activeOpacity={0.6}
                 className={`w-9 h-9 rounded-full items-center justify-center ${
-                  mine === type ? 'bg-bg-primary-500/10' : ''
+                  mine === type ? 'bg-primary-500/10' : ''
                 }`}>
                 <ReactionGlyph type={type} size={22} />
               </TouchableOpacity>
@@ -118,7 +118,7 @@ export default function FeedReactions({ reactions, onReact }: Props) {
         activeOpacity={0.7}
         className="flex-row items-center justify-center gap-2 py-2 rounded-[10px]">
         <ReactionGlyph type={mine} size={16} />
-        <Text className={`text-[13px] font-bold ${mine ? 'text-bg-primary-500' : 'text-[#666]'}`}>
+        <Text className={`text-[13px] font-bold ${mine ? 'text-primary-500' : 'text-[#666]'}`}>
           {mine ? t(`feed.reactions.${mine}`) : t('feed.react')}
         </Text>
       </TouchableOpacity>

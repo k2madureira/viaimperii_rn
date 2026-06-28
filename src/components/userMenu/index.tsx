@@ -50,7 +50,7 @@ export default function UserMenu({ onChangePassword, onEdit }: Props) {
           )}
         </View>
         {/* Indicador de que abre opções */}
-        <View className="w-4 h-4 rounded-full bg-primary items-center justify-center -ml-2 mt-5 border border-white">
+        <View className="w-4 h-4 rounded-full bg-primary-500 items-center justify-center -ml-2 mt-5 border border-white">
           <Text className="text-[8px] text-white leading-none">▾</Text>
         </View>
       </TouchableOpacity>

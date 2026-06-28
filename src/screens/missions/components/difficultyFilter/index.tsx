@@ -45,7 +45,7 @@ export default function DifficultyFilter({ value, onChange }: Props) {
         activeOpacity={0.8}
         onPress={visible ? close : open}
         className={`w-9 h-9 rounded-full items-center justify-center border ${
-          active ? 'bg-primary border-primary' : 'bg-white border-[#e0e0e0]'
+          active ? 'bg-primary-500 border-primary-500' : 'bg-white border-[#e0e0e0]'
         }`}>
         <FilterIcon size={16} color={active ? '#fff' : '#666'} />
       </TouchableOpacity>
@@ -72,7 +72,7 @@ export default function DifficultyFilter({ value, onChange }: Props) {
                 activeOpacity={0.7}
                 onPress={() => select(null)}>
                 <Text className="text-[13px] font-medium text-[#111]">{t('difficultyFilter.all')}</Text>
-                {value === null && <Text className="text-[13px] font-bold text-primary">✓</Text>}
+                {value === null && <Text className="text-[13px] font-bold text-primary-500">✓</Text>}
               </TouchableOpacity>
 
               {OPTIONS.map((opt) => (
@@ -90,7 +90,7 @@ export default function DifficultyFilter({ value, onChange }: Props) {
                       {t(`missionItem.difficulty.${opt}`)}
                     </Text>
                   </View>
-                  {value === opt && <Text className="text-[13px] font-bold text-primary">✓</Text>}
+                  {value === opt && <Text className="text-[13px] font-bold text-primary-500">✓</Text>}
                 </TouchableOpacity>
               ))}
             </View>

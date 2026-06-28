@@ -22,7 +22,7 @@ function Chip({
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
-      className={`px-4 py-2 rounded-full border ${active ? 'bg-primary border-primary' : 'bg-white border-[#e0e0e0]'}`}>
+      className={`px-4 py-2 rounded-full border ${active ? 'bg-primary-500 border-primary-500' : 'bg-white border-[#e0e0e0]'}`}>
       <Text className={`text-[12px] font-semibold ${active ? 'text-white' : 'text-[#666]'}`}>
         {label}
       </Text>

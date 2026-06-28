@@ -118,7 +118,7 @@ export default function SignupForm() {
       {/* Toggle código de convite */}
       {!showInviteCode ? (
         <TouchableOpacity onPress={() => setShowInviteCode(true)}>
-          <Text className="text-primary text-[13px] font-medium">
+          <Text className="text-primary-500 text-[13px] font-medium">
             + {t('auth.signup.addInviteCode')}
           </Text>
         </TouchableOpacity>
@@ -149,7 +149,7 @@ export default function SignupForm() {
         onPress={() => setCreatePassword(v => !v)}
         className="flex-row items-center gap-2">
         <View
-          className={`w-4 h-4 rounded border ${createPassword ? 'bg-primary border-primary' : 'border-[#ccc] bg-white'} items-center justify-center`}>
+          className={`w-4 h-4 rounded border ${createPassword ? 'bg-primary-500 border-primary-500' : 'border-[#ccc] bg-white'} items-center justify-center`}>
           {createPassword && <Text className="text-white text-[10px] font-bold">✓</Text>}
         </View>
         <Text className="text-[13px] text-[#444]">{t('auth.signup.createPassword')}</Text>
@@ -242,7 +242,7 @@ export default function SignupForm() {
       <form.Subscribe selector={(state) => state.isSubmitting}>
         {(isSubmitting) => (
           <TouchableOpacity
-            className="bg-primary rounded-[10px] py-[15px] items-center"
+            className="bg-primary-500 rounded-[10px] py-[15px] items-center"
             activeOpacity={0.85}
             disabled={isSubmitting || isPending}
             onPress={form.handleSubmit}>
@@ -266,7 +266,7 @@ export default function SignupForm() {
       <View className="flex-row justify-center items-center">
         <Text className="text-[13px] text-[#555]">{t('auth.signup.hasAccount')} </Text>
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text className="text-[13px] text-primary font-semibold">{t('auth.signup.signin')}</Text>
+          <Text className="text-[13px] text-primary-500 font-semibold">{t('auth.signup.signin')}</Text>
         </TouchableOpacity>
       </View>
     </View>
