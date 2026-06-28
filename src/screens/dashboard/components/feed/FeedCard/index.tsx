@@ -51,7 +51,7 @@ export default function FeedCard({
   onReact,
   onOpenComments,
 }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const navigation = useNavigation<HomeNavigationProp>();
   const { author } = item;
   const avatarUrl = author.active_avatar?.url ?? author.image ?? null;
@@ -111,8 +111,9 @@ export default function FeedCard({
     if (h < 24) return t('feed.time.hours', { count: h });
     const days = Math.floor(h / 24);
     if (days < 7) return t('feed.time.days', { count: days });
-    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-  }, [item.created_at, t]);
+    const locale = i18n.language === 'pt' ? 'pt-BR' : 'en-US';
+    return d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
+  }, [item.created_at, t, i18n.language]);
 
   const isSystem = item.source === 'system';
   const meta = EVENT_META[item.verb];
