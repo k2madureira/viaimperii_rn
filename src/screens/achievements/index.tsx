@@ -87,6 +87,15 @@ export default function AchievementsScreen() {
         <View className="py-16 items-center">
           <ActivityIndicator color="#9E1B32" />
         </View>
+      ) : profileQuery.isError ? (
+        <View className="flex-1 items-center justify-center gap-3 px-8">
+          <Text className="text-[13px] text-[#888] text-center">{t('achievements.loadError')}</Text>
+          <TouchableOpacity
+            onPress={() => profileQuery.refetch()}
+            className="bg-primary-500 rounded-[12px] px-5 py-2.5">
+            <Text className="text-[13px] font-bold text-white">{t('profile.retry')}</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <ScrollView
           contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 24, gap: 10 }}

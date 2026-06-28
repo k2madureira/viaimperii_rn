@@ -256,6 +256,7 @@ export default {
   },
   ranks: {
     title: 'RANKS',
+    loadError: 'Could not load ranks.',
     allRanks: 'All ranks',
     level: 'Level {{level}}',
     currentSuffix: ' · current',
@@ -302,11 +303,13 @@ export default {
   },
   legions: {
     allLegions: 'All legions',
+    loadError: 'Could not load legions.',
     yourLegion: 'Your legion',
     joinHint: 'To join this legion, complete your first mission — the choice will appear automatically.',
   },
   achievements: {
     progress: '{{unlocked}} of {{total}} unlocked',
+    loadError: 'Could not load achievements.',
     toUnlock: 'To unlock',
     obtained: 'obtained',
     filterAll: 'All',
@@ -328,6 +331,7 @@ export default {
   userMenu: {
     changePassword: 'Change password',
     signOut: 'Sign out',
+    openMenu: 'Open user menu',
   },
   changePassword: {
     setTitle: 'Set your password',

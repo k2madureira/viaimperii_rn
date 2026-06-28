@@ -134,6 +134,15 @@ export default function RanksScreen() {
             <View className="py-12 items-center">
               <ActivityIndicator color="#8B1A2B" />
             </View>
+          ) : ranksQuery.isError ? (
+            <View className="py-10 items-center gap-3">
+              <Text className="text-[13px] text-[#888] text-center">{t('ranks.loadError')}</Text>
+              <TouchableOpacity
+                onPress={() => ranksQuery.refetch()}
+                className="bg-primary-500 rounded-[12px] px-5 py-2.5">
+                <Text className="text-[13px] font-bold text-white">{t('profile.retry')}</Text>
+              </TouchableOpacity>
+            </View>
           ) : (
             <View className="bg-white border border-[#f0eded] rounded-[14px] overflow-hidden">
               {sortedRanks.map((r, idx) => {

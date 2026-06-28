@@ -88,8 +88,8 @@ export function connectMissionEvents(
      
       // readyState 3 = LOADING (chunks arriving), 4 = DONE
       if (state === 3 || state === 4) {
-        console.log('RESPONSE', xhr.responseText);
-        console.log({ xhr })
+        if (__DEV__) console.log('RESPONSE', xhr.responseText);
+        if (__DEV__) console.log({ xhr })
         const text = xhr.responseText ?? '';
         if (text.length > lastIndex) {
           parseSSEChunk(text.slice(lastIndex), onEvent);
@@ -131,7 +131,7 @@ function parseSSEChunk(chunk: string, onEvent: (event: MissionEvent) => void) {
   let eventType = '';
   let dataStr = '';
 
-  console.log({  chunk })
+  if (__DEV__) console.log({ chunk })
   for (const raw of chunk.split('\n')) {
     const line = raw.trimEnd();
 
@@ -140,14 +140,14 @@ function parseSSEChunk(chunk: string, onEvent: (event: MissionEvent) => void) {
 
     } else if (line.startsWith('data:')) {
       dataStr = line.slice(5).trim();
-      console.log({  dataStr })
+      if (__DEV__) console.log({ dataStr })
     } else if (line === '' && dataStr) {
      
       try {
         const parsed = JSON.parse(dataStr) as Record<string, unknown>;
         const type = (eventType || parsed.type) as MissionEventType | undefined;
 
-        console.log({  parsed, type })
+        if (__DEV__) console.log({ parsed, type })
 
         if (type && type !== 'ping') {
           onEvent({ type, ...parsed } as MissionEvent);

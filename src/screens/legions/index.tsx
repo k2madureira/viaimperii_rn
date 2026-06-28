@@ -63,6 +63,15 @@ export default function LegionsScreen() {
             <View className="py-12 items-center">
               <ActivityIndicator color="#8B1A2B" />
             </View>
+          ) : legionsQuery.isError ? (
+            <View className="py-10 items-center gap-3">
+              <Text className="text-[13px] text-[#888] text-center">{t('legions.loadError')}</Text>
+              <TouchableOpacity
+                onPress={() => legionsQuery.refetch()}
+                className="bg-primary-500 rounded-[12px] px-5 py-2.5">
+                <Text className="text-[13px] font-bold text-white">{t('profile.retry')}</Text>
+              </TouchableOpacity>
+            </View>
           ) : (
             <LegionBookshelf legions={legions} userLegionId={userLegion?.id} />
           )}

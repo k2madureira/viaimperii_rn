@@ -256,6 +256,7 @@ export default {
   },
   ranks: {
     title: 'PATENTES',
+    loadError: 'Não foi possível carregar as patentes.',
     allRanks: 'Todas as patentes',
     level: 'Nível {{level}}',
     currentSuffix: ' · atual',
@@ -302,11 +303,13 @@ export default {
   },
   legions: {
     allLegions: 'Todas as legiões',
+    loadError: 'Não foi possível carregar as legiões.',
     yourLegion: 'Sua legião',
     joinHint: 'Para ingressar nesta legião, conclua sua primeira missão — a escolha aparecerá automaticamente.',
   },
   achievements: {
     progress: '{{unlocked}} de {{total}} desbloqueadas',
+    loadError: 'Não foi possível carregar as conquistas.',
     toUnlock: 'A conquistar',
     obtained: 'obtida',
     filterAll: 'Todas',
@@ -328,6 +331,7 @@ export default {
   userMenu: {
     changePassword: 'Alterar senha',
     signOut: 'Sair',
+    openMenu: 'Abrir menu do usuário',
   },
   changePassword: {
     setTitle: 'Defina sua senha',

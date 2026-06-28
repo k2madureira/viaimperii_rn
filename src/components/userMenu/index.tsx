@@ -40,7 +40,9 @@ export default function UserMenu({ onChangePassword }: Props) {
         ref={buttonRef}
         onPress={openMenu}
         className="flex-row items-center"
-        activeOpacity={0.75}>
+        activeOpacity={0.75}
+        accessibilityRole="button"
+        accessibilityLabel={t('userMenu.openMenu')}>
         <View className="w-10 h-10 rounded-full bg-[#f4eaea] items-center justify-center overflow-hidden">
           {avatarUrl ? (
             <Image source={{ uri: avatarUrl }} style={{ width: 40, height: 40 }} resizeMode="cover" />
