@@ -58,28 +58,19 @@ export default function AchievementsScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 10, gap: 8 }}>
-          <TouchableOpacity
+          <FilterChip
+            label={t('achievements.filterAll')}
+            active={filterSpecialtyId == null}
             onPress={() => setFilterSpecialtyId(null)}
-            activeOpacity={0.8}
-            className={`px-3 py-1.5 rounded-full border ${filterSpecialtyId == null ? 'bg-primary-500 border-primary-500' : 'bg-white border-[#e0dada]'}`}>
-            <Text className={`text-[12px] font-bold ${filterSpecialtyId == null ? 'text-white' : 'text-[#666]'}`}>
-              {t('achievements.filterAll')}
-            </Text>
-          </TouchableOpacity>
-          {specialties.map((s) => {
-            const active = filterSpecialtyId === s.id;
-            return (
-              <TouchableOpacity
-                key={s.id}
-                onPress={() => setFilterSpecialtyId(active ? null : s.id)}
-                activeOpacity={0.8}
-                className={`px-3 py-1.5 rounded-full border ${active ? 'bg-primary-500 border-primary-500' : 'bg-white border-[#e0dada]'}`}>
-                <Text className={`text-[12px] font-bold ${active ? 'text-white' : 'text-[#666]'}`}>
-                  {s.name}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
+          />
+          {specialties.map((s) => (
+            <FilterChip
+              key={s.id}
+              label={s.name}
+              active={filterSpecialtyId === s.id}
+              onPress={() => setFilterSpecialtyId(filterSpecialtyId === s.id ? null : s.id)}
+            />
+          ))}
         </ScrollView>
       )}
 
@@ -129,6 +120,25 @@ export default function AchievementsScreen() {
   );
 }
 
+function FilterChip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.8}
+      className="px-3 py-1.5 rounded-full border"
+      style={{
+        backgroundColor: active ? '#9E1B32' : '#fff',
+        borderColor: active ? '#9E1B32' : '#e0dada',
+      }}>
+      <Text
+        className="text-[12px] font-bold"
+        style={{ color: active ? '#fff' : '#666' }}>
+        {label}
+      </Text>
+    </TouchableOpacity>
+  );
+}
+
 function AchievementRow({
   achievement,
   unlocked,
@@ -140,7 +150,8 @@ function AchievementRow({
 }) {
   return (
     <View
-      className={`flex-row items-center rounded-[14px] border p-3.5 ${unlocked ? 'bg-white border-[#f0eded]' : 'bg-[#f6f6f6] border-[#eee]'}`}>
+      className="flex-row items-center rounded-[14px] border p-3.5"
+      style={{ backgroundColor: unlocked ? '#fff' : '#f6f6f6', borderColor: unlocked ? '#f0eded' : '#eee' }}>
       <View className="w-12 h-12 rounded-full bg-[#faf7f7] items-center justify-center overflow-hidden mr-3">
         {achievement.icon_url ? (
           achievement.icon_url.endsWith('.svg') ? (
@@ -165,7 +176,8 @@ function AchievementRow({
       </View>
       <View className="flex-1">
         <Text
-          className={`text-[14px] font-bold ${unlocked ? 'text-charcoal' : 'text-[#999]'}`}
+          className="text-[14px] font-bold"
+          style={{ color: unlocked ? '#1a1a1a' : '#999' }}
           numberOfLines={1}>
           {achievement.name}
         </Text>
@@ -176,7 +188,7 @@ function AchievementRow({
         ) : null}
       </View>
       <View className="items-end ml-2">
-        <Text className={`text-[12px] font-bold ${unlocked ? 'text-accent-500' : 'text-[#bbb]'}`}>
+        <Text className="text-[12px] font-bold" style={{ color: unlocked ? '#D4A017' : '#bbb' }}>
           +{achievement.xp_reward} {t('common.xp')}
         </Text>
         {unlocked && <Text className="text-[10px] text-laurel font-semibold mt-0.5">{t('achievements.obtained')}</Text>}
