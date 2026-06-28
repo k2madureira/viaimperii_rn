@@ -262,6 +262,7 @@ export default {
     chooseTrackSuffix: ' · choose a track',
     conquered: 'achieved',
     secretXp: '? XP',
+    secretXpHint: 'revealed at the top',
     trackChoiceTitle: 'Track choice',
     trackChoiceDescription:
       'When you reach this rank, you choose between Legionaries and Patricians — a milestone that defines your path.',

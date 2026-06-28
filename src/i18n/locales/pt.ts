@@ -262,6 +262,7 @@ export default {
     chooseTrackSuffix: ' · escolha uma trilha',
     conquered: 'conquistada',
     secretXp: '? XP',
+    secretXpHint: 'revelado no topo',
     trackChoiceTitle: 'Escolha da trilha',
     trackChoiceDescription:
       'Ao alcançar esta patente, você decide entre Legionários e Patrícios — um marco que define o seu caminho.',

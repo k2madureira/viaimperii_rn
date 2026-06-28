@@ -1,5 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -53,6 +53,20 @@ export default function RanksScreen() {
   const ranksQuery = useRanks(trackId, trackId != null);
   const sortedRanks = [...(ranksQuery.data ?? [])].sort((a, b) => a.level - b.level);
 
+  const scrollRef = useRef<ScrollView>(null);
+  const currentRankY = useRef<number | null>(null);
+
+  // Scroll automático até a patente atual após carregar a lista.
+  useEffect(() => {
+    if (ranksQuery.isLoading || sortedRanks.length === 0 || currentLevel === 0) return;
+    const timer = setTimeout(() => {
+      if (currentRankY.current != null) {
+        scrollRef.current?.scrollTo({ y: Math.max(0, currentRankY.current - 120), animated: true });
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [ranksQuery.isLoading, sortedRanks.length, currentLevel]);
+
   return (
     <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
       {/* Header */}
@@ -71,6 +85,7 @@ export default function RanksScreen() {
       </View>
 
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 32, gap: 20 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -138,6 +153,7 @@ export default function RanksScreen() {
                 return (
                   <View
                     key={r.id}
+                    onLayout={isCurrent ? (e) => { currentRankY.current = e.nativeEvent.layout.y; } : undefined}
                     className={`px-4 py-3 ${idx > 0 ? 'border-t border-[#f4f1f1]' : ''} ${
                       isChoiceRank ? 'bg-accent-500/10' : isCurrent ? 'bg-[#f4eaea]' : isLocked ? 'bg-[#f8f8f8]' : ''
                     }`}>
@@ -173,7 +189,10 @@ export default function RanksScreen() {
                         {isLocked ? (
                           <LockIcon size={16} color="#ccc" strokeWidth={2} />
                         ) : isTopSecret ? (
-                          <Text className="text-[15px] font-bold text-[#ccc]">{t('ranks.secretXp')}</Text>
+                          <View className="items-end">
+                            <Text className="text-[15px] font-bold text-[#ccc]">{t('ranks.secretXp')}</Text>
+                            <Text className="text-[9px] text-[#ccc]">{t('ranks.secretXpHint')}</Text>
+                          </View>
                         ) : (
                           <>
                             <Text
