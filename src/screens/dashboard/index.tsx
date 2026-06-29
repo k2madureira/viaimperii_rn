@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionSelectModal, Navbar, ProvinceSetupModal, TrackSelectModal } from '../../components';
-import { PrimusPilusEmblem } from '../../components/icons';
+import { AureusCoin, CoinAmount, PrimusPilusEmblem } from '../../components/icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { legionColorById } from '../../utils/legionColors';
 import { ChangePasswordModal } from './components';
@@ -28,6 +28,7 @@ import { useLegions } from '../missions/model/queries/useLegions';
 import { useAvailableMissions } from '../missions/model/queries/useAvailableMissions';
 import { useJoinLegion } from '../missions/model/mutations/useJoinLegion';
 import { useUserProfile } from './model/queries/useUserProfile';
+import { useWallet } from './model/queries/useWallet';
 import { useCampaigns } from './model/queries/useCampaigns';
 import { useLegionDetail } from './model/queries/useLegionDetail';
 import { useUpdateProvince } from './model/mutations/useUpdateProvince';
@@ -47,6 +48,7 @@ export default function DashboardScreen() {
   const isTemporary = user?.is_temporary_password === true;
 
   const profileQuery = useUserProfile(user?.user_id);
+  const walletQuery = useWallet(!!user);
   const availableQuery = useAvailableMissions(null, null);
   const campaignsQuery = useCampaigns();
   const legionsQuery = useLegions();
@@ -68,6 +70,7 @@ export default function DashboardScreen() {
 
   const onRefresh = () => {
     profileQuery.refetch();
+    walletQuery.refetch();
     availableQuery.refetch();
     campaignsQuery.refetch();
     feedQuery.refetch();
@@ -185,6 +188,27 @@ export default function DashboardScreen() {
             </Text>
           </View>
         </View>
+      )}
+
+      {/* 1.7 — CARTEIRA (saldo de moedas) */}
+      {walletQuery.data && (
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('Profile')}
+          className="bg-[#6B1221] rounded-[16px] px-4 py-3.5 flex-row items-center">
+          <View className="w-11 h-11 rounded-full bg-accent-500/20 items-center justify-center mr-3">
+            <AureusCoin size={26} />
+          </View>
+          <View className="flex-1">
+            <Text className="text-[10px] font-bold text-white/50 tracking-[2px] uppercase">
+              {t('dashboard.walletTitle')}
+            </Text>
+            <View className="mt-1">
+              <CoinAmount atomic={walletQuery.data.balance} size={18} textColor="#E8C36B" />
+            </View>
+          </View>
+          <Text className="text-white/40 text-[20px]">›</Text>
+        </TouchableOpacity>
       )}
 
       {/* 2 — PATENTE (70%) + MISSÕES (30%) lado a lado */}

@@ -18,6 +18,30 @@ Mantenha-o atualizado ao alterar comportamento.
 
 ---
 
+## 0.1 Padrões de UI (Frontend — obrigatório)
+
+- **Modais de seleção/escolha** devem **sempre reusar o mesmo padrão** do
+  `LegionSelectModal` (`src/components/legionSelectModal/`): card central
+  (`bg-black/60 items-center justify-center` + `bg-white rounded-[20px] p-6`),
+  **carrossel** com setas `‹ ›` e imagem circular central, **indicadores de
+  posição** (dots), **botão primário** full-width e **overlay de confirmação**
+  (`absolute inset-0`) — nunca Alert nativo.
+  - **Não** criar layouts alternativos (bottom-sheet) para escolhas equivalentes.
+    **Abas** (segmented), **filtros** (ex.: chips de raridade) e uma **matriz de
+    miniaturas** (clicar para selecionar, além das setas) são permitidos **sobre**
+    esse mesmo carrossel — como auxílio, não como layout substituto. Ex.: o seletor
+    de avatares (`src/screens/profile/components/avatarPickerModal/`) tem abas
+    "habilitados/loja" (com ícone), filtro de raridade e grid de avatares, mantendo
+    o preview central + setas.
+- **Ícones**: usar SVG (`react-native-svg`) via componentes em `src/components/icons/`
+  — não emoji em UI definitiva. Moedas têm ícones próprios por denominação
+  (`AureusCoin` ouro, `DenariusCoin` prata, `AsCoin` bronze) + `CoinAmount`, que
+  formata um valor **atômico** em moedas (ver `src/utils/coins.ts`).
+- **Toda tela nova** usa a `Navbar` padrão (`src/components/navbar/`) — sem headers
+  customizados.
+
+---
+
 ## 1. Arquitetura e Convenções
 
 - **Clean Architecture** em 4 camadas: `domain → application → infrastructure → presentation`.

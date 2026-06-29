@@ -28,6 +28,7 @@ import {
 } from '../../components/masteryIcons';
 import { legionColorById } from '../../utils/legionColors';
 import { ChangePasswordModal, LegionCard, RankCard } from '../dashboard/components';
+import AvatarPickerModal from './components/avatarPickerModal';
 import { UserCountry } from '../../api/users/userApi';
 import { useUserProfile } from '../dashboard/model/queries/useUserProfile';
 import { useLegions } from '../missions/model/queries/useLegions';
@@ -51,6 +52,7 @@ export default function ProfileScreen() {
   const navigation = useNavigation();
   const [showPassword, setShowPassword] = useState(false);
   const [showAvatar, setShowAvatar] = useState(false);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   // Perfil próprio quando não vem userId no params (ou é o id do logado).
   const routeUserId = route.params?.userId;
@@ -137,16 +139,28 @@ export default function ProfileScreen() {
           }>
           {/* Cabeçalho do perfil */}
           <View className="items-center pt-2">
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => avatarUrl && setShowAvatar(true)}
-              className="w-20 h-20 rounded-full bg-primary-500 items-center justify-center overflow-hidden">
-              {avatarUrl ? (
-                <Image source={{ uri: avatarUrl }} style={{ width: 80, height: 80 }} resizeMode="cover" />
-              ) : (
-                <Text className="text-[30px] font-extrabold text-white">{initial}</Text>
+            <View>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => avatarUrl && setShowAvatar(true)}
+                className="w-20 h-20 rounded-full bg-primary-500 items-center justify-center overflow-hidden">
+                {avatarUrl ? (
+                  <Image source={{ uri: avatarUrl }} style={{ width: 80, height: 80 }} resizeMode="cover" />
+                ) : (
+                  <Text className="text-[30px] font-extrabold text-white">{initial}</Text>
+                )}
+              </TouchableOpacity>
+              {/* Editar avatar — abre o seletor (possuídos + loja) */}
+              {isOwnProfile && (
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={() => setShowAvatarPicker(true)}
+                  accessibilityLabel={t('avatarPicker.editAvatar')}
+                  className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-charcoal border-2 border-white items-center justify-center">
+                  <Text className="text-[11px]">✏️</Text>
+                </TouchableOpacity>
               )}
-            </TouchableOpacity>
+            </View>
             <Text
               className="text-[22px] font-extrabold text-charcoal mt-3"
               style={{ fontFamily: serif }}>
@@ -275,6 +289,13 @@ export default function ProfileScreen() {
           visible={showPassword}
           isTemporary={false}
           onClose={() => setShowPassword(false)}
+        />
+      )}
+
+      {isOwnProfile && (
+        <AvatarPickerModal
+          visible={showAvatarPicker}
+          onClose={() => setShowAvatarPicker(false)}
         />
       )}
 
