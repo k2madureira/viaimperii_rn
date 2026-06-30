@@ -352,7 +352,7 @@ export default function DashboardScreen() {
 
       {/* 5 — COMPOSER DE POST */}
       <FeedComposer
-        avatarUrl={data?.active_avatar?.url ?? null}
+        avatarUrl={data?.active_avatar?.thumb_url ?? data?.active_avatar?.url ?? null}
         canLegion={legion != null}
         canProvince={data?.province != null}
       />

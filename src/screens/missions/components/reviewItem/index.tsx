@@ -31,7 +31,11 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
   const { t } = useTranslation();
   const diffColor = DIFFICULTY_COLOR[item.difficulty ?? ''] ?? '#aaa';
   const targetMs = parseBackendDate(item.completable_at)?.getTime() ?? null;
-  const avatarUrl = item.executor.active_avatar?.url ?? item.executor.image ?? null;
+  const avatarUrl =
+    item.executor.active_avatar?.thumb_url ??
+    item.executor.active_avatar?.url ??
+    item.executor.image ??
+    null;
   const initial = item.executor.name?.trim().charAt(0).toUpperCase() || '?';
 
   const [remaining, setRemaining] = useState<number>(() =>

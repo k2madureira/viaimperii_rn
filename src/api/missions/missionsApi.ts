@@ -233,6 +233,7 @@ export interface ActiveAvatar {
   name: string;
   slug: string;
   url: string | null;
+  thumb_url: string | null; // webp leve p/ listas/ícones
   type: string;
 }
 

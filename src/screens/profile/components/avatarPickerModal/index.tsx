@@ -244,7 +244,7 @@ export default function AvatarPickerModal({ visible, onClose }: Props) {
                           borderWidth: selected ? 2.5 : 1.5,
                           borderColor: selected ? '#9E1B32' : c,
                         }}>
-                        <AvatarImage uri={a.url} size={cell} fontSize={Math.round(cell * 0.42)} />
+                        <AvatarImage uri={a.thumb_url ?? a.url} size={cell} fontSize={Math.round(cell * 0.42)} />
                         {a.is_active && (
                           <View className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-primary-500 border border-white" />
                         )}

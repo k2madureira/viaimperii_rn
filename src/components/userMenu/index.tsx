@@ -20,7 +20,8 @@ export default function UserMenu({ onChangePassword }: Props) {
   const { t } = useTranslation();
   const { user, signOut } = useAuth();
   const profileQuery = useUserProfile(user?.user_id);
-  const avatarUrl = profileQuery.data?.active_avatar?.url ?? null;
+  const aa = profileQuery.data?.active_avatar;
+  const avatarUrl = aa?.thumb_url ?? aa?.url ?? null;
   const [visible, setVisible] = useState(false);
   const [anchor, setAnchor] = useState({ top: 0, right: 0 });
   const buttonRef = useRef<React.ComponentRef<typeof TouchableOpacity>>(null);

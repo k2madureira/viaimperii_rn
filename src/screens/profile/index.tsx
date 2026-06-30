@@ -70,7 +70,9 @@ export default function ProfileScreen() {
 
   const name = data?.user.name ?? (isOwnProfile ? user?.name : undefined) ?? '—';
   const initial = name.trim().charAt(0).toUpperCase();
-  const avatarUrl = data?.active_avatar?.url ?? null;
+  const avatarFull = data?.active_avatar?.url ?? null;
+  // Ícone do cabeçalho usa a thumb leve; a ampliação usa a imagem cheia.
+  const avatarUrl = data?.active_avatar?.thumb_url ?? avatarFull;
   const cr = data?.current_rank;
   const rankName = cr?.name ?? data?.user.rank ?? '—';
   const rankImage = cr?.image_url ?? null;
@@ -306,8 +308,8 @@ export default function ProfileScreen() {
           onPress={() => setShowAvatar(false)}
           className="flex-1 bg-black/80 items-center justify-center">
           <View className="w-64 h-64 rounded-full overflow-hidden border-4 border-white/20">
-            {avatarUrl ? (
-              <Image source={{ uri: avatarUrl }} style={{ width: 256, height: 256 }} resizeMode="cover" />
+            {avatarFull ? (
+              <Image source={{ uri: avatarFull }} style={{ width: 256, height: 256 }} resizeMode="cover" />
             ) : null}
           </View>
           <Text className="text-white/60 text-[13px] mt-4">{name}</Text>

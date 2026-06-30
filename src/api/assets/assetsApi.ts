@@ -8,6 +8,7 @@ export interface AssetItem {
   name: string;
   slug: string;
   url: string | null;
+  thumb_url: string | null; // webp leve (~12KB) p/ listas/ícones
   type: string; // avatar | frame | badge | …
   rarity: AssetRarity;
   is_free: boolean;
