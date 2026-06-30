@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import {
   ActivityIndicator,
   Image,
+  Modal,
   Platform,
   RefreshControl,
   ScrollView,
@@ -27,6 +28,7 @@ import {
 } from '../../components/masteryIcons';
 import { legionColorById } from '../../utils/legionColors';
 import { ChangePasswordModal, LegionCard, RankCard } from '../dashboard/components';
+import AvatarPickerModal from './components/avatarPickerModal';
 import { UserCountry } from '../../api/users/userApi';
 import { useUserProfile } from '../dashboard/model/queries/useUserProfile';
 import { useLegions } from '../missions/model/queries/useLegions';
@@ -49,6 +51,8 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const navigation = useNavigation();
   const [showPassword, setShowPassword] = useState(false);
+  const [showAvatar, setShowAvatar] = useState(false);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   // Perfil próprio quando não vem userId no params (ou é o id do logado).
   const routeUserId = route.params?.userId;
@@ -66,7 +70,9 @@ export default function ProfileScreen() {
 
   const name = data?.user.name ?? (isOwnProfile ? user?.name : undefined) ?? '—';
   const initial = name.trim().charAt(0).toUpperCase();
-  const avatarUrl = data?.active_avatar?.url ?? null;
+  const avatarFull = data?.active_avatar?.url ?? null;
+  // Ícone do cabeçalho usa a thumb leve; a ampliação usa a imagem cheia.
+  const avatarUrl = data?.active_avatar?.thumb_url ?? avatarFull;
   const cr = data?.current_rank;
   const rankName = cr?.name ?? data?.user.rank ?? '—';
   const rankImage = cr?.image_url ?? null;
@@ -135,11 +141,26 @@ export default function ProfileScreen() {
           }>
           {/* Cabeçalho do perfil */}
           <View className="items-center pt-2">
-            <View className="w-20 h-20 rounded-full bg-primary-500 items-center justify-center overflow-hidden">
-              {avatarUrl ? (
-                <Image source={{ uri: avatarUrl }} style={{ width: 80, height: 80 }} resizeMode="cover" />
-              ) : (
-                <Text className="text-[30px] font-extrabold text-white">{initial}</Text>
+            <View>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => avatarUrl && setShowAvatar(true)}
+                className="w-20 h-20 rounded-full bg-primary-500 items-center justify-center overflow-hidden">
+                {avatarUrl ? (
+                  <Image source={{ uri: avatarUrl }} style={{ width: 80, height: 80 }} resizeMode="cover" />
+                ) : (
+                  <Text className="text-[30px] font-extrabold text-white">{initial}</Text>
+                )}
+              </TouchableOpacity>
+              {/* Editar avatar — abre o seletor (possuídos + loja) */}
+              {isOwnProfile && (
+                <TouchableOpacity
+                  activeOpacity={0.85}
+                  onPress={() => setShowAvatarPicker(true)}
+                  accessibilityLabel={t('avatarPicker.editAvatar')}
+                  className="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-charcoal border-2 border-white items-center justify-center">
+                  <Text className="text-[11px]">✏️</Text>
+                </TouchableOpacity>
               )}
             </View>
             <Text
@@ -175,6 +196,7 @@ export default function ProfileScreen() {
               progressPct={cr?.progress_pct}
               imageUrl={cr?.image_url}
               trackName={data?.track?.name}
+              onPress={() => (navigation as any).navigate('Home', { screen: 'Ranks' })}
             />
             <LegionCard
               legion={data?.legion ?? null}
@@ -271,6 +293,28 @@ export default function ProfileScreen() {
           onClose={() => setShowPassword(false)}
         />
       )}
+
+      {isOwnProfile && (
+        <AvatarPickerModal
+          visible={showAvatarPicker}
+          onClose={() => setShowAvatarPicker(false)}
+        />
+      )}
+
+      {/* Avatar ampliado */}
+      <Modal visible={showAvatar} transparent animationType="fade" onRequestClose={() => setShowAvatar(false)}>
+        <TouchableOpacity
+          activeOpacity={1}
+          onPress={() => setShowAvatar(false)}
+          className="flex-1 bg-black/80 items-center justify-center">
+          <View className="w-64 h-64 rounded-full overflow-hidden border-4 border-white/20">
+            {avatarFull ? (
+              <Image source={{ uri: avatarFull }} style={{ width: 256, height: 256 }} resizeMode="cover" />
+            ) : null}
+          </View>
+          <Text className="text-white/60 text-[13px] mt-4">{name}</Text>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 }

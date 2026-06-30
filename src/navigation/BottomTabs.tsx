@@ -9,7 +9,7 @@ import LegionIcon from './icons/LegionIcon';
 import AchievementsIcon from './icons/AchievementsIcon';
 import ProfileIcon from './icons/ProfileIcon';
 import MissionsScreen from '../screens/missions';
-import LegionsScreen from '../screens/legions';
+import LegionStack from './LegionStack';
 import AchievementsScreen from '../screens/achievements';
 import ProfileScreen from '../screens/profile';
 import HomeStack from './HomeStack';
@@ -83,7 +83,7 @@ export default function BottomTabs() {
       })}>
       <Tab.Screen name="Home" component={HomeStack} />
       <Tab.Screen name="Missions" component={MissionsScreen} />
-      <Tab.Screen name="Legion" component={LegionsScreen} />
+      <Tab.Screen name="Legion" component={LegionStack} />
       <Tab.Screen name="Achievements" component={AchievementsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>

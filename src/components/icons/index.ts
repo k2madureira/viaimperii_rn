@@ -12,6 +12,13 @@ export { default as ThumbsUpIcon } from './thumbsUp';
 export { default as CommentIcon } from './comment';
 export { default as PlusCircleIcon } from './plusCircle';
 
+// Mercado de avatares (abas)
+export { default as ShopIcon } from './shop';
+export { default as UnlockedIcon } from './unlocked';
+
+// Moedas (denominações) + valor formatado
+export { AureusCoin, DenariusCoin, AsCoin, CoinIcon, CoinAmount } from './coins';
+
 // Ícones de navegação (bottom tabs)
 export { default as HomeIcon } from '../../navigation/icons/HomeIcon';
 export { default as MissionsIcon } from '../../navigation/icons/MissionsIcon';

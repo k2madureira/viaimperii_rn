@@ -18,6 +18,30 @@ Mantenha-o atualizado ao alterar comportamento.
 
 ---
 
+## 0.1 Padrões de UI (Frontend — obrigatório)
+
+- **Modais de seleção/escolha** devem **sempre reusar o mesmo padrão** do
+  `LegionSelectModal` (`src/components/legionSelectModal/`): card central
+  (`bg-black/60 items-center justify-center` + `bg-white rounded-[20px] p-6`),
+  **carrossel** com setas `‹ ›` e imagem circular central, **indicadores de
+  posição** (dots), **botão primário** full-width e **overlay de confirmação**
+  (`absolute inset-0`) — nunca Alert nativo.
+  - **Não** criar layouts alternativos (bottom-sheet) para escolhas equivalentes.
+    **Abas** (segmented), **filtros** (ex.: chips de raridade) e uma **matriz de
+    miniaturas** (clicar para selecionar, além das setas) são permitidos **sobre**
+    esse mesmo carrossel — como auxílio, não como layout substituto. Ex.: o seletor
+    de avatares (`src/screens/profile/components/avatarPickerModal/`) tem abas
+    "habilitados/loja" (com ícone), filtro de raridade e grid de avatares, mantendo
+    o preview central + setas.
+- **Ícones**: usar SVG (`react-native-svg`) via componentes em `src/components/icons/`
+  — não emoji em UI definitiva. Moedas têm ícones próprios por denominação
+  (`AureusCoin` ouro, `DenariusCoin` prata, `AsCoin` bronze) + `CoinAmount`, que
+  formata um valor **atômico** em moedas (ver `src/utils/coins.ts`).
+- **Toda tela nova** usa a `Navbar` padrão (`src/components/navbar/`) — sem headers
+  customizados.
+
+---
+
 ## 1. Arquitetura e Convenções
 
 - **Clean Architecture** em 4 camadas: `domain → application → infrastructure → presentation`.
@@ -308,6 +332,30 @@ Regras:
   `missions_completed_total`, e por janela: `xp_in_period`, `missions_completed`,
   `campaigns_completed`, `achievements_unlocked`, `ranks_gained`, `active_days`,
   `xp_by_source`. Cada métrica filtra pela sua coluna de data correta.
+
+---
+
+## 13.1 Login Streak (Ofensiva de Login)
+
+Dias consecutivos de login que concedem bônus progressivo de XP em toda atividade.
+
+- **Tabela `user_login_streaks`** (`user_id` unique): `current_streak`, `longest_streak`,
+  `last_login_date` (date), `timezone` (string, default `America/Sao_Paulo`).
+- **Registro automático** no `POST /auth/sign-in`: o login aceita `timezone` opcional no body
+  (fuso do dispositivo do usuário); o streak é calculado no fuso informado (ou SP se omitido).
+- **Escala linear**: +1 % de bônus por dia de streak, máximo **20 %** em 20 dias
+  (`STREAK_MAX_DAYS = 20`, `STREAK_BONUS_PER_DAY = 0.01`, `STREAK_MAX_BONUS = 0.20`).
+- **Decay 3×**: cada dia sem login desconta **3 dias** do streak
+  (`STREAK_DECAY_MULTIPLIER = 3`). Ex.: streak 15, ausência de 2 dias → 15 − (2×3) = 9, +1 (login) = 10.
+- **Bônus de XP aplicado** em:
+  - `finalize_pending_mission()` — missões (job, lazy-finalize, approve).
+  - `approve_service` — recompensa do revisor.
+  - O bônus é calculado via `apply_streak_bonus(base_xp, current_streak)` → `(total, bonus)`.
+  - Campanhas via porta (`User.gain_xp`) ainda sem bônus (domínio puro, sem sessão).
+- **Resposta do login** inclui objeto `streak` com: `current_streak`, `longest_streak`,
+  `last_login_date`, `timezone`, `bonus_pct` (0–20), `next_milestone`, `max_streak_days`,
+  `is_max_bonus`.
+- **Endpoint dedicado**: `GET /users/{id}/streak` — consulta independente do login.
 
 ---
 

@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionSelectModal, Navbar, ProvinceSetupModal, TrackSelectModal } from '../../components';
-import { PrimusPilusEmblem } from '../../components/icons';
+import { AureusCoin, CoinAmount, PrimusPilusEmblem } from '../../components/icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { legionColorById } from '../../utils/legionColors';
 import { ChangePasswordModal } from './components';
@@ -28,6 +28,7 @@ import { useLegions } from '../missions/model/queries/useLegions';
 import { useAvailableMissions } from '../missions/model/queries/useAvailableMissions';
 import { useJoinLegion } from '../missions/model/mutations/useJoinLegion';
 import { useUserProfile } from './model/queries/useUserProfile';
+import { useWallet } from './model/queries/useWallet';
 import { useCampaigns } from './model/queries/useCampaigns';
 import { useLegionDetail } from './model/queries/useLegionDetail';
 import { useUpdateProvince } from './model/mutations/useUpdateProvince';
@@ -47,6 +48,7 @@ export default function DashboardScreen() {
   const isTemporary = user?.is_temporary_password === true;
 
   const profileQuery = useUserProfile(user?.user_id);
+  const walletQuery = useWallet(!!user);
   const availableQuery = useAvailableMissions(null, null);
   const campaignsQuery = useCampaigns();
   const legionsQuery = useLegions();
@@ -68,6 +70,7 @@ export default function DashboardScreen() {
 
   const onRefresh = () => {
     profileQuery.refetch();
+    walletQuery.refetch();
     availableQuery.refetch();
     campaignsQuery.refetch();
     feedQuery.refetch();
@@ -110,6 +113,7 @@ export default function DashboardScreen() {
   }, [isTemporary, legionDismissed, needsProvince, needsTrack, hasLegion, completedCount]);
 
   // ── Dados derivados ────────────────────────────────────────────────────────
+  const streak = user?.streak ?? null;
   const firstName = user?.name?.split(' ')[0] ?? t('dashboard.defaultName');
   const rankName = profile?.rank ?? user?.rank ?? '—';
   const totalXp = profile?.total_xp ?? user?.total_xp ?? 0;
@@ -157,6 +161,55 @@ export default function DashboardScreen() {
           {legion ? ` • ${legion.name}` : ''}
         </Text>
       </View>
+
+      {/* 1.5 — LOGIN STREAK */}
+      {streak && streak.current_streak > 0 && (
+        <View className="bg-white border border-[#f0eded] rounded-[16px] p-4 flex-row items-center">
+          <View className="w-11 h-11 rounded-full bg-accent-500/15 items-center justify-center mr-3">
+            <Text className="text-[22px]">🔥</Text>
+          </View>
+          <View className="flex-1">
+            <Text className="text-[14px] font-extrabold text-charcoal">
+              {t('dashboard.streakDays', { count: streak.current_streak })}
+            </Text>
+            <Text className="text-[12px] text-[#888] mt-0.5">
+              {streak.is_max_bonus
+                ? t('dashboard.streakMax', { pct: streak.bonus_pct })
+                : t('dashboard.streakBonus', { pct: streak.bonus_pct, next: streak.next_milestone })}
+            </Text>
+          </View>
+          {/* Mini progress */}
+          <View className="items-center ml-2">
+            <Text className="text-[16px] font-extrabold text-accent-500">
+              +{streak.bonus_pct}%
+            </Text>
+            <Text className="text-[9px] text-[#aaa] uppercase tracking-[1px]">
+              {t('common.xp')}
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {/* 1.7 — CARTEIRA (saldo de moedas) */}
+      {walletQuery.data && (
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => navigation.navigate('Profile')}
+          className="bg-[#6B1221] rounded-[16px] px-4 py-3.5 flex-row items-center">
+          <View className="w-11 h-11 rounded-full bg-accent-500/20 items-center justify-center mr-3">
+            <AureusCoin size={26} />
+          </View>
+          <View className="flex-1">
+            <Text className="text-[10px] font-bold text-white/50 tracking-[2px] uppercase">
+              {t('dashboard.walletTitle')}
+            </Text>
+            <View className="mt-1">
+              <CoinAmount atomic={walletQuery.data.balance} size={18} textColor="#E8C36B" />
+            </View>
+          </View>
+          <Text className="text-white/40 text-[20px]">›</Text>
+        </TouchableOpacity>
+      )}
 
       {/* 2 — PATENTE (70%) + MISSÕES (30%) lado a lado */}
       <View className="flex-row" style={{ gap: 12 }}>
@@ -299,7 +352,7 @@ export default function DashboardScreen() {
 
       {/* 5 — COMPOSER DE POST */}
       <FeedComposer
-        avatarUrl={data?.active_avatar?.url ?? null}
+        avatarUrl={data?.active_avatar?.thumb_url ?? data?.active_avatar?.url ?? null}
         canLegion={legion != null}
         canProvince={data?.province != null}
       />
