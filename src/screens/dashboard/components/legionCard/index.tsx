@@ -12,13 +12,20 @@ interface Props {
 
 export default function LegionCard({ legion, color, onPress }: Props) {
   const { t } = useTranslation();
+  const Wrapper: any = onPress ? TouchableOpacity : View;
+
   // Sem legião: card no mesmo formato, porém vazio/informativo.
   if (!legion) {
     return (
-      <View className="bg-laurel rounded-[16px] p-5 min-h-[132px] justify-center">
-        <Text className="text-[11px] font-semibold text-white/70 tracking-[3px] uppercase">
-          {t('legionCard.yourLegion')}
-        </Text>
+      <Wrapper
+        className="bg-laurel rounded-[16px] p-5 min-h-[132px] justify-center"
+        {...(onPress ? { onPress, activeOpacity: 0.9 } : {})}>
+        <View className="flex-row items-center justify-between">
+          <Text className="text-[11px] font-semibold text-white/70 tracking-[3px] uppercase">
+            {t('legionCard.yourLegion')}
+          </Text>
+          {onPress ? <Text className="text-white/60 text-[20px]">›</Text> : null}
+        </View>
         <View className="h-1.5" />
         <Text
           className="text-[20px] font-extrabold text-white"
@@ -28,11 +35,9 @@ export default function LegionCard({ legion, color, onPress }: Props) {
         <Text className="text-[12px] text-white/80 mt-1.5">
           {t('legionCard.completeFirstMission')}
         </Text>
-      </View>
+      </Wrapper>
     );
   }
-
-  const Wrapper: any = onPress ? TouchableOpacity : View;
 
   return (
     <Wrapper

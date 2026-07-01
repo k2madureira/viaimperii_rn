@@ -19,6 +19,16 @@ export { default as UnlockedIcon } from './unlocked';
 // Moedas (denominações) + valor formatado
 export { AureusCoin, DenariusCoin, AsCoin, CoinIcon, CoinAmount } from './coins';
 
+// Chama do streak de login
+export { default as FireIcon } from './fire';
+
+// Diamante (carteira) e ícone de gatilho da carteira
+export { default as DiamondIcon } from './diamond';
+export { default as WalletIcon } from './wallet';
+
+// Cruz (+) — botão de criar post na bottom tab bar
+export { default as PlusIcon } from './plus';
+
 // Ícones de navegação (bottom tabs)
 export { default as HomeIcon } from '../../navigation/icons/HomeIcon';
 export { default as MissionsIcon } from '../../navigation/icons/MissionsIcon';

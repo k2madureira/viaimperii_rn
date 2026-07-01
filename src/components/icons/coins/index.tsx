@@ -144,17 +144,22 @@ export function CoinIcon({ denom, size = 18 }: CoinProps & { denom: CoinDenom })
   return <AsCoin size={size} />;
 }
 
+// Sigla curta por denominação, usada ao lado do valor (ex.: carteira da home).
+const COIN_SIGLA: Record<CoinDenom, string> = { aureus: 'AU', denarius: 'DN', as: 'AS' };
+
 // Mostra um valor atômico como moedas (ícone + contagem) por denominação.
 export function CoinAmount({
   atomic,
   size = 16,
   textColor = '#3d2900',
   compact = false,
+  showSigla = false,
 }: {
   atomic: number;
   size?: number;
   textColor?: string;
   compact?: boolean;
+  showSigla?: boolean;
 }) {
   const parts = compact ? coinParts(atomic).slice(0, 1) : coinParts(atomic);
   return (
@@ -164,6 +169,7 @@ export function CoinAmount({
           <CoinIcon denom={p.name} size={size} />
           <Text style={{ color: textColor, fontWeight: '800', fontSize: Math.round(size * 0.82) }}>
             {p.count}
+            {showSigla ? ` ${COIN_SIGLA[p.name]}` : ''}
           </Text>
         </View>
       ))}
