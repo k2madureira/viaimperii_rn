@@ -140,9 +140,9 @@ export default function FeedCard({
   };
 
   return (
-    <View className="bg-white border border-[#f0eded] rounded-[18px] p-4">
+    <View className="bg-white border border-[#f0eded] rounded-[18px] overflow-hidden py-4">
       {/* Header do autor */}
-      <View className="flex-row items-center">
+      <View className="flex-row items-center px-4">
         <View ref={avatarRef} collapsable={false} className="mr-3">
           <TouchableOpacity onPress={openUser} activeOpacity={0.8}>
             <View className="w-10 h-10 rounded-full bg-[#efeaea] items-center justify-center overflow-hidden">
@@ -163,13 +163,6 @@ export default function FeedCard({
             {relativeTime}
           </Text>
         </TouchableOpacity>
-        {author.rank?.image ? (
-          <Image
-            source={{ uri: author.rank.image }}
-            style={{ width: 26, height: 26 }}
-            resizeMode="contain"
-          />
-        ) : null}
         {isOwnPost && (
           <View ref={menuRef} collapsable={false}>
             <TouchableOpacity onPress={openMenu} activeOpacity={0.6} className="pl-2 pr-1 py-1">
@@ -181,7 +174,7 @@ export default function FeedCard({
 
       {/* Conteúdo */}
       {isSystem ? (
-        <View className="flex-row items-start mt-3 bg-[#faf7f7] rounded-[12px] p-3">
+        <View className="flex-row items-start mt-3 mx-4 bg-[#faf7f7] rounded-[12px] p-3">
           <Text className="text-[18px] mr-2">{meta?.emoji ?? '✨'}</Text>
           <View className="flex-1">
             <Text className="text-[13px] text-[#333] leading-[19px]">{systemLine()}</Text>
@@ -195,13 +188,13 @@ export default function FeedCard({
       ) : (
         <>
           {item.body ? (
-            <Text className="text-[14px] text-[#333] leading-[20px] mt-3">{item.body}</Text>
+            <Text className="text-[14px] text-[#333] leading-[20px] mt-3 px-4">{item.body}</Text>
           ) : null}
           {item.image_url ? (
-            <TouchableOpacity activeOpacity={0.9} onPress={() => setImageViewer(true)}>
+            <TouchableOpacity activeOpacity={0.9} onPress={() => setImageViewer(true)} className="mt-3">
               <Image
                 source={{ uri: item.image_url }}
-                style={{ width: '100%', height: 200, borderRadius: 12, marginTop: 10 }}
+                style={{ width: '100%', height: 200 }}
                 resizeMode="cover"
               />
             </TouchableOpacity>
@@ -211,7 +204,7 @@ export default function FeedCard({
 
       {/* Resumo (reações + comentários), estilo LinkedIn */}
       {(item.reactions.total > 0 || item.comments_count > 0) && (
-        <View className="flex-row items-center justify-between mt-3">
+        <View className="flex-row items-center justify-between mt-3 px-4">
           {item.reactions.total > 0 ? (
             <View ref={reactorsRef} collapsable={false}>
               <TouchableOpacity onPress={openReactors} activeOpacity={0.7}>
@@ -235,7 +228,7 @@ export default function FeedCard({
 
       {/* Divisor + barra de ações */}
       <View className="h-px bg-[#f3eeee] mt-2.5" />
-      <View className="flex-row mt-1">
+      <View className="flex-row mt-1 px-4">
         <FeedReactions
           reactions={item.reactions}
           onReact={(type) => onReact(item.id, type, item.reactions.mine)}

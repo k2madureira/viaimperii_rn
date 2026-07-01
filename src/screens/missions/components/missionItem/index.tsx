@@ -6,6 +6,7 @@ import Toast from 'react-native-toast-message';
 import { Mission } from '../../../../api/missions/missionsApi';
 import { formatBackendDateTime } from '../../../../utils/date';
 import { useMissionStatus } from '../../model/queries/useMissionStatus';
+import { useAuth } from '../../../../contexts/AuthContext';
 
 interface Props {
   mission: Mission;
@@ -155,11 +156,17 @@ function ReviewPanel({ mission }: { mission: Mission }) {
 
 export default function MissionItem({ mission, onStart, onComplete, pending }: Props) {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const isCompleted = mission.status === 'completed';
   const isInProgress = mission.status === 'in_progress';
   const isPendingReview = mission.status === 'pending_review';
   const diffColor = DIFFICULTY_COLOR[mission.difficulty ?? ''] ?? '#aaa';
   const completedAtLabel = formatBackendDateTime(mission.completed_at);
+
+  // XP extra que a sequência de login (streak) credita sobre o valor base da
+  // missão — mesmo bônus aplicado pelo backend em finalize_pending_mission().
+  const streakBonusPct = user?.streak?.bonus_pct ?? 0;
+  const streakBonusXp = Math.round((mission.xp_reward * streakBonusPct) / 100);
 
   return (
     <View
@@ -216,6 +223,11 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
 
         <View className="items-end gap-1">
           <Text className="text-[13px] font-extrabold text-accent-500">+{mission.xp_reward} {t('common.xp')}</Text>
+          {streakBonusPct > 0 && streakBonusXp > 0 && !isCompleted && (
+            <Text className="text-[10px] font-bold text-[#F2994A]">
+              {t('missionItem.streakBonusXp', { xp: streakBonusXp, pct: streakBonusPct })}
+            </Text>
+          )}
           {isCompleted && (
             <View className="bg-laurel/15 rounded-full px-2 py-0.5">
               <Text className="text-[10px] font-bold text-laurel">{t('missionItem.completed')}</Text>

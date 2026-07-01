@@ -5,6 +5,7 @@ import {
   Image,
   Modal,
   Platform,
+  Pressable,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -98,8 +99,18 @@ export default function AvatarPickerModal({ visible, onClose }: Props) {
 
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <View className="flex-1 bg-black/60 items-center justify-center px-6">
-        <View className="w-full bg-white rounded-[20px] p-6 items-center" style={{ maxHeight: '90%' }}>
+      <Pressable className="flex-1 bg-black/60 items-center justify-center px-6" onPress={onClose}>
+        <Pressable
+          onPress={() => {}}
+          className="w-full bg-white rounded-[20px] p-6 items-center"
+          style={{ maxHeight: '90%' }}>
+          <TouchableOpacity
+            onPress={onClose}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            className="absolute top-4 right-4 w-8 h-8 rounded-full bg-[#f0eded] items-center justify-center z-10">
+            <Text className="text-[16px] font-bold text-[#888]">×</Text>
+          </TouchableOpacity>
+
           <Text className="text-[11px] font-bold text-[#999] tracking-[2px] uppercase">
             {t('avatarPicker.chooseTitle')}
           </Text>
@@ -280,12 +291,14 @@ export default function AvatarPickerModal({ visible, onClose }: Props) {
           <TouchableOpacity activeOpacity={0.7} onPress={onClose} className="mt-3">
             <Text className="text-[12px] text-[#aaa] text-center">{t('common.back')}</Text>
           </TouchableOpacity>
-        </View>
+        </Pressable>
 
         {/* Confirmação temática (igual ao modal de legião) */}
         {confirming && item && (
-          <View className="absolute inset-0 bg-black/50 items-center justify-center px-8">
-            <View className="w-full bg-white rounded-[18px] p-6">
+          <Pressable
+            className="absolute inset-0 bg-black/50 items-center justify-center px-8"
+            onPress={() => setConfirming(false)}>
+            <Pressable onPress={() => {}} className="w-full bg-white rounded-[18px] p-6">
               <View className="items-center">
                 <View className="w-12 h-12 rounded-full bg-primary-500/10 items-center justify-center mb-3">
                   {tab === 'owned' ? <UnlockedIcon size={24} color="#9E1B32" /> : <AureusCoin size={26} />}
@@ -325,10 +338,10 @@ export default function AvatarPickerModal({ visible, onClose }: Props) {
                   )}
                 </TouchableOpacity>
               </View>
-            </View>
-          </View>
+            </Pressable>
+          </Pressable>
         )}
-      </View>
+      </Pressable>
     </Modal>
   );
 }

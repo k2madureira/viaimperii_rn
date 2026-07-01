@@ -12,6 +12,9 @@ import Svg, {
 
 interface Props {
   size?: number;
+  // Quando informado, renderiza uma silhueta monocromática (ex.: ícone de
+  // navegação, que precisa seguir o esquema de cor cinza/ativo da barra).
+  color?: string;
 }
 
 const CX = 32;
@@ -38,12 +41,46 @@ function leaf(angleDeg: number, key: string) {
   );
 }
 
+// Variante monocromática da folha (ícone de navegação).
+function leafMono(angleDeg: number, key: string, color: string) {
+  const rad = (angleDeg * Math.PI) / 180;
+  const x = CX + R * Math.cos(rad);
+  const y = CY - R * Math.sin(rad);
+  const rotation = 90 - angleDeg;
+  return (
+    <Ellipse
+      key={key}
+      cx={x}
+      cy={y}
+      rx={2.4}
+      ry={5.4}
+      fill={color}
+      transform={`rotate(${rotation}, ${x}, ${y})`}
+    />
+  );
+}
+
 /**
  * Emblema do rank Primus Pilus I — coroa de louros dourada, anel de aço,
  * escudo vermelho com cruz prateada e fita inferior. Reconstruído em vetor
  * (react-native-svg) a partir da arte oficial da patente.
  */
-export default function PrimusPilusEmblem({ size = 40 }: Props) {
+export default function PrimusPilusEmblem({ size = 40, color }: Props) {
+  if (color) {
+    return (
+      <Svg width={size} height={size} viewBox="0 0 64 64" fill="none">
+        {LEFT.map((a, i) => leafMono(a, `l${i}`, color))}
+        {RIGHT.map((a, i) => leafMono(a, `r${i}`, color))}
+        <Circle cx={CX} cy={CY} r={15.5} fill={color} opacity={0.3} />
+        <Path
+          d="M32 19 L43 23 V31 C43 38 38 42.5 32 45 C26 42.5 21 38 21 31 V23 Z"
+          fill={color}
+        />
+        <Path d="M22 46 L32 50 L42 46 L40 53 L32 50 L24 53 Z" fill={color} />
+      </Svg>
+    );
+  }
+
   return (
     <Svg width={size} height={size} viewBox="0 0 64 64" fill="none">
       <Defs>

@@ -27,10 +27,11 @@ import {
   StrategyIcon,
 } from '../../components/masteryIcons';
 import { legionColorById } from '../../utils/legionColors';
-import { ChangePasswordModal, LegionCard, RankCard } from '../dashboard/components';
+import { ChangePasswordModal, LegionCard, RankCard, WalletButton } from '../dashboard/components';
 import AvatarPickerModal from './components/avatarPickerModal';
 import { UserCountry } from '../../api/users/userApi';
 import { useUserProfile } from '../dashboard/model/queries/useUserProfile';
+import { useWallet } from '../dashboard/model/queries/useWallet';
 import { useLegions } from '../missions/model/queries/useLegions';
 import { useUserStats } from '../missions/model/queries/useUserStats';
 
@@ -64,6 +65,8 @@ export default function ProfileScreen() {
   const statsQuery = useUserStats(targetId, 'all');
   // Legiões — usadas só para derivar a cor canônica da legião (igual à home).
   const legionsQuery = useLegions();
+  // Carteira — só no próprio perfil (saldo do usuário logado).
+  const walletQuery = useWallet(isOwnProfile);
 
   const data = profileQuery.data;
   const stats = statsQuery.data;
@@ -95,7 +98,9 @@ export default function ProfileScreen() {
     <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
       {/* Navbar com seta de voltar quando visualizando perfil de outro usuário */}
       {isOwnProfile ? (
-        <Navbar />
+        <Navbar
+          rightExtra={walletQuery.data ? <WalletButton balance={walletQuery.data.balance} /> : null}
+        />
       ) : (
         <View className="flex-row items-center px-4 pt-5 pb-3 bg-white border-b border-[#f0f0f0]">
           <TouchableOpacity
@@ -201,6 +206,7 @@ export default function ProfileScreen() {
             <LegionCard
               legion={data?.legion ?? null}
               color={legionColorById(legionsQuery.data, data?.legion?.id)}
+              onPress={() => (navigation as any).navigate('Home', { screen: 'Legions' })}
             />
             <LocalCard
               country={data?.province?.country ?? null}

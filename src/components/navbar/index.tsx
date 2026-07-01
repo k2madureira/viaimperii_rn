@@ -5,12 +5,18 @@ import { ChangePasswordModal } from '../../screens/dashboard/components';
 import LogoIcon from '../logoIcon';
 import UserMenu from '../userMenu';
  
+interface Props {
+  // Slot opcional à direita (antes do UserMenu) — usado pela Home/Perfil para
+  // o botão de carteira, sem criar um header customizado.
+  rightExtra?: React.ReactNode;
+}
+
 /**
  * Navbar usada nas telas internas (Missions, Ranking, etc.):
  * logo + nome do app à esquerda, UserMenu à direita.
  * A navegação principal agora é a bottom tab bar — sem botão de menu/drawer.
  */
-export default function Navbar() {
+export default function Navbar({ rightExtra }: Props) {
   const { t } = useTranslation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
@@ -25,7 +31,10 @@ export default function Navbar() {
             {t('common.appName')}
           </Text>
         </View>
-        <UserMenu onChangePassword={() => setShowPasswordModal(true)} />
+        <View className="flex-row items-center">
+          {rightExtra ? <View style={{ marginRight: 16 }}>{rightExtra}</View> : null}
+          <UserMenu onChangePassword={() => setShowPasswordModal(true)} />
+        </View>
       </View>
 
       {/* Modal de troca de senha (acionado manualmente pelo UserMenu) */}

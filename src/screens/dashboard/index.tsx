@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   Platform,
   RefreshControl,
   Text,
@@ -13,16 +12,10 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionSelectModal, Navbar, ProvinceSetupModal, TrackSelectModal } from '../../components';
-import { AureusCoin, CoinAmount, PrimusPilusEmblem } from '../../components/icons';
+import { PrimusPilusEmblem } from '../../components/icons';
 import { useAuth } from '../../contexts/AuthContext';
-import { legionColorById } from '../../utils/legionColors';
-import { ChangePasswordModal } from './components';
-import {
-  CommentsModal,
-  FeedCard,
-  FeedComposer,
-  MissionsSummaryCard,
-} from './components/feed';
+import { ChangePasswordModal, StreakButton, WalletButton } from './components';
+import { CommentsModal, FeedCard, FeedComposer } from './components/feed';
 import { FeedItem } from '../../api/feed/feedApi';
 import { useLegions } from '../missions/model/queries/useLegions';
 import { useAvailableMissions } from '../missions/model/queries/useAvailableMissions';
@@ -30,7 +23,6 @@ import { useJoinLegion } from '../missions/model/mutations/useJoinLegion';
 import { useUserProfile } from './model/queries/useUserProfile';
 import { useWallet } from './model/queries/useWallet';
 import { useCampaigns } from './model/queries/useCampaigns';
-import { useLegionDetail } from './model/queries/useLegionDetail';
 import { useUpdateProvince } from './model/mutations/useUpdateProvince';
 import { useChooseTrack } from './model/mutations/useChooseTrack';
 import { useTracks } from '../ranks/model/queries/useTracks';
@@ -60,10 +52,7 @@ export default function DashboardScreen() {
 
   const data = profileQuery.data;
   const profile = data?.user;
-  const currentRank = data?.current_rank ?? null;
-  const xpToNextRank = currentRank?.xp_to_next_rank ?? data?.xp_to_next_rank ?? 0;
   const legion = data?.legion ?? null;
-  const legionDetailQuery = useLegionDetail(legion?.id);
 
   const refreshing =
     profileQuery.isRefetching || availableQuery.isRefetching || feedQuery.isRefetching;
@@ -116,22 +105,6 @@ export default function DashboardScreen() {
   const streak = user?.streak ?? null;
   const firstName = user?.name?.split(' ')[0] ?? t('dashboard.defaultName');
   const rankName = profile?.rank ?? user?.rank ?? '—';
-  const totalXp = profile?.total_xp ?? user?.total_xp ?? 0;
-  // Bloqueado: tem XP para avançar mas ainda não escolheu trilha (Recruta IV).
-  const mustChooseTrack = data?.must_choose_track === true;
-  // Patente máxima de verdade (Imperador) — não confundir com o estado bloqueado.
-  const isMaxRank = xpToNextRank <= 0 && !mustChooseTrack;
-  // Progresso dentro da faixa da patente — calculado no backend (progress_pct, 0..100).
-  const rankProgress = mustChooseTrack
-    ? 1
-    : Math.min(1, (currentRank?.progress_pct ?? 0) / 100);
-  // Nome da próxima patente já considerando a trilha do usuário (vem do backend).
-  const nextRankName = currentRank?.next_rank_name ?? data?.next_rank_name ?? null;
-
-  // Resumo de missões diárias disponíveis (card compacto ao lado da patente).
-  const dailyAvailable = (availableQuery.data?.items ?? []).filter((m) => m.type === 'daily');
-  const dailyCount = dailyAvailable.length;
-  const dailyXp = dailyAvailable.reduce((sum, m) => sum + (m.xp_reward ?? 0), 0);
 
   const completedIds = new Set(profile?.completed_missions?.map((c) => c.mission_id) ?? []);
   const completedCampaigns = new Set(profile?.completed_campaigns ?? []);
@@ -142,151 +115,24 @@ export default function DashboardScreen() {
     })
     .find(({ campaign, done, total }) => !completedCampaigns.has(campaign.id) && done < total);
 
-  const legionColor = legionColorById(legionsQuery.data, legion?.id) ?? '#2F7A52';
-  const legionMembers = legionDetailQuery.data?.total_users;
-
   const feedItems = (feedQuery.data?.pages ?? []).flatMap((p) => p.items);
 
   const ListHeader = (
     <View style={{ gap: 18 }}>
       {/* 1 — HEADER */}
-      <View>
-        <Text
-          className="text-[26px] font-extrabold text-charcoal"
-          style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-          {t('dashboard.greeting', { name: firstName })}
-        </Text>
-        <Text className="text-[13px] text-[#777] mt-0.5" numberOfLines={1}>
-          {rankName}
-          {legion ? ` • ${legion.name}` : ''}
-        </Text>
-      </View>
-
-      {/* 1.5 — LOGIN STREAK */}
-      {streak && streak.current_streak > 0 && (
-        <View className="bg-white border border-[#f0eded] rounded-[16px] p-4 flex-row items-center">
-          <View className="w-11 h-11 rounded-full bg-accent-500/15 items-center justify-center mr-3">
-            <Text className="text-[22px]">🔥</Text>
-          </View>
-          <View className="flex-1">
-            <Text className="text-[14px] font-extrabold text-charcoal">
-              {t('dashboard.streakDays', { count: streak.current_streak })}
-            </Text>
-            <Text className="text-[12px] text-[#888] mt-0.5">
-              {streak.is_max_bonus
-                ? t('dashboard.streakMax', { pct: streak.bonus_pct })
-                : t('dashboard.streakBonus', { pct: streak.bonus_pct, next: streak.next_milestone })}
-            </Text>
-          </View>
-          {/* Mini progress */}
-          <View className="items-center ml-2">
-            <Text className="text-[16px] font-extrabold text-accent-500">
-              +{streak.bonus_pct}%
-            </Text>
-            <Text className="text-[9px] text-[#aaa] uppercase tracking-[1px]">
-              {t('common.xp')}
-            </Text>
-          </View>
+      <View className="flex-row items-center justify-between">
+        <View className="flex-1">
+          <Text
+            className="text-[26px] font-extrabold text-charcoal"
+            style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
+            {t('dashboard.greeting', { name: firstName })}
+          </Text>
+          <Text className="text-[13px] text-[#777] mt-0.5" numberOfLines={1}>
+            {rankName}
+            {legion ? ` • ${legion.name}` : ''}
+          </Text>
         </View>
-      )}
-
-      {/* 1.7 — CARTEIRA (saldo de moedas) */}
-      {walletQuery.data && (
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={() => navigation.navigate('Profile')}
-          className="bg-[#6B1221] rounded-[16px] px-4 py-3.5 flex-row items-center">
-          <View className="w-11 h-11 rounded-full bg-accent-500/20 items-center justify-center mr-3">
-            <AureusCoin size={26} />
-          </View>
-          <View className="flex-1">
-            <Text className="text-[10px] font-bold text-white/50 tracking-[2px] uppercase">
-              {t('dashboard.walletTitle')}
-            </Text>
-            <View className="mt-1">
-              <CoinAmount atomic={walletQuery.data.balance} size={18} textColor="#E8C36B" />
-            </View>
-          </View>
-          <Text className="text-white/40 text-[20px]">›</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* 2 — PATENTE (70%) + MISSÕES (30%) lado a lado */}
-      <View className="flex-row" style={{ gap: 12 }}>
-        <View className="bg-primary-500 rounded-[20px] p-4 flex-[7]">
-          <View className="flex-row items-center">
-            <View className="flex-1">
-              <Text className="text-[10px] font-bold text-white/70 tracking-[2px] uppercase">
-                {t('dashboard.yourRank')}
-              </Text>
-              <Text
-                className="text-[22px] font-extrabold text-white mt-1"
-                numberOfLines={1}
-                style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-                {rankName}
-              </Text>
-              <Text className="text-[12px] text-white/80 mt-0.5">
-                {totalXp.toLocaleString()} {t('common.xp')}
-              </Text>
-            </View>
-
-            {currentRank?.image_url ? (
-              <View className="w-14 h-14 rounded-full bg-white/15 items-center justify-center overflow-hidden ml-2">
-                <Image
-                  source={{ uri: currentRank.image_url }}
-                  style={{ width: 44, height: 44 }}
-                  resizeMode="contain"
-                />
-              </View>
-            ) : null}
-          </View>
-
-          <View className="h-[7px] bg-white/25 rounded-full overflow-hidden mt-3">
-            <View
-              className="h-full rounded-full bg-accent-500"
-              style={{ width: `${rankProgress * 100}%` }}
-            />
-          </View>
-
-          {mustChooseTrack ? (
-            <>
-              <Text className="text-[11px] text-white/85 mt-2" numberOfLines={2}>
-                {t('dashboard.chooseTrackToAdvance')}
-              </Text>
-              <TouchableOpacity
-                onPress={() => setTrackModalVisible(true)}
-                activeOpacity={0.9}
-                className="bg-white rounded-[12px] py-2.5 items-center mt-3">
-                <Text className="text-[12px] font-bold text-primary-500">{t('dashboard.chooseTrackCta')}</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              <Text className="text-[11px] text-white/85 mt-2" numberOfLines={2}>
-                {isMaxRank
-                  ? t('dashboard.maxRankReached')
-                  : t('dashboard.xpToNextRank', {
-                      xp: xpToNextRank,
-                      rank: nextRankName ?? t('dashboard.nextRankFallback'),
-                    })}
-              </Text>
-              <TouchableOpacity
-                onPress={() => navigation.navigate('Ranks')}
-                activeOpacity={0.9}
-                className="bg-white/15 rounded-[12px] py-2.5 items-center mt-3">
-                <Text className="text-[12px] font-bold text-white">{t('dashboard.viewRequirements')}</Text>
-              </TouchableOpacity>
-            </>
-          )}
-        </View>
-
-        <View className="flex-[3]">
-          <MissionsSummaryCard
-            count={dailyCount}
-            xp={dailyXp}
-            onPress={() => navigation.navigate('Missions')}
-          />
-        </View>
+        {streak && streak.current_streak > 0 && <StreakButton streak={streak} />}
       </View>
 
       {/* 3 — CAMPANHA ATUAL */}
@@ -319,63 +165,27 @@ export default function DashboardScreen() {
         </View>
       )}
 
-      {/* 4 — POSIÇÃO NA LEGIÃO */}
-      {legion && (
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Legion')}
-          activeOpacity={0.85}
-          className="flex-row items-center bg-white border border-[#f0eded] rounded-[16px] p-4">
-          <View
-            className="w-10 h-10 rounded-full items-center justify-center mr-3 overflow-hidden"
-            style={{ backgroundColor: legion.image_url ? '#faf7f7' : legionColor }}>
-            {legion.image_url ? (
-              <Image
-                source={{ uri: legion.image_url }}
-                style={{ width: 32, height: 32 }}
-                resizeMode="contain"
-              />
-            ) : (
-              <Text className="text-[18px]">🦅</Text>
-            )}
-          </View>
-          <View className="flex-1">
-            <Text className="text-[14px] font-extrabold text-charcoal">{legion.name}</Text>
-            <Text className="text-[12px] text-[#888]">
-              {legionMembers != null
-                ? t('dashboard.activeMembers', { count: legionMembers })
-                : t('dashboard.yourLegionFallback')}
-            </Text>
-          </View>
-          <Text className="text-[#bbb] text-[20px]">›</Text>
-        </TouchableOpacity>
-      )}
-
       {/* 5 — COMPOSER DE POST */}
       <FeedComposer
         avatarUrl={data?.active_avatar?.thumb_url ?? data?.active_avatar?.url ?? null}
         canLegion={legion != null}
         canProvince={data?.province != null}
       />
-
-      {/* 6 — TÍTULO DO MURAL */}
-      <View className="flex-row items-center gap-2 mt-1">
-        <PrimusPilusEmblem size={26} />
-        <Text
-          className="text-[18px] font-extrabold text-charcoal"
-          style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-          {t('feed.title')}
-        </Text>
-      </View>
     </View>
   );
 
   return (
     <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
-      <Navbar />
+      <Navbar
+        rightExtra={
+          walletQuery.data ? <WalletButton balance={walletQuery.data.balance} /> : null
+        }
+      />
       <FlatList
         data={feedItems}
         keyExtractor={(item) => String(item.id)}
         ListHeaderComponent={ListHeader}
+        ListHeaderComponentStyle={{ marginBottom: 20 }}
         renderItem={({ item }) => (
           <FeedCard
             item={item}
@@ -388,7 +198,11 @@ export default function DashboardScreen() {
           />
         )}
         ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-        contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 24 }}
+        contentContainerStyle={{
+          paddingHorizontal: 3,
+          paddingTop: 20,
+          paddingBottom: insets.bottom + 24,
+        }}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
         refreshControl={
