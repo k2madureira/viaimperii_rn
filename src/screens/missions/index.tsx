@@ -96,12 +96,19 @@ export default function MissionsScreen() {
   const availableQuery = useAvailableMissions(specialtyId, effectiveDifficulty, !isHistory);
   // Catálogo completo (já filtrado por trilha no backend) — usado para derivar
   // quais especialidades pertencem à trilha do usuário, sem o efeito da cota diária.
+  // Obs.: paginado (perPage=100) — não usar para achar missões específicas do usuário,
+  // pois trilhas com mais de 100 missões (ex.: Patrícios, 132) truncariam o resultado.
   const catalogQuery = useMissions(undefined, true);
   // Histórico = missões concluídas (status=completed), mais recentes primeiro.
   const completedQuery = useMissions('completed', isHistory, {
     sortField: 'completed_at',
     sortOrder: 'desc',
   });
+  // "Ativas" = em andamento + em revisão. Consultadas via filtro de status no backend
+  // (em vez de derivar do catalogQuery paginado) para não perder missões do usuário
+  // que ficariam fora da primeira página do catálogo.
+  const inProgressActiveQuery = useMissions('in_progress', isInProgress);
+  const pendingReviewQuery = useMissions('pending_review', isInProgress);
 
   // Fila de revisão de pares (só carrega quando o modo "Revisão" está ativo).
   const toReviewQuery = useMissionsToReview(isReview);
@@ -174,15 +181,22 @@ export default function MissionsScreen() {
   // Já ordenado por data de conclusão (desc) no backend.
   const historyMissions = completedQuery.data ?? [];
 
-  // "Ativas" = em andamento + em revisão (pending_review). O backend não filtra
-  // pending_review por status, então derivamos do catálogo completo.
+  // Deduplica por id: as duas queries são invalidadas juntas (['missions']) quando o
+  // status de uma missão muda, então pode haver uma janela em que a mesma missão
+  // ainda aparece na lista antiga (stale) e já aparece na nova — o Map mantém só a
+  // última ocorrência (a mais recente, já que pendingReview vem depois no spread).
   const inProgressMissions = sortByDifficulty(
-    (catalogQuery.data ?? []).filter(
-      (m) => m.status === 'in_progress' || m.status === 'pending_review',
+    Array.from(
+      new Map(
+        [...(inProgressActiveQuery.data ?? []), ...(pendingReviewQuery.data ?? [])].map((m) => [
+          m.id,
+          m,
+        ]),
+      ).values(),
     ),
   );
-  const inProgressLoading = catalogQuery.isLoading;
-  const inProgressError = catalogQuery.isError;
+  const inProgressLoading = inProgressActiveQuery.isLoading || pendingReviewQuery.isLoading;
+  const inProgressError = inProgressActiveQuery.isError || pendingReviewQuery.isError;
 
   const historyLoading =  completedQuery.isLoading;
   const historyError =  completedQuery.isError;
@@ -194,7 +208,7 @@ export default function MissionsScreen() {
   } else if(isHistory) {
     refreshing = completedQuery.isRefetching;
   } else if(isInProgress){
-    refreshing = catalogQuery.isRefetching;
+    refreshing = inProgressActiveQuery.isRefetching || pendingReviewQuery.isRefetching;
   } else if (!isHistory && !isInProgress) {
     refreshing = availableQuery.isRefetching
   }
@@ -208,7 +222,8 @@ export default function MissionsScreen() {
     if (isHistory) {
       completedQuery.refetch();
     } else if (isInProgress) {
-      catalogQuery.refetch();
+      inProgressActiveQuery.refetch();
+      pendingReviewQuery.refetch();
     } else {
       availableQuery.refetch();
     }

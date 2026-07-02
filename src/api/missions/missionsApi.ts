@@ -13,6 +13,10 @@ export interface Mission {
   difficulty: 'easy' | 'medium' | 'hard' | null;
   xp_reward: number;
   mastery_reward: number;
+  // Preview do que a missão paga em moeda ao completar (valor atômico, em "asses").
+  // Não é o valor efetivamente creditado — isso só existe após a finalização.
+  coin_reward: number;
+  coin_reward_display: string;
   specialty_id: number | null;
   specialty_name: string | null;
   track_id: number | null;

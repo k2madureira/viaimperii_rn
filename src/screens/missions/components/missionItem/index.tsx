@@ -7,6 +7,7 @@ import { Mission } from '../../../../api/missions/missionsApi';
 import { formatBackendDateTime } from '../../../../utils/date';
 import { useMissionStatus } from '../../model/queries/useMissionStatus';
 import { useAuth } from '../../../../contexts/AuthContext';
+import { ArrowUpIcon, CoinAmount } from '../../../../components/icons';
 
 interface Props {
   mission: Mission;
@@ -113,21 +114,27 @@ function ReviewPanel({ mission }: { mission: Mission }) {
       {/* Confirmação de envio + timer */}
       <View className="flex-row items-center justify-between">
         <Text className="text-[11px] font-bold text-[#9a7b1f] uppercase tracking-[1px]">
-          ⏳ {t('missionItem.reviewLabel')}
+          ⏳ {needsApproval ? t('missionItem.reviewLabel') : t('missionItem.pointsPendingLabel')}
         </Text>
         <Text className="text-[13px] font-extrabold text-[#7a5b00]">
           {formatRemaining(remaining)}
         </Text>
       </View>
 
-      <Text className="text-[11px] text-[#7a5b00] leading-[16px]">
-        ✓ {t('missionItem.reviewSubmitted')}
-      </Text>
+      {/* "Aguardando validação" só faz sentido quando há revisão de pares (medium/hard) —
+          fáceis são só um timer, sem ninguém validando. */}
+      {needsApproval && (
+        <Text className="text-[11px] text-[#7a5b00] leading-[16px]">
+          ✓ {t('missionItem.reviewSubmitted')}
+        </Text>
+      )}
 
+      {/* Fáceis não passam por revisão de pares — evita a palavra "revisão"/"validação"
+          e diz diretamente quando os pontos caem, âncorado no mesmo contador acima. */}
       <Text className="text-[11px] text-[#9a7b1f] leading-[15px]">
         {needsApproval
           ? t('missionItem.autoCompleteWithApproval')
-          : t('missionItem.autoComplete')}
+          : t('missionItem.pointsCreditIn', { time: formatRemaining(remaining) })}
       </Text>
 
       {needsApproval && (
@@ -160,13 +167,14 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
   const isCompleted = mission.status === 'completed';
   const isInProgress = mission.status === 'in_progress';
   const isPendingReview = mission.status === 'pending_review';
+  // Só medium/hard passam por aprovação de pares (§7); fáceis são só um timer.
+  const needsApproval = mission.approvals_required > 0;
   const diffColor = DIFFICULTY_COLOR[mission.difficulty ?? ''] ?? '#aaa';
   const completedAtLabel = formatBackendDateTime(mission.completed_at);
 
-  // XP extra que a sequência de login (streak) credita sobre o valor base da
-  // missão — mesmo bônus aplicado pelo backend em finalize_pending_mission().
+  // Bônus de XP por sequência de login — mesmo percentual aplicado pelo backend
+  // em finalize_pending_mission().
   const streakBonusPct = user?.streak?.bonus_pct ?? 0;
-  const streakBonusXp = Math.round((mission.xp_reward * streakBonusPct) / 100);
 
   return (
     <View
@@ -222,11 +230,17 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
         </View>
 
         <View className="items-end gap-1">
-          <Text className="text-[13px] font-extrabold text-accent-500">+{mission.xp_reward} {t('common.xp')}</Text>
-          {streakBonusPct > 0 && streakBonusXp > 0 && !isCompleted && (
-            <Text className="text-[10px] font-bold text-[#F2994A]">
-              {t('missionItem.streakBonusXp', { xp: streakBonusXp, pct: streakBonusPct })}
-            </Text>
+          <View className="flex-row items-center gap-1">
+            <Text className="text-[13px] font-extrabold text-accent-500">+{mission.xp_reward}{t('common.xp')}</Text>
+            {streakBonusPct > 0 && !isCompleted && (
+              <>
+                <ArrowUpIcon size={11} color="#2F7A52" />
+                <Text className="text-[12px] font-extrabold text-laurel">+{streakBonusPct}%</Text>
+              </>
+            )}
+          </View>
+          {mission.coin_reward > 0 && (
+            <CoinAmount atomic={mission.coin_reward} size={11} textColor="#9a7b1f" />
           )}
           {isCompleted && (
             <View className="bg-laurel/15 rounded-full px-2 py-0.5">
@@ -240,7 +254,9 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
           )}
           {isPendingReview && (
             <View className="bg-accent-500/20 rounded-full px-2 py-0.5">
-              <Text className="text-[10px] font-bold text-[#9a7b1f]">{t('missionItem.inReview')}</Text>
+              <Text className="text-[10px] font-bold text-[#9a7b1f]">
+                {needsApproval ? t('missionItem.inReview') : t('missionItem.pointsPendingLabel')}
+              </Text>
             </View>
           )}
         </View>
