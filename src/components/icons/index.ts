@@ -22,6 +22,9 @@ export { AureusCoin, DenariusCoin, AsCoin, CoinIcon, CoinAmount } from './coins'
 // Chama do streak de login
 export { default as FireIcon } from './fire';
 
+// Seta para cima (bônus/ganho, ex.: bônus de XP por sequência)
+export { default as ArrowUpIcon } from './arrowUp';
+
 // Diamante (carteira) e ícone de gatilho da carteira
 export { default as DiamondIcon } from './diamond';
 export { default as WalletIcon } from './wallet';
