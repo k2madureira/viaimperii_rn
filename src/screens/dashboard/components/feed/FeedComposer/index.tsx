@@ -38,6 +38,7 @@ export default function FeedComposer({ avatarUrl, canLegion, canProvince }: Prop
       <PostComposerForm
         canLegion={canLegion}
         canProvince={canProvince}
+        authorAvatarUrl={avatarUrl}
         onPosted={() => setExpanded(false)}
         onCancel={() => setExpanded(false)}
       />

@@ -83,6 +83,7 @@ export default {
     composerPlaceholder: 'Share something with the Empire...',
     post: 'Post',
     addImage: 'Add image',
+    addMedia: 'Add media',
     edit: 'Edit',
     delete: 'Delete',
     editTitle: 'Edit post',
@@ -108,6 +109,7 @@ export default {
     emptyTitle: 'The Wall is quiet',
     emptyBody: 'Complete missions or post something to get started.',
     scopeLabel: 'Who can see this post?',
+    audienceLabel: 'Audience:',
     scope: {
       global: 'Empire',
       legion: 'Legion',

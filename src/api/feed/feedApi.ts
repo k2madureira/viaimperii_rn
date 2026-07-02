@@ -48,15 +48,28 @@ export interface ReactionSummary {
   mine: ReactionType | null;
 }
 
+export type MediaType = 'image' | 'video';
+
+// Item de mídia de um post (multi-mídia ordenada). Coexiste com o `image_url`
+// legado (single-image) — ambos podem vir juntos na resposta.
+export interface PostMedia {
+  key: string; // key pública no S3
+  type: MediaType;
+  url: string; // url pública permanente
+}
+
 export interface FeedItem {
   id: number;
   verb: FeedVerb | string;
   source: 'user' | 'system';
   scope: FeedScope | string;
   author: FeedAuthor;
-  body: string | null; // texto do post (user_post)
-  image_url: string | null; // imagem pública do post
+  body: string | null; // texto do post (markdown leve: **negrito**, _itálico_, ~~riscado~~)
+  image_url: string | null; // imagem pública do post — caminho legado single-image
   payload: Record<string, any> | null; // snapshot do evento de sistema
+  hashtags: string[]; // extraídas do body no backend (#tag, minúsculo, dedup)
+  mentions: FeedAuthor[]; // menções resolvidas ao vivo
+  media: PostMedia[]; // imagens/vídeos ordenados
   reactions: ReactionSummary;
   comments_count: number;
   created_at: string;
@@ -87,6 +100,27 @@ export interface ReactResponse {
   mine: ReactionType | null;
 }
 
+// ── Busca de usuários (autocomplete de @menção) ───────────────────────────────
+
+interface UserSearchResponse {
+  items: FeedAuthor[];
+}
+
+/**
+ * Busca usuários por username para o autocomplete de menções. Como `username`
+ * não é único, pode trazer homônimos — o client resolve o escolhido pelo `id`
+ * (uuid) e o envia em `mentions`. Tolerante ao formato de resposta.
+ */
+export async function searchUsers(q: string, limit = 8): Promise<FeedAuthor[]> {
+  const response = await apiFetch(`/users/search?q=${encodeURIComponent(q)}&limit=${limit}`);
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao buscar usuários'));
+  }
+  const data = await readContent<UserSearchResponse | FeedAuthor[]>(response);
+  if (Array.isArray(data)) return data;
+  return data?.items ?? [];
+}
+
 // ── Timeline ────────────────────────────────────────────────────────────────────
 
 export async function getFeed(
@@ -105,9 +139,17 @@ export async function getFeed(
   return readContent<FeedListResponse>(response);
 }
 
+// Item de mídia enviado na criação/edição: `key` pública (do presign) + tipo.
+export interface PostMediaInput {
+  key: string;
+  type?: MediaType; // default 'image' no backend
+}
+
 export interface CreatePostInput {
   body?: string;
-  image_key?: string;
+  image_key?: string; // caminho legado single-image (compatibilidade)
+  media?: PostMediaInput[]; // multi-mídia ordenada (imagens/vídeos)
+  mentions?: string[]; // uuids dos usuários mencionados (resolvidos no client)
   scope?: FeedScope;
 }
 
@@ -126,7 +168,10 @@ export async function createPost(input: CreatePostInput): Promise<FeedItem> {
 
 export interface UpdatePostInput {
   body?: string | null;
-  image_key?: string | null; // "" / null limpa a imagem
+  image_key?: string | null; // "" / null limpa a imagem legada
+  // `media`/`mentions`, quando enviados, SUBSTITUEM o conjunto inteiro do post.
+  media?: PostMediaInput[];
+  mentions?: string[];
 }
 
 export async function updatePost(eventId: number, input: UpdatePostInput): Promise<FeedItem> {
@@ -243,9 +288,11 @@ export async function createComment(
   return readContent<FeedComment>(response);
 }
 
-// ── Upload de imagem do post (objeto PÚBLICO) ─────────────────────────────────
+// ── Upload de mídia do post (objeto PÚBLICO) ──────────────────────────────────
 
 export type FeedImageContentType = 'image/jpeg' | 'image/png' | 'image/webp';
+export type FeedVideoContentType = 'video/mp4' | 'video/quicktime';
+export type FeedMediaContentType = FeedImageContentType | FeedVideoContentType;
 
 interface FeedPresignResult {
   upload_url: string;
@@ -254,25 +301,25 @@ interface FeedPresignResult {
   expires_in: number;
 }
 
-async function presignFeedUpload(contentType: FeedImageContentType): Promise<FeedPresignResult> {
+async function presignFeedUpload(contentType: FeedMediaContentType): Promise<FeedPresignResult> {
   const response = await apiFetch('/uploads/presign', {
     method: 'POST',
     body: JSON.stringify({ content_type: contentType, purpose: 'feed' }),
   });
   if (!response.ok) {
-    throw new Error(await readError(response, 'Erro ao preparar o envio da imagem'));
+    throw new Error(await readError(response, 'Erro ao preparar o envio da mídia'));
   }
   return readContent<FeedPresignResult>(response);
 }
 
 /**
- * Faz upload da imagem do post direto ao S3 (presigned PUT, objeto público) e
- * retorna a `key` para enviar como `image_key` no POST /feed. Diferente da
- * evidência (privada), o feed exige o header `x-amz-acl: public-read` no PUT.
+ * Faz upload de uma mídia (imagem ou vídeo) do post direto ao S3 (presigned PUT,
+ * objeto público) e retorna a `key`. Diferente da evidência (privada), o feed
+ * exige o header `x-amz-acl: public-read` no PUT.
  */
-export async function uploadFeedImage(
+export async function uploadFeedMedia(
   localUri: string,
-  contentType: FeedImageContentType,
+  contentType: FeedMediaContentType,
 ): Promise<string> {
   const { upload_url, key } = await presignFeedUpload(contentType);
   const blob = await (await fetch(localUri)).blob();
@@ -282,7 +329,11 @@ export async function uploadFeedImage(
     body: blob,
   });
   if (!put.ok) {
-    throw new Error('Falha ao enviar a imagem para o armazenamento.');
+    throw new Error('Falha ao enviar a mídia para o armazenamento.');
   }
   return key;
 }
+
+/** @deprecated use `uploadFeedMedia` — mantido por compatibilidade. */
+export const uploadFeedImage = (localUri: string, contentType: FeedImageContentType) =>
+  uploadFeedMedia(localUri, contentType);

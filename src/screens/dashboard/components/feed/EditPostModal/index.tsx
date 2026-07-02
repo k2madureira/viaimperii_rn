@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -6,7 +6,6 @@ import {
   Modal,
   Platform,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -15,8 +14,12 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
 import { ImageIcon } from '../../../../../components/icons';
-import { FeedItem, uploadFeedImage } from '../../../../../api/feed/feedApi';
+import { FeedAuthor, FeedItem, uploadFeedImage } from '../../../../../api/feed/feedApi';
 import { useUpdatePost } from '../../../model/mutations/useUpdatePost';
+import MarkdownEditor, { Selection } from '../MarkdownEditor';
+import MentionSuggestions from '../MentionSuggestions';
+import { htmlToMarkdown, markdownToHtml } from '../markdown';
+import { activeToken, replaceRange } from '../tokenUtils';
 
 const FEED_IMAGE_MAX_WIDTH = 1280;
 const FEED_IMAGE_COMPRESS = 0.7;
@@ -36,26 +39,60 @@ interface Props {
   onClose: () => void;
 }
 
+// Wrapper fino: só controla o Modal. O formulário real é remontado a cada post
+// (`key={item.id}`) para carregar o texto certo no estado inicial.
 export default function EditPostModal({ item, onClose }: Props) {
+  return (
+    <Modal
+      transparent
+      visible={item != null}
+      animationType="fade"
+      statusBarTranslucent
+      onRequestClose={onClose}>
+      {item ? <EditPostForm key={item.id} item={item} onClose={onClose} /> : null}
+    </Modal>
+  );
+}
+
+function EditPostForm({ item, onClose }: { item: FeedItem; onClose: () => void }) {
   const { t } = useTranslation();
   const updateM = useUpdatePost();
 
-  const [body, setBody] = useState('');
-  const [keptImageUrl, setKeptImageUrl] = useState<string | null>(null); // imagem atual mantida
+  // O `body` é HTML (backend). Converte para markdown leve para editar no
+  // TextInput; no salvar, converte de volta para HTML.
+  const initialText = useMemo(() => htmlToMarkdown(item.body ?? ''), [item.body]);
+  const [text, setText] = useState(initialText);
+  const [selection, setSelection] = useState<Selection>({
+    start: initialText.length,
+    end: initialText.length,
+  });
+  const [keptImageUrl, setKeptImageUrl] = useState<string | null>(item.image_url ?? null); // imagem atual mantida
   const [newImageUri, setNewImageUri] = useState<string | null>(null); // nova imagem local
   const [uploading, setUploading] = useState(false);
+  // Menções: pré-carregadas das existentes + as novas. O PATCH substitui o
+  // conjunto inteiro quando `mentions` é enviado.
+  const [pickedMentions, setPickedMentions] = useState<{ id: string; name: string }[]>(
+    item.mentions.map((a) => ({ id: a.id, name: a.name })),
+  );
 
-  useEffect(() => {
-    setBody(item?.body ?? '');
-    setKeptImageUrl(item?.image_url ?? null);
-    setNewImageUri(null);
-    setUploading(false);
-  }, [item?.id]);
+  const token = useMemo(() => activeToken(text, selection.start), [text, selection.start]);
+  const mentionQuery = token?.type === '@' ? token.query : null;
+
+  const selectMention = (user: FeedAuthor) => {
+    if (!token || token.type !== '@') return;
+    const insert = `@${user.name} `;
+    setText(replaceRange(text, token.start, token.end, insert));
+    const caret = token.start + insert.length;
+    setSelection({ start: caret, end: caret });
+    setPickedMentions((prev) =>
+      prev.some((p) => p.id === user.id) ? prev : [...prev, { id: user.id, name: user.name }],
+    );
+  };
 
   const previewUri = newImageUri ?? keptImageUrl;
   const hasImage = previewUri != null;
-  const canSave =
-    (body.trim().length > 0 || hasImage) && !uploading && !updateM.isPending;
+  const hasText = text.trim().length > 0;
+  const canSave = (hasText || hasImage) && !uploading && !updateM.isPending;
 
   const pickImage = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -86,10 +123,15 @@ export default function EditPostModal({ item, onClose }: Props) {
   };
 
   const handleSave = async () => {
-    if (!item || !canSave) return;
+    if (!canSave) return;
     try {
-      const input: { body?: string | null; image_key?: string | null } = {
-        body: body.trim() || null,
+      // markdown → HTML (backend sanitiza contra o allowlist). Vazio → limpa o texto.
+      const bodyHtml = hasText ? markdownToHtml(text.trim()) : null;
+      // Reenvia as menções cujo @nome ainda está presente no texto final.
+      const mentions = pickedMentions.filter((p) => text.includes(`@${p.name}`)).map((p) => p.id);
+      const input: { body?: string | null; image_key?: string | null; mentions?: string[] } = {
+        body: bodyHtml,
+        mentions: [...new Set(mentions)],
       };
       if (newImageUri) {
         // nova imagem escolhida → sobe e troca
@@ -111,22 +153,23 @@ export default function EditPostModal({ item, onClose }: Props) {
   const busy = uploading || updateM.isPending;
 
   return (
-    <Modal transparent visible={item != null} animationType="fade" statusBarTranslucent onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
-        <View className="flex-1 bg-black/60 items-center justify-center px-6">
-          <View className="w-full bg-white rounded-[20px] p-5">
-            <Text className="text-[16px] font-extrabold text-charcoal mb-3">{t('feed.editTitle')}</Text>
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} className="flex-1">
+      <View className="flex-1 bg-black/60 items-center justify-center px-6">
+        <View className="w-full bg-white rounded-[20px] p-5" style={{ maxHeight: '88%' }}>
+          <Text className="text-[16px] font-extrabold text-charcoal mb-3">{t('feed.editTitle')}</Text>
 
-            <TextInput
-              value={body}
-              onChangeText={setBody}
-              placeholder={t('feed.composerPlaceholder')}
-              placeholderTextColor="#aaa"
-              multiline
-              maxLength={2000}
-              className="text-[14px] text-charcoal min-h-[80px] bg-[#f7f4f4] rounded-[12px] px-3 py-2.5"
-              style={{ textAlignVertical: 'top' }}
+          <View className="flex-shrink">
+            <MarkdownEditor
+              value={text}
+              onChangeText={setText}
+              selection={selection}
+              onSelectionChange={setSelection}
+              autoFocus
+              minHeight={120}
             />
+
+            {/* Sugestões de @menção */}
+            <MentionSuggestions query={mentionQuery} onSelect={selectMention} />
 
             {hasImage ? (
               <View className="rounded-[12px] overflow-hidden border border-[#e0e0e0] mt-3">
@@ -147,30 +190,30 @@ export default function EditPostModal({ item, onClose }: Props) {
                 <Text className="text-[13px] font-bold text-primary-500">{t('feed.addImage')}</Text>
               </TouchableOpacity>
             )}
+          </View>
 
-            <View className="flex-row gap-3 mt-4">
-              <TouchableOpacity
-                onPress={onClose}
-                disabled={busy}
-                activeOpacity={0.85}
-                className="flex-1 rounded-[12px] py-3 items-center border border-[#e0e0e0]">
-                <Text className="text-[14px] font-bold text-[#666]">{t('evidenceModal.cancel')}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={handleSave}
-                disabled={!canSave}
-                activeOpacity={0.85}
-                className={`flex-1 rounded-[12px] py-3 items-center ${canSave ? 'bg-primary-500' : 'bg-primary-500/40'}`}>
-                {busy ? (
-                  <ActivityIndicator color="#fff" size="small" />
-                ) : (
-                  <Text className="text-[14px] font-bold text-white">{t('feed.save')}</Text>
-                )}
-              </TouchableOpacity>
-            </View>
+          <View className="flex-row gap-3 mt-4">
+            <TouchableOpacity
+              onPress={onClose}
+              disabled={busy}
+              activeOpacity={0.85}
+              className="flex-1 rounded-[12px] py-3 items-center border border-[#e0e0e0]">
+              <Text className="text-[14px] font-bold text-[#666]">{t('evidenceModal.cancel')}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={handleSave}
+              disabled={!canSave}
+              activeOpacity={0.85}
+              className={`flex-1 rounded-[12px] py-3 items-center ${canSave ? 'bg-primary-500' : 'bg-primary-500/40'}`}>
+              {busy ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <Text className="text-[14px] font-bold text-white">{t('feed.save')}</Text>
+              )}
+            </TouchableOpacity>
           </View>
         </View>
-      </KeyboardAvoidingView>
-    </Modal>
+      </View>
+    </KeyboardAvoidingView>
   );
 }

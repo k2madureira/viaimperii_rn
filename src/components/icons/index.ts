@@ -29,6 +29,10 @@ export { default as WalletIcon } from './wallet';
 // Cruz (+) — botão de criar post na bottom tab bar
 export { default as PlusIcon } from './plus';
 
+// Listas do editor rich (com marcadores / numerada)
+export { default as ListIcon } from './list';
+export { default as OrderedListIcon } from './orderedList';
+
 // Ícones de navegação (bottom tabs)
 export { default as HomeIcon } from '../../navigation/icons/HomeIcon';
 export { default as MissionsIcon } from '../../navigation/icons/MissionsIcon';
