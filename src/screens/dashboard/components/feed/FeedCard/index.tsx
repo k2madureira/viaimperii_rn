@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { HomeNavigationProp } from '../../../../../navigation/HomeStack';
 import { FeedItem, ReactionType } from '../../../../../api/feed/feedApi';
 import { parseBackendDate } from '../../../../../utils/date';
-import { CommentIcon } from '../../../../../components/icons';
+import { CommentIcon, EditIcon, EyeIcon, TrashIcon } from '../../../../../components/icons';
 import FeedReactions, { ReactionCluster } from '../FeedReactions';
 import AnchoredPopover, { Anchor } from '../AnchoredPopover';
 import FeedHtml from '../FeedHtml';
@@ -163,7 +163,7 @@ export default function FeedCard({
             {relativeTime}
           </Text>
         </TouchableOpacity>
-        {isOwnPost && (
+        {!isSystem && (
           <View ref={menuRef} collapsable={false}>
             <TouchableOpacity onPress={openMenu} activeOpacity={0.6} className="pl-2 pr-1 py-1">
               <Text className="text-[20px] text-[#999]">⋯</Text>
@@ -187,11 +187,7 @@ export default function FeedCard({
         </View>
       ) : (
         <>
-          {item.body ? (
-            <View className="mt-3 px-4">
-              <FeedHtml html={item.body} className="text-[14px] text-[#333] leading-[20px]" />
-            </View>
-          ) : null}
+          {item.body ? <CollapsibleBody html={item.body} /> : null}
           <View className="px-0">
             <MediaGallery item={item} />
           </View>
@@ -288,26 +284,41 @@ export default function FeedCard({
         </View>
       </AnchoredPopover>
 
-      {/* Popover: menu editar/excluir (próprios posts) */}
+      {/* Popover: menu do post — editar/excluir nos próprios; visualizar nos demais */}
       <AnchoredPopover anchor={menuAnchor} onClose={() => setMenuAnchor(null)} width={172} align="right">
         <TouchableOpacity
           onPress={() => {
             setMenuAnchor(null);
-            setEditing(true);
+            navigation.navigate('PostDetail', { post: item });
           }}
           activeOpacity={0.7}
           className="flex-row items-center gap-2.5 px-4 py-3">
-          <Text className="text-[15px]">✏️</Text>
-          <Text className="text-[14px] font-bold text-charcoal">{t('feed.edit')}</Text>
+          <EyeIcon size={17} color="#121212" />
+          <Text className="text-[14px] font-bold text-charcoal">{t('feed.view')}</Text>
         </TouchableOpacity>
-        <View className="h-px bg-[#f3eeee]" />
-        <TouchableOpacity
-          onPress={confirmDelete}
-          activeOpacity={0.7}
-          className="flex-row items-center gap-2.5 px-4 py-3">
-          <Text className="text-[15px]">🗑️</Text>
-          <Text className="text-[14px] font-bold text-[#c0392b]">{t('feed.delete')}</Text>
-        </TouchableOpacity>
+        {isOwnPost && (
+          <>
+            <View className="h-px bg-[#f3eeee]" />
+            <TouchableOpacity
+              onPress={() => {
+                setMenuAnchor(null);
+                setEditing(true);
+              }}
+              activeOpacity={0.7}
+              className="flex-row items-center gap-2.5 px-4 py-3">
+              <EditIcon size={17} color="#121212" />
+              <Text className="text-[14px] font-bold text-charcoal">{t('feed.edit')}</Text>
+            </TouchableOpacity>
+            <View className="h-px bg-[#f3eeee]" />
+            <TouchableOpacity
+              onPress={confirmDelete}
+              activeOpacity={0.7}
+              className="flex-row items-center gap-2.5 px-4 py-3">
+              <TrashIcon size={17} color="#c0392b" />
+              <Text className="text-[14px] font-bold text-[#c0392b]">{t('feed.delete')}</Text>
+            </TouchableOpacity>
+          </>
+        )}
       </AnchoredPopover>
 
       {/* Popover: quem reagiu (usuários + reações) */}
@@ -318,6 +329,148 @@ export default function FeedCard({
       />
 
       <EditPostModal item={editing ? item : null} onClose={() => setEditing(false)} />
+    </View>
+  );
+}
+
+// Nº máximo de linhas do preview colapsado. Acima disso o texto é cortado e o
+// "…Ler mais" (azul) é emendado inline no fim da última linha, dando sensação
+// de continuidade (não é um botão separado abaixo).
+const MAX_PREVIEW_LINES = 7;
+const READ_MORE_BLUE = '#1D6FE0';
+const BODY_CLASS = 'text-[14px] text-[#333] leading-[20px]';
+
+// Projeção texto-puro do HTML do post (para o preview cortado). Preserva quebras
+// de bloco como \n; o conteúdo rico (negrito etc.) volta ao expandir.
+function htmlToText(html: string): string {
+  return html
+    .replace(/<\s*br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|li|h[1-3]|ul|ol)\s*>/gi, '\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&quot;/gi, '"')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+// Apara o final do texto — remove a última palavra (ou alguns caracteres, se
+// for uma palavra única longa). Usado para abrir espaço até o "…Ler mais" caber
+// na mesma linha do corte.
+function trimTail(s: string): string {
+  const t = s.replace(/\s+$/, '');
+  const idx = t.lastIndexOf(' ');
+  if (idx > 0) return t.slice(0, idx).replace(/\s+$/, '');
+  return t.slice(0, Math.max(0, t.length - 4));
+}
+
+function CollapsibleBody({ html }: { html: string }) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+  const plain = React.useMemo(() => htmlToText(html), [html]);
+  // null = medindo; false = cabe (mostra rich); string = texto cortado p/ preview.
+  const [clip, setClip] = useState<string | null | false>(null);
+  // Trava quando o preview + "…Ler mais" já cabe nas MAX linhas (para o loop).
+  const [stable, setStable] = useState(false);
+  const measured = useRef(false);
+  const iterations = useRef(0);
+  const readMore = t('feed.readMore');
+
+  // Expandido → conteúdo rico completo + "Ler menos".
+  if (expanded) {
+    return (
+      <View className="mt-3 px-4">
+        <FeedHtml html={html} className={BODY_CLASS} />
+        <Text
+          onPress={() => setExpanded(false)}
+          className="text-[13px] font-bold mt-1"
+          style={{ color: READ_MORE_BLUE }}>
+          {t('feed.readLess')}
+        </Text>
+      </View>
+    );
+  }
+
+  const verifying = typeof clip === 'string' && !stable;
+
+  return (
+    <View className="mt-3 px-4">
+      {clip === null || verifying ? (
+        // Medindo/convergindo: preview simples cortado às MAX linhas (sem o link
+        // ainda, para nunca exibir um "…Ler mais" truncado pelo SO durante o ajuste).
+        <Text className={BODY_CLASS} numberOfLines={MAX_PREVIEW_LINES}>
+          {plain}
+        </Text>
+      ) : clip === false ? (
+        // Cabe inteiro → conteúdo rico.
+        <FeedHtml html={html} className={BODY_CLASS} />
+      ) : (
+        // Estável: preview cortado + "…Ler mais" inline. SEM numberOfLines — o
+        // verificador já garantiu que cabe, então o SO não trunca o link.
+        <Text className={BODY_CLASS}>
+          {clip}
+          <Text
+            onPress={() => setExpanded(true)}
+            style={{ color: READ_MORE_BLUE, fontWeight: '700' }}>
+            {readMore}
+          </Text>
+        </Text>
+      )}
+
+      {/* Medidor inicial invisível: conta as linhas do texto completo. */}
+      {clip === null && (
+        <Text
+          className={BODY_CLASS}
+          style={{ position: 'absolute', left: 0, right: 0, opacity: 0 }}
+          onTextLayout={(e) => {
+            if (measured.current) return;
+            measured.current = true;
+            const lines = e.nativeEvent.lines;
+            if (lines.length <= MAX_PREVIEW_LINES) {
+              setClip(false);
+              return;
+            }
+            const first = lines
+              .slice(0, MAX_PREVIEW_LINES)
+              .map((l) => l.text)
+              .join('')
+              .replace(/\s+$/, '');
+            setClip(first);
+          }}>
+          {plain}
+        </Text>
+      )}
+
+      {/* Verificador invisível: mede "preview + …Ler mais" SEM limite de linhas;
+          se estourar MAX, apara mais uma palavra e remede — até o link caber na
+          mesma linha (nunca quebra para uma linha nova). */}
+      {verifying && (
+        <Text
+          className={BODY_CLASS}
+          style={{ position: 'absolute', left: 0, right: 0, opacity: 0 }}
+          onTextLayout={(e) => {
+            const lines = e.nativeEvent.lines;
+            const last = lines[lines.length - 1]?.text ?? '';
+            // Texto do preview que sobra na última linha, DEPOIS de remover o
+            // "…Ler mais" do fim. Se sobrar conteúdo, o link está colado ao corte;
+            // se não sobrar, o link caiu sozinho numa linha nova → aparar mais.
+            const tailBeforeLink = last.slice(0, Math.max(0, last.length - readMore.length)).trim();
+            const glued = lines.length <= MAX_PREVIEW_LINES && tailBeforeLink.length > 0;
+            if (!glued && iterations.current < 80 && (clip as string).length > 0) {
+              iterations.current += 1;
+              setClip((c) => (typeof c === 'string' ? trimTail(c) : c));
+            } else {
+              setStable(true);
+            }
+          }}>
+          {clip}
+          <Text style={{ fontWeight: '700' }}>{readMore}</Text>
+        </Text>
+      )}
     </View>
   );
 }
