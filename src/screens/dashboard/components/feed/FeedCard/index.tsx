@@ -8,7 +8,8 @@ import { parseBackendDate } from '../../../../../utils/date';
 import { CommentIcon } from '../../../../../components/icons';
 import FeedReactions, { ReactionCluster } from '../FeedReactions';
 import AnchoredPopover, { Anchor } from '../AnchoredPopover';
-import ImageViewerModal from '../ImageViewerModal';
+import FeedHtml from '../FeedHtml';
+import MediaGallery from '../MediaGallery';
 import EditPostModal from '../EditPostModal';
 import ReactorsPopover from '../ReactorsPopover';
 import { useDeletePost } from '../../../model/mutations/useDeletePost';
@@ -70,7 +71,6 @@ export default function FeedCard({
   const [userAnchor, setUserAnchor] = useState<Anchor | null>(null);
   const [menuAnchor, setMenuAnchor] = useState<Anchor | null>(null);
   const [reactorsAnchor, setReactorsAnchor] = useState<Anchor | null>(null);
-  const [imageViewer, setImageViewer] = useState(false);
   const [editing, setEditing] = useState(false);
 
   const isOwnPost =
@@ -188,17 +188,13 @@ export default function FeedCard({
       ) : (
         <>
           {item.body ? (
-            <Text className="text-[14px] text-[#333] leading-[20px] mt-3 px-4">{item.body}</Text>
+            <View className="mt-3 px-4">
+              <FeedHtml html={item.body} className="text-[14px] text-[#333] leading-[20px]" />
+            </View>
           ) : null}
-          {item.image_url ? (
-            <TouchableOpacity activeOpacity={0.9} onPress={() => setImageViewer(true)} className="mt-3">
-              <Image
-                source={{ uri: item.image_url }}
-                style={{ width: '100%', height: 200 }}
-                resizeMode="cover"
-              />
-            </TouchableOpacity>
-          ) : null}
+          <View className="px-0">
+            <MediaGallery item={item} />
+          </View>
         </>
       )}
 
@@ -319,11 +315,6 @@ export default function FeedCard({
         eventId={item.id}
         anchor={reactorsAnchor}
         onClose={() => setReactorsAnchor(null)}
-      />
-
-      <ImageViewerModal
-        uri={imageViewer ? item.image_url : null}
-        onClose={() => setImageViewer(false)}
       />
 
       <EditPostModal item={editing ? item : null} onClose={() => setEditing(false)} />

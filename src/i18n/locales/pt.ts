@@ -83,6 +83,7 @@ export default {
     composerPlaceholder: 'Compartilhe algo com o Império...',
     post: 'Publicar',
     addImage: 'Adicionar imagem',
+    addMedia: 'Adicionar mídia',
     edit: 'Editar',
     delete: 'Excluir',
     editTitle: 'Editar publicação',
@@ -108,6 +109,7 @@ export default {
     emptyTitle: 'O Mural está silencioso',
     emptyBody: 'Conclua missões ou publique algo para começar.',
     scopeLabel: 'Quem pode ver esta publicação?',
+    audienceLabel: 'Público:',
     scope: {
       global: 'Império',
       legion: 'Legião',

@@ -155,6 +155,9 @@ export default function BottomTabs() {
         visible={createPostVisible}
         canLegion={canLegion}
         canProvince={canProvince}
+        authorAvatarUrl={
+          profileQuery.data?.active_avatar?.thumb_url ?? profileQuery.data?.active_avatar?.url ?? null
+        }
         onClose={() => setCreatePostVisible(false)}
       />
     </>
