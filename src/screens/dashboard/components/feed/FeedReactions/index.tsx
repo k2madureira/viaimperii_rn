@@ -2,24 +2,19 @@ import React, { useState } from 'react';
 import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ReactionSummary, ReactionType } from '../../../../../api/feed/feedApi';
-import { ThumbsUpIcon } from '../../../../../components/icons';
+import { ReactionIcon } from '../../../../../components/icons';
 
-export const REACTIONS: { type: ReactionType; emoji: string }[] = [
-  { type: 'like', emoji: '👍' },
-  { type: 'clap', emoji: '👏' },
-  { type: 'fire', emoji: '🔥' },
-  { type: 'salute', emoji: '🫡' },
+export const REACTIONS: { type: ReactionType }[] = [
+  { type: 'like' },
+  { type: 'clap' },
+  { type: 'fire' },
+  { type: 'salute' },
 ];
 
-const LIKE_YELLOW = '#F4C20D';
-
-// Glifo de uma reação: 'like' usa o SVG amarelo; as demais usam emoji.
+// Glifo de uma reação (SVG). Sem reação ainda (`null`) → mostra o "curtir" como
+// afordância padrão do botão.
 export function ReactionGlyph({ type, size }: { type: ReactionType | null; size: number }) {
-  if (type == null || type === 'like') {
-    return <ThumbsUpIcon size={size + 2} color={LIKE_YELLOW} />;
-  }
-  const emoji = REACTIONS.find((r) => r.type === type)?.emoji;
-  return <Text style={{ fontSize: size }}>{emoji}</Text>;
+  return <ReactionIcon type={type ?? 'like'} size={size} />;
 }
 
 // Cluster de emojis + total (estilo LinkedIn, exibido acima das ações).
@@ -34,7 +29,7 @@ export function ReactionCluster({ reactions }: { reactions: ReactionSummary }) {
             key={r.type}
             className="w-5 h-5 rounded-full bg-white items-center justify-center border border-[#f0eded]"
             style={{ marginLeft: i === 0 ? 0 : -6 }}>
-            <Text className="text-[10px]">{r.emoji}</Text>
+            <ReactionGlyph type={r.type} size={13} />
           </View>
         ))}
       </View>
@@ -84,11 +79,10 @@ export default function FeedReactions({ reactions, onReact }: Props) {
           <Pressable onPress={() => setOpen(false)} style={[StyleSheet.absoluteFill, { zIndex: 40 }]} />
           {/* Dropup flutuante de reações */}
           <View
-            className="absolute flex-row items-center bg-white rounded-full px-2 py-1.5 border border-[#eadfdf]"
+            className="absolute flex-row items-center bg-white rounded-full px-1.5 py-1.5 border border-[#eadfdf]"
             style={{
               bottom: 46,
               left: 4,
-              gap: 2,
               zIndex: 50,
               elevation: 8,
               shadowColor: '#000',
@@ -101,7 +95,7 @@ export default function FeedReactions({ reactions, onReact }: Props) {
                 key={type}
                 onPress={() => pick(type)}
                 activeOpacity={0.6}
-                className={`w-9 h-9 rounded-full items-center justify-center ${
+                className={`w-8 h-8 rounded-full items-center justify-center ${
                   mine === type ? 'bg-primary-500/10' : ''
                 }`}>
                 <ReactionGlyph type={type} size={22} />

@@ -91,21 +91,16 @@ export default function BottomTabs() {
             paddingBottom: bottomInset,
           },
           tabBarIcon: ({ focused }) => {
-            // Botão de criar post: círculo verde de destaque com um (+) branco,
+            // Botão de criar post: destaque em vermelho imperial com um (+) branco,
             // sempre com a mesma aparência (não segue o estado focused).
             if (route.name === 'CreatePost') {
               return (
                 <View
-                  className="w-12 h-12 rounded-[12px] bg-laurel items-center justify-center"
+                  className="w-12 h-12 rounded-[12px] bg-primary-700 items-center justify-center"
                   style={{
                     marginTop: -8,
                     borderWidth: 3,
                     borderColor: '#fff',
-                    elevation: 2,
-                    shadowColor: '#000',
-                    shadowOpacity: 0.1,
-                    shadowRadius: 4,
-                    shadowOffset: { width: 0, height: 2 },
                   }}>
                   <PlusIcon size={26} color="#fff" strokeWidth={2.6} />
                 </View>

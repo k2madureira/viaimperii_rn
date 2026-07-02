@@ -11,11 +11,18 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { LegionSelectModal, Navbar, ProvinceSetupModal, TrackSelectModal } from '../../components';
+import {
+  GlobalSearchModal,
+  LegionSelectModal,
+  Navbar,
+  ProvinceSetupModal,
+  SearchBar,
+  TrackSelectModal,
+} from '../../components';
 import { PrimusPilusEmblem } from '../../components/icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { ChangePasswordModal, StreakButton, WalletButton } from './components';
-import { CommentsModal, FeedCard, FeedComposer } from './components/feed';
+import { CommentsModal, FeedCard } from './components/feed';
 import { FeedItem } from '../../api/feed/feedApi';
 import { useLegions } from '../missions/model/queries/useLegions';
 import { useAvailableMissions } from '../missions/model/queries/useAvailableMissions';
@@ -80,6 +87,8 @@ export default function DashboardScreen() {
   const [recommendedIds] = useState<number[]>([]);
   // Modal de comentários do feed.
   const [commentsItem, setCommentsItem] = useState<FeedItem | null>(null);
+  // Modal de busca global.
+  const [searchVisible, setSearchVisible] = useState(false);
 
   const needsProvince = profileQuery.isSuccess && data?.province == null;
   const needsTrack = profileQuery.isSuccess && data?.must_choose_track === true;
@@ -165,12 +174,10 @@ export default function DashboardScreen() {
         </View>
       )}
 
-      {/* 5 — COMPOSER DE POST */}
-      <FeedComposer
-        avatarUrl={data?.active_avatar?.thumb_url ?? data?.active_avatar?.url ?? null}
-        canLegion={legion != null}
-        canProvince={data?.province != null}
-      />
+      {/* 5 — BARRA DE BUSCA GLOBAL */}
+      <View style={{ paddingTop: 6, paddingBottom: 6 }}>
+        <SearchBar onPress={() => setSearchVisible(true)} />
+      </View>
     </View>
   );
 
@@ -208,7 +215,9 @@ export default function DashboardScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#9E1B32" />
         }
-        onEndReachedThreshold={0.4}
+        // Dispara o carregamento incremental (+5) quando o usuário se aproxima
+        // do fim — ~1 tela antes do último post.
+        onEndReachedThreshold={0.6}
         onEndReached={() => {
           if (feedQuery.hasNextPage && !feedQuery.isFetchingNextPage) {
             feedQuery.fetchNextPage();
@@ -292,6 +301,8 @@ export default function DashboardScreen() {
       />
 
       <CommentsModal item={commentsItem} onClose={() => setCommentsItem(null)} />
+
+      <GlobalSearchModal visible={searchVisible} onClose={() => setSearchVisible(false)} />
     </View>
   );
 }

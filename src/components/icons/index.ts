@@ -32,6 +32,23 @@ export { default as WalletIcon } from './wallet';
 // Cruz (+) — botão de criar post na bottom tab bar
 export { default as PlusIcon } from './plus';
 
+// Lupa — barra de busca global
+export { default as SearchIcon } from './search';
+
+// Ações do menu de post (visualizar / editar / excluir)
+export { default as EyeIcon } from './eye';
+export { default as EditIcon } from './edit';
+export { default as TrashIcon } from './trash';
+
+// Ícones de reação do feed (like/clap/fire/salute) + dispatcher
+export {
+  ReactionIcon,
+  LikeReactionIcon,
+  ClapReactionIcon,
+  FireReactionIcon,
+  SaluteReactionIcon,
+} from './reactions';
+
 // Listas do editor rich (com marcadores / numerada)
 export { default as ListIcon } from './list';
 export { default as OrderedListIcon } from './orderedList';
