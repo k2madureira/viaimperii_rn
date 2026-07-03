@@ -6,7 +6,7 @@ import {
   Easing,
   FlatList,
   Image,
-  KeyboardAvoidingView,
+  Keyboard,
   Modal,
   Platform,
   Pressable,
@@ -90,6 +90,36 @@ export default function CommentsModal({ item, onClose }: Props) {
     }
   }, [item, sheetY]);
 
+  // Controle manual da altura do teclado: dentro de um Modal do Android o
+  // KeyboardAvoidingView não recebe corretamente os eventos de resize da
+  // janela nativa (o Dialog não herda o windowSoftInputMode da Activity),
+  // o que deixava um espaço residual ao fechar o teclado.
+  const keyboardHeight = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    const showEvt = Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow';
+    const hideEvt = Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide';
+    const onShow = (e: { endCoordinates: { height: number }; duration?: number }) => {
+      Animated.timing(keyboardHeight, {
+        toValue: e.endCoordinates?.height ?? 0,
+        duration: Platform.OS === 'ios' ? (e.duration ?? 250) : 180,
+        useNativeDriver: false,
+      }).start();
+    };
+    const onHide = (e: { duration?: number }) => {
+      Animated.timing(keyboardHeight, {
+        toValue: 0,
+        duration: Platform.OS === 'ios' ? (e?.duration ?? 250) : 150,
+        useNativeDriver: false,
+      }).start();
+    };
+    const subShow = Keyboard.addListener(showEvt, onShow);
+    const subHide = Keyboard.addListener(hideEvt, onHide);
+    return () => {
+      subShow.remove();
+      subHide.remove();
+    };
+  }, [keyboardHeight]);
+
   const comments = (commentsQuery.data?.pages ?? []).flatMap((p) => p.items);
 
   const submit = () => {
@@ -112,9 +142,8 @@ export default function CommentsModal({ item, onClose }: Props) {
           style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.5)' }]}
         />
 
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          style={{ flex: 1, justifyContent: 'flex-end' }}
+        <Animated.View
+          style={{ flex: 1, justifyContent: 'flex-end', paddingBottom: keyboardHeight }}
           pointerEvents="box-none">
           <Animated.View
             className="bg-white rounded-t-[24px]"
@@ -189,7 +218,7 @@ export default function CommentsModal({ item, onClose }: Props) {
               </TouchableOpacity>
             </View>
           </Animated.View>
-        </KeyboardAvoidingView>
+        </Animated.View>
       </View>
     </Modal>
   );
