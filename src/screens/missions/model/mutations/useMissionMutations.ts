@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
 import {
+  abandonMission,
   completeMission,
   MissionEvidence,
   startMission,
@@ -58,6 +59,22 @@ export function useCompleteMission() {
     },
     onError: (error: Error) => {
       Toast.show({ type: 'error', text1: i18n.t('toasts.completeError'), text2: error.message });
+    },
+  });
+}
+
+export function useAbandonMission() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (slug: string) => abandonMission(slug),
+    onSuccess: () => {
+      Toast.show({ type: 'success', text1: i18n.t('toasts.abandonTitle'), text2: i18n.t('toasts.abandonBody') });
+      queryClient.invalidateQueries({ queryKey: ['missions'] });
+      queryClient.invalidateQueries({ queryKey: ['missions-available'] });
+    },
+    onError: (error: Error) => {
+      Toast.show({ type: 'error', text1: i18n.t('toasts.abandonError'), text2: error.message });
     },
   });
 }

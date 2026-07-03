@@ -32,7 +32,7 @@ import {
 } from './components';
 
 const PAGE_SIZE = 5;
-import { useCompleteMission, useStartMission } from './model/mutations/useMissionMutations';
+import { useAbandonMission, useCompleteMission, useStartMission } from './model/mutations/useMissionMutations';
 import { useJoinLegion } from './model/mutations/useJoinLegion';
 import { useApproveMission } from './model/mutations/useApproveMission';
 import { useRejectMission } from './model/mutations/useRejectMission';
@@ -116,6 +116,7 @@ export default function MissionsScreen() {
 
   const startM = useStartMission();
   const completeM = useCompleteMission();
+  const abandonM = useAbandonMission();
   const joinLegionM = useJoinLegion(user?.user_id);
   const legionsQuery = useLegions();
   const { adState, watchAd } = useRewardedVideo();
@@ -163,6 +164,7 @@ export default function MissionsScreen() {
     : completeM.isPending
       ? completeM.variables?.slug
       : null;
+  const abandonPendingSlug = abandonM.isPending ? abandonM.variables : null;
 
   const allAvailable = availableQuery.data?.items ?? [];
   const availableMissions = sortByDifficulty(allAvailable.filter((m) => m.type === missionType));
@@ -235,7 +237,9 @@ export default function MissionsScreen() {
       mission={m}
       onStart={(slug) => startM.mutate(slug)}
       onComplete={handleComplete}
+      onAbandon={(mission) => abandonM.mutate(mission.slug)}
       pending={pendingSlug === m.slug}
+      abandonPending={abandonPendingSlug === m.slug}
     />
   );
 
