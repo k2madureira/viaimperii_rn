@@ -22,6 +22,9 @@ export { AureusCoin, DenariusCoin, AsCoin, CoinIcon, CoinAmount } from './coins'
 // Chama do streak de login
 export { default as FireIcon } from './fire';
 
+// Sino de notificações
+export { default as BellIcon } from './bell';
+
 // Seta para cima (bônus/ganho, ex.: bônus de XP por sequência)
 export { default as ArrowUpIcon } from './arrowUp';
 

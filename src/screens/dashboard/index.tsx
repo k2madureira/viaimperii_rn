@@ -21,7 +21,7 @@ import {
 } from '../../components';
 import { PrimusPilusEmblem } from '../../components/icons';
 import { useAuth } from '../../contexts/AuthContext';
-import { ChangePasswordModal, StreakButton, WalletButton } from './components';
+import { ChangePasswordModal, NotificationsButton, StreakButton, WalletButton } from './components';
 import { CommentsModal, FeedCard } from './components/feed';
 import { FeedItem } from '../../api/feed/feedApi';
 import { useLegions } from '../missions/model/queries/useLegions';
@@ -36,6 +36,7 @@ import { useTracks } from '../ranks/model/queries/useTracks';
 import { useFeed } from './model/queries/useFeed';
 import { useReactFeed } from './model/mutations/useReactFeed';
 import { useFeedEvents } from './model/hooks/useFeedEvents';
+import { useNotificationEvents } from './model/hooks/useNotificationEvents';
 import { usePersistedFlag } from '../../hooks/usePersistedFlag';
 
 export default function DashboardScreen() {
@@ -56,6 +57,7 @@ export default function DashboardScreen() {
   const feedQuery = useFeed('home', !!user);
   const reactM = useReactFeed();
   useFeedEvents(!!user);
+  useNotificationEvents(!!user);
 
   const data = profileQuery.data;
   const profile = data?.user;
@@ -141,7 +143,10 @@ export default function DashboardScreen() {
             {legion ? ` • ${legion.name}` : ''}
           </Text>
         </View>
-        {streak && streak.current_streak > 0 && <StreakButton streak={streak} />}
+        <View className="flex-row items-center gap-3">
+          {streak && streak.current_streak > 0 && <StreakButton streak={streak} />}
+          <NotificationsButton />
+        </View>
       </View>
 
       {/* 3 — CAMPANHA ATUAL */}
