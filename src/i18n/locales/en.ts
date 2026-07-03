@@ -405,6 +405,23 @@ export default {
     signOut: 'Sign out',
     openMenu: 'Open user menu',
   },
+  notifications: {
+    title: 'Notifications',
+    empty: 'No notifications yet.',
+    markAllRead: 'Mark all as read',
+    types: {
+      feed_comment: '{{from}} commented on your post',
+      feed_reaction: '{{from}} reacted to your post',
+      feed_mention: '{{from}} mentioned you in a post',
+      mission_approved: '{{from}} approved your mission ({{count}}/{{required}})',
+      mission_rejected: '{{from}} rejected your evidence — review and resend',
+      mission_finalized: 'Mission completed: {{name}} (+{{xp}} XP)',
+      rank_up: 'You reached the rank of {{rank}}!',
+      medal_earned: 'New medal earned: {{medal}}',
+      new_follower: '{{from}} started following you',
+      generic: 'You have a new notification',
+    },
+  },
   changePassword: {
     setTitle: 'Set your password',
     changeTitle: 'Change password',
@@ -543,6 +560,8 @@ export default {
     feedPostUpdateError: 'Error editing post',
     feedPostDeleted: 'Post deleted.',
     feedPostDeleteError: 'Error deleting post',
+    notificationsMarkAllError: 'Error marking notifications as read',
+    notificationsOpenPostError: 'Error opening the post',
     error: 'Error',
   },
 };

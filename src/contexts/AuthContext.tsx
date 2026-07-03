@@ -3,6 +3,7 @@ import React, { createContext, useCallback, useContext, useEffect, useState } fr
 import { registerAuthHandlers } from '../api/config/authBridge';
 import { closeMissionEvents } from '../api/missions/missionEvents';
 import { closeFeedEvents } from '../api/feed/feedEvents';
+import { closeNotificationEvents } from '../api/notifications/notificationEvents';
 import { LoginStreak } from '../api/auth/authApi';
 
 const ACCESS_KEY = 'access_token';
@@ -92,7 +93,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = useCallback(async () => {
     // Encerra a sessão SSE no servidor ANTES de apagar o token (o DELETE precisa
     // do header de auth). Best-effort — não bloqueia o logout se falhar.
-    await Promise.all([closeMissionEvents(), closeFeedEvents()]);
+    await Promise.all([closeMissionEvents(), closeFeedEvents(), closeNotificationEvents()]);
     await Promise.all([
       SecureStore.deleteItemAsync(ACCESS_KEY),
       SecureStore.deleteItemAsync(REFRESH_KEY),

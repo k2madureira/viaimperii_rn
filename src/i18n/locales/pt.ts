@@ -405,6 +405,23 @@ export default {
     signOut: 'Sair',
     openMenu: 'Abrir menu do usuário',
   },
+  notifications: {
+    title: 'Notificações',
+    empty: 'Nenhuma notificação por aqui.',
+    markAllRead: 'Marcar todas como lidas',
+    types: {
+      feed_comment: '{{from}} comentou na sua publicação',
+      feed_reaction: '{{from}} reagiu à sua publicação',
+      feed_mention: '{{from}} mencionou você numa publicação',
+      mission_approved: '{{from}} aprovou sua missão ({{count}}/{{required}})',
+      mission_rejected: '{{from}} rejeitou sua evidência — revise e reenvie',
+      mission_finalized: 'Missão concluída: {{name}} (+{{xp}} XP)',
+      rank_up: 'Você alcançou a patente {{rank}}!',
+      medal_earned: 'Nova medalha conquistada: {{medal}}',
+      new_follower: '{{from}} começou a seguir você',
+      generic: 'Você tem uma nova notificação',
+    },
+  },
   changePassword: {
     setTitle: 'Defina sua senha',
     changeTitle: 'Alterar senha',
@@ -545,6 +562,8 @@ export default {
     feedPostUpdateError: 'Erro ao editar publicação',
     feedPostDeleted: 'Publicação excluída.',
     feedPostDeleteError: 'Erro ao excluir publicação',
+    notificationsMarkAllError: 'Erro ao marcar notificações como lidas',
+    notificationsOpenPostError: 'Erro ao abrir a publicação',
     error: 'Erro',
   },
 };
