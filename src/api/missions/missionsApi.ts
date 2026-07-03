@@ -149,6 +149,23 @@ export async function startMission(slug: string): Promise<void> {
   }
 }
 
+export interface AbandonMissionResult {
+  message: string;
+  mission_slug: string;
+  status: string;
+}
+
+// Desiste de uma missão já aceita (in_progress ou pending_review) — sem afetar XP.
+export async function abandonMission(slug: string): Promise<AbandonMissionResult> {
+  const response = await apiFetch(`/missions/${slug}/abandon`, { method: 'POST' });
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao desistir da missão'));
+  }
+
+  return readContent<AbandonMissionResult>(response);
+}
+
 export async function registerRewardedVideo(): Promise<RewardedVideoResult> {
   const response = await apiFetch('/missions/rewarded-video', { method: 'POST' });
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Alert, Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
@@ -13,7 +13,9 @@ interface Props {
   mission: Mission;
   onStart: (slug: string) => void;
   onComplete: (mission: Mission) => void;
+  onAbandon: (mission: Mission) => void;
   pending: boolean;
+  abandonPending: boolean;
 }
 
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -161,7 +163,7 @@ function ReviewPanel({ mission }: { mission: Mission }) {
   );
 }
 
-export default function MissionItem({ mission, onStart, onComplete, pending }: Props) {
+export default function MissionItem({ mission, onStart, onComplete, onAbandon, pending, abandonPending }: Props) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const isCompleted = mission.status === 'completed';
@@ -171,6 +173,17 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
   const needsApproval = mission.approvals_required > 0;
   const diffColor = DIFFICULTY_COLOR[mission.difficulty ?? ''] ?? '#aaa';
   const completedAtLabel = formatBackendDateTime(mission.completed_at);
+  // Qualquer ação em andamento neste card trava as outras (evita duplo tap).
+  const busy = pending || abandonPending;
+
+  // Desistir é permitido em in_progress e pending_review (o backend não concede
+  // XP em nenhum dos dois, então nada é perdido além do progresso/evidência).
+  const confirmAbandon = () => {
+    Alert.alert(t('missionItem.abandonConfirmTitle'), t('missionItem.abandonConfirmBody'), [
+      { text: t('evidenceModal.cancel'), style: 'cancel' },
+      { text: t('missionItem.abandonConfirmAction'), style: 'destructive', onPress: () => onAbandon(mission) },
+    ]);
+  };
 
   // Bônus de XP por sequência de login — mesmo percentual aplicado pelo backend
   // em finalize_pending_mission().
@@ -262,19 +275,47 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
         </View>
       </View>
 
-      {isPendingReview && <ReviewPanel mission={mission} />}
+      {isPendingReview && (
+        <>
+          <ReviewPanel mission={mission} />
+          <View className="mt-2">
+            <TouchableOpacity
+              disabled={busy}
+              activeOpacity={0.85}
+              onPress={confirmAbandon}
+              className="rounded-[10px] py-2 items-center border border-[#e0e0e0]">
+              {abandonPending ? (
+                <ActivityIndicator color="#888" size="small" />
+              ) : (
+                <Text className="text-[12px] font-bold text-[#888]">{t('missionItem.abandonMission')}</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
 
       {isInProgress && (
-        <View className="mt-3">
+        <View className="mt-3 flex-row gap-2">
           <TouchableOpacity
-            disabled={pending}
+            disabled={busy}
             activeOpacity={0.85}
             onPress={() => onComplete(mission)}
-            className="rounded-[10px] py-2.5 items-center bg-primary-500">
+            className="flex-1 rounded-[10px] py-2.5 items-center bg-primary-500">
             {pending ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
               <Text className="text-[13px] font-bold text-white">{t('missionItem.completeMission')}</Text>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            disabled={busy}
+            activeOpacity={0.85}
+            onPress={confirmAbandon}
+            className="rounded-[10px] py-2.5 px-4 items-center border border-[#e0c9cb]">
+            {abandonPending ? (
+              <ActivityIndicator color="#9E1B32" size="small" />
+            ) : (
+              <Text className="text-[13px] font-bold text-primary-500">{t('missionItem.abandonMission')}</Text>
             )}
           </TouchableOpacity>
         </View>
