@@ -169,9 +169,9 @@ export default function RanksScreen() {
                     <View className="flex-row items-center">
                       {/* Imagem da patente */}
                       <View className="w-11 h-11 rounded-full bg-[#faf7f7] items-center justify-center overflow-hidden">
-                        {r.image_url ? (
+                        {r.thumb_url ?? r.image_url ? (
                           <Image
-                            source={{ uri: r.image_url }}
+                            source={{ uri: (r.thumb_url ?? r.image_url) as string }}
                             style={{ width: 36, height: 36, opacity: isLocked ? 0.2 : isAchieved ? 1 : 0.35 }}
                             resizeMode="contain"
                           />

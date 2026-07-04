@@ -116,6 +116,14 @@ export default function FeedCard({
   }, [item.created_at, t, i18n.language]);
 
   const isSystem = item.source === 'system';
+  // Eventos de atividade (rank_up, mission_completed, …) usam o card de evento.
+  // Posts de conteúdo (verb `user_post`) renderizam corpo/mídia normalmente —
+  // inclusive os gerados por IA, que vêm com `source: system` mas são posts reais.
+  const isActivityEvent = item.verb !== 'user_post';
+  // Post de cronista (IA): conteúdo `user_post` publicado pelo sistema. Não tem
+  // patente real (o autor é um bot), então escondemos o rank e destacamos o
+  // avatar com uma borda vermelha.
+  const isCronista = item.source === 'system' && !isActivityEvent;
   const meta = EVENT_META[item.verb];
 
   // Linha do evento de sistema (usa o payload snapshotado).
@@ -145,7 +153,10 @@ export default function FeedCard({
       <View className="flex-row items-center px-4">
         <View ref={avatarRef} collapsable={false} className="mr-3">
           <TouchableOpacity onPress={openUser} activeOpacity={0.8}>
-            <View className="w-10 h-10 rounded-full bg-[#efeaea] items-center justify-center overflow-hidden">
+            <View
+              className={`w-10 h-10 rounded-full bg-[#efeaea] items-center justify-center overflow-hidden ${
+                isCronista ? 'border-2 border-primary-500' : ''
+              }`}>
               {avatarUrl ? (
                 <Image source={{ uri: avatarUrl }} style={{ width: 40, height: 40 }} resizeMode="cover" />
               ) : (
@@ -159,7 +170,7 @@ export default function FeedCard({
             {author.name}
           </Text>
           <Text className="text-[11px] text-[#999]" numberOfLines={1}>
-            {author.rank?.name ? `${author.rank.name} • ` : ''}
+            {!isCronista && author.rank?.name ? `${author.rank.name} • ` : ''}
             {relativeTime}
           </Text>
         </TouchableOpacity>
@@ -173,7 +184,7 @@ export default function FeedCard({
       </View>
 
       {/* Conteúdo */}
-      {isSystem ? (
+      {isActivityEvent ? (
         <View className="flex-row items-start mt-3 mx-4 bg-[#faf7f7] rounded-[12px] p-3">
           <Text className="text-[18px] mr-2">{meta?.emoji ?? '✨'}</Text>
           <View className="flex-1">
@@ -238,7 +249,10 @@ export default function FeedCard({
       <AnchoredPopover anchor={userAnchor} onClose={() => setUserAnchor(null)} width={234} align="left">
         <View className="p-3.5">
           <View className="flex-row items-center">
-            <View className="w-12 h-12 rounded-full bg-[#efeaea] items-center justify-center overflow-hidden mr-3">
+            <View
+              className={`w-12 h-12 rounded-full bg-[#efeaea] items-center justify-center overflow-hidden mr-3 ${
+                isCronista ? 'border-2 border-primary-500' : ''
+              }`}>
               {avatarUrl ? (
                 <Image source={{ uri: avatarUrl }} style={{ width: 48, height: 48 }} resizeMode="cover" />
               ) : (
@@ -249,11 +263,11 @@ export default function FeedCard({
               <Text className="text-[14px] font-extrabold text-charcoal" numberOfLines={1}>
                 {author.name}
               </Text>
-              {author.rank?.name ? (
+              {!isCronista && author.rank?.name ? (
                 <View className="flex-row items-center mt-0.5">
-                  {author.rank.image ? (
+                  {author.rank.thumb ?? author.rank.image ? (
                     <Image
-                      source={{ uri: author.rank.image }}
+                      source={{ uri: (author.rank.thumb ?? author.rank.image) as string }}
                       style={{ width: 16, height: 16, marginRight: 4 }}
                       resizeMode="contain"
                     />

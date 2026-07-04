@@ -16,11 +16,11 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionAttributes, Navbar } from '../../components';
 import { useLegionDetail } from '../dashboard/model/queries/useLegionDetail';
 import { LegionCountry } from '../../api/legion/legionApi';
-import { LegionStackParamList } from '../../navigation/LegionStack';
+import { HomeStackParamList } from '../../navigation/HomeStack';
 import { legionColorById } from '../../utils/legionColors';
 import { useLegions } from '../missions/model/queries/useLegions';
 
-type WarRoomRoute = RouteProp<LegionStackParamList, 'WarRoom'>;
+type WarRoomRoute = RouteProp<HomeStackParamList, 'WarRoom'>;
 
 export default function WarRoomScreen() {
   const insets = useSafeAreaInsets();

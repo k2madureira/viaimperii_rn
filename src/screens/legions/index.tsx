@@ -21,7 +21,7 @@ import { useUserProfile } from '../dashboard/model/queries/useUserProfile';
 import { useLegions } from '../missions/model/queries/useLegions';
 import { useJoinLegion } from '../missions/model/mutations/useJoinLegion';
 import { legionColorByIndex } from '../../utils/legionColors';
-import { LegionNavigationProp } from '../../navigation/LegionStack';
+import { HomeNavigationProp } from '../../navigation/HomeStack';
 
 const TRACK_CHANGE_PENALTY_PCT = 0.05;
 
@@ -39,7 +39,7 @@ export default function LegionsScreen() {
   const [allImagesLoaded, setAllImagesLoaded] = useState(false);
   const [loadedCount, setLoadedCount] = useState(0);
 
-  const totalImages = legions.filter((l) => l.image_url).length;
+  const totalImages = legions.filter((l) => l.thumb_url ?? l.image_url).length;
 
   const handleImageLoad = useCallback(() => {
     setLoadedCount((prev) => {
@@ -82,10 +82,10 @@ export default function LegionsScreen() {
         {!allImagesLoaded && legions.length > 0 && (
           <View style={{ position: 'absolute', opacity: 0, width: 1, height: 1, overflow: 'hidden' }}>
             {legions.map((l) =>
-              l.image_url ? (
+              l.thumb_url ?? l.image_url ? (
                 <Image
                   key={l.id}
-                  source={{ uri: l.image_url }}
+                  source={{ uri: (l.thumb_url ?? l.image_url) as string }}
                   style={{ width: 1, height: 1 }}
                   onLoad={handleImageLoad}
                   onError={handleImageLoad}
@@ -209,9 +209,9 @@ function LegionBadges({
                   borderWidth: isUserLegion ? 2.5 : isActive ? 2 : 0,
                   borderColor: isUserLegion ? '#2F7A52' : color,
                 }}>
-                {legion.image_url ? (
+                {legion.thumb_url ?? legion.image_url ? (
                   <Image
-                    source={{ uri: legion.image_url }}
+                    source={{ uri: (legion.thumb_url ?? legion.image_url) as string }}
                     style={{
                       width: 40,
                       height: 40,
@@ -265,7 +265,7 @@ function LegionExpandedCard({
   userId: string | undefined;
 }) {
   const { t } = useTranslation();
-  const navigation = useNavigation<LegionNavigationProp>();
+  const navigation = useNavigation<HomeNavigationProp>();
   const [showConfirm, setShowConfirm] = useState(false);
   const joinMutation = useJoinLegion(userId);
 
@@ -288,9 +288,9 @@ function LegionExpandedCard({
           <View
             className="w-24 h-24 rounded-full items-center justify-center overflow-hidden"
             style={{ backgroundColor: `${color}10` }}>
-            {legion.image_url ? (
+            {legion.thumb_url ?? legion.image_url ? (
               <Image
-                source={{ uri: legion.image_url }}
+                source={{ uri: (legion.thumb_url ?? legion.image_url) as string }}
                 style={{ width: 80, height: 80 }}
                 resizeMode="contain"
               />

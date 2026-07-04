@@ -47,9 +47,9 @@ export default function LegionCard({ legion, color, onPress }: Props) {
       <View className="flex-row items-center">
         {/* Insígnia da legião */}
         <View className="w-16 h-16 rounded-full bg-white/15 items-center justify-center mr-4 overflow-hidden">
-          {legion.image_url ? (
+          {legion.thumb_url ?? legion.image_url ? (
             <Image
-              source={{ uri: legion.image_url }}
+              source={{ uri: (legion.thumb_url ?? legion.image_url) as string }}
               style={{ width: 52, height: 52 }}
               resizeMode="contain"
             />

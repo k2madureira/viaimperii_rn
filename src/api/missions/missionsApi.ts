@@ -23,6 +23,8 @@ export interface Mission {
   status: MissionStatus;
   proof_type: ProofType;
   acceptance_criteria: string | null;
+  // Tags temáticas derivadas da cópia (migration 0049); sempre presente ([] quando sem tema).
+  tags: string[];
   // Preenchidos apenas enquanto status === 'pending_review' (janela de revisão).
   completable_at: string | null;
   remaining_seconds: number | null;
@@ -141,6 +143,47 @@ export async function getAvailableMissions(
   return readContent<PaginatedMissions>(response);
 }
 
+// ── Missões recomendadas (content-based, GET /missions/recommended) ───────────
+
+// Missão do feed de recomendação: além dos campos base, traz o resultado do
+// ranqueamento (score 0..1, motivos em PT-BR e tags que casaram com o perfil).
+export interface RecommendedMission extends Mission {
+  score: number;
+  reasons: string[];
+  matched_tags: string[];
+}
+
+export interface RecommendedMissions {
+  page: number;
+  perPage: number;
+  totalItems: number;
+  // false em cold start (usuário sem histórico) — ordem padrão do catálogo, sem score.
+  personalized: boolean;
+  items: RecommendedMission[];
+  availableMissions?: MissionAllowance;
+}
+
+export async function getRecommendedMissions(
+  specialtyId?: number,
+  difficulty?: MissionDifficulty,
+  type?: 'daily' | 'monthly',
+  page = 1,
+  perPage = 50,
+): Promise<RecommendedMissions> {
+  const parts = [`page=${page}`, `perPage=${perPage}`];
+  if (specialtyId != null) parts.push(`specialtyId=${specialtyId}`);
+  if (difficulty != null) parts.push(`difficulty=${difficulty}`);
+  if (type != null) parts.push(`type=${type}`);
+
+  const response = await apiFetch(`/missions/recommended?${parts.join('&')}`);
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao carregar missões recomendadas'));
+  }
+
+  return readContent<RecommendedMissions>(response);
+}
+
 export async function startMission(slug: string): Promise<void> {
   const response = await apiFetch(`/missions/${slug}/start`, { method: 'POST' });
 
@@ -247,6 +290,7 @@ export interface RankMini {
   id: number;
   name: string;
   image: string | null;
+  thumb: string | null; // webp leve (256px) p/ badge de patente
 }
 
 export interface ActiveAvatar {
