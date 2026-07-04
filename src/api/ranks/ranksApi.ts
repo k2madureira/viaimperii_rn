@@ -37,6 +37,7 @@ export interface Rank {
   description: string | null;
   icon_url: string | null;
   image_url: string | null;
+  thumb_url: string | null; // webp leve (256px) p/ listas/grids
   track_id: number | null; // NULL = patente compartilhada (Recruta I-IV, Governador+)
   xp_required: number; // XP acumulado para alcançar a patente (curva variável)
 }

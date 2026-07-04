@@ -24,6 +24,7 @@ export interface RankImage {
   level: number;
   icon_url: string | null;
   image_url: string | null;
+  thumb_url: string | null; // webp leve (256px) p/ listas/grids
 }
 
 // Asset cosmético equipado (avatar) — retornado no login e no detail do usuário.
@@ -73,6 +74,7 @@ export interface UserLegion {
   symbol: string | null;
   description: string | null;
   image_url: string | null;
+  thumb_url: string | null; // webp leve (256px) p/ listas/grids
   specialty_id: number | null;
 }
 

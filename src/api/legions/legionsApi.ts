@@ -6,6 +6,7 @@ export interface Legion {
   symbol: string | null;
   description: string | null;
   image_url: string | null;
+  thumb_url: string | null; // webp leve (256px) p/ listas/grids
   specialty_id: number | null;
 }
 

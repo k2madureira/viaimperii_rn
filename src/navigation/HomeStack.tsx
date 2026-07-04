@@ -4,6 +4,7 @@ import React from 'react';
 import DashboardScreen from '../screens/dashboard';
 import RanksScreen from '../screens/ranks';
 import LegionsScreen from '../screens/legions';
+import WarRoomScreen from '../screens/legions/WarRoom';
 import ProfileScreen from '../screens/profile';
 import PostDetailScreen from '../screens/postDetail';
 import { FeedItem } from '../api/feed/feedApi';
@@ -12,6 +13,7 @@ export type HomeStackParamList = {
   Dashboard: undefined;
   Ranks: undefined;
   Legions: undefined;
+  WarRoom: { legionId: number };
   Profile: { userId?: string } | undefined;
   PostDetail: { post: FeedItem };
 };
@@ -26,6 +28,7 @@ export default function HomeStack() {
       <Stack.Screen name="Dashboard" component={DashboardScreen} />
       <Stack.Screen name="Ranks" component={RanksScreen} />
       <Stack.Screen name="Legions" component={LegionsScreen} />
+      <Stack.Screen name="WarRoom" component={WarRoomScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="PostDetail" component={PostDetailScreen} />
     </Stack.Navigator>

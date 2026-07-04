@@ -37,6 +37,7 @@ import { useJoinLegion } from './model/mutations/useJoinLegion';
 import { useApproveMission } from './model/mutations/useApproveMission';
 import { useRejectMission } from './model/mutations/useRejectMission';
 import { useAvailableMissions } from './model/queries/useAvailableMissions';
+import { useRecommendedMissions } from './model/queries/useRecommendedMissions';
 import { useLegions } from './model/queries/useLegions';
 import { useMissions } from './model/queries/useMissions';
 import { useMissionsToReview } from './model/queries/useMissionsToReview';
@@ -70,6 +71,8 @@ export default function MissionsScreen() {
   const [missionType, setMissionType] = useState<'daily' | 'monthly'>('daily');
   const [specialtyId, setSpecialtyId] = useState<number | null>(null);
   const [difficultyFilter, setDifficultyFilter] = useState<MissionDifficulty | null>(null);
+  // Aba "Disponíveis": ordena por recomendação (padrão) ou lista completa.
+  const [availableMode, setAvailableMode] = useState<'recommended' | 'all'>('recommended');
   const [visible, setVisible] = useState(PAGE_SIZE);
   const isReview = viewMode === 'review';
 
@@ -88,12 +91,22 @@ export default function MissionsScreen() {
     if (isBelowRecruitIV) setDifficultyFilter(null);
   }, [isBelowRecruitIV]);
 
-  // Reinicia a paginação ao trocar de aba, tipo, especialidade ou nível.
-  useEffect(() => setVisible(PAGE_SIZE), [tab, missionType, specialtyId, difficultyFilter]);
+  // Reinicia a paginação ao trocar de aba, tipo, especialidade, nível ou modo.
+  useEffect(() => setVisible(PAGE_SIZE), [tab, missionType, specialtyId, difficultyFilter, availableMode]);
+
+  const isRecommended = availableMode === 'recommended';
 
   const statsQuery = useUserStats(user?.user_id, period);
   const specialtiesQuery = useSpecialties();
+  // Mantida sempre viva (fora do histórico) para o saldo/allowance, mesmo no modo recomendado.
   const availableQuery = useAvailableMissions(specialtyId, effectiveDifficulty, !isHistory);
+  // Feed recomendado (content-based) — só quando a aba "Disponíveis" está em modo recomendado.
+  const recommendedQuery = useRecommendedMissions(
+    specialtyId,
+    effectiveDifficulty,
+    missionType,
+    tab === 'available' && isRecommended,
+  );
   // Catálogo completo (já filtrado por trilha no backend) — usado para derivar
   // quais especialidades pertencem à trilha do usuário, sem o efeito da cota diária.
   // Obs.: paginado (perPage=100) — não usar para achar missões específicas do usuário,
@@ -168,6 +181,8 @@ export default function MissionsScreen() {
 
   const allAvailable = availableQuery.data?.items ?? [];
   const availableMissions = sortByDifficulty(allAvailable.filter((m) => m.type === missionType));
+  // Recomendadas já vêm ranqueadas por score no backend — preserva a ordem (sem re-sort).
+  const recommendedMissions = (recommendedQuery.data?.items ?? []).filter((m) => m.type === missionType);
 
   // Especialidades da trilha do usuário (derivadas do catálogo completo, não da
   // lista capada pela cota). Sem trilha definida → mostra todas.
@@ -212,7 +227,7 @@ export default function MissionsScreen() {
   } else if(isInProgress){
     refreshing = inProgressActiveQuery.isRefetching || pendingReviewQuery.isRefetching;
   } else if (!isHistory && !isInProgress) {
-    refreshing = availableQuery.isRefetching
+    refreshing = isRecommended ? recommendedQuery.isRefetching : availableQuery.isRefetching;
   }
 
   const onRefresh = () => {
@@ -226,6 +241,9 @@ export default function MissionsScreen() {
     } else if (isInProgress) {
       inProgressActiveQuery.refetch();
       pendingReviewQuery.refetch();
+    } else if (isRecommended) {
+      recommendedQuery.refetch();
+      availableQuery.refetch();
     } else {
       availableQuery.refetch();
     }
@@ -375,6 +393,20 @@ export default function MissionsScreen() {
           <View className="p-3 gap-3">
             {tab === 'available' && (
               <>
+                {/* Modo de ordenação: recomendadas (personalizado) x lista completa. */}
+                <View className="flex-row bg-[#f4f4f4] rounded-[10px] p-1">
+                  <SortModeTab
+                    label={t('missions.tabRecommended')}
+                    active={isRecommended}
+                    onPress={() => setAvailableMode('recommended')}
+                  />
+                  <SortModeTab
+                    label={t('missions.tabAll')}
+                    active={!isRecommended}
+                    onPress={() => setAvailableMode('all')}
+                  />
+                </View>
+
                 {/* Filtros empilhados: especialidade (chips) + nível (chips visíveis).
                     O nível antes era um ícone de funil escondido — usuários não o
                     encontravam; agora é uma linha de chips rotulada e clara. */}
@@ -402,7 +434,19 @@ export default function MissionsScreen() {
                   </View>
                 )}
 
-                {availableQuery.isLoading ? (
+                {isRecommended ? (
+                  recommendedQuery.isLoading ? (
+                    <View className="py-12 items-center">
+                      <ActivityIndicator color="#8B1A2B" />
+                    </View>
+                  ) : recommendedQuery.isError ? (
+                    <ErrorBox text={t('missions.errorRecommended')} />
+                  ) : recommendedMissions.length === 0 ? (
+                    <EmptyBox text={t('missions.emptyAvailable')} />
+                  ) : (
+                    renderList(recommendedMissions)
+                  )
+                ) : availableQuery.isLoading ? (
                   <View className="py-12 items-center">
                     <ActivityIndicator color="#8B1A2B" />
                   </View>
@@ -634,6 +678,28 @@ function ModeTab({
           <Text className="text-[10px] font-bold text-white">{badge}</Text>
         </View>
       )}
+    </TouchableOpacity>
+  );
+}
+
+function SortModeTab({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={onPress}
+      className={`flex-1 py-2 rounded-[8px] items-center ${active ? 'bg-white' : ''}`}
+      style={active ? { shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 } : undefined}>
+      <Text className={`text-[12px] font-bold ${active ? 'text-primary-500' : 'text-[#aaa]'}`}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 }

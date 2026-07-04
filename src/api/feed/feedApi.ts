@@ -22,6 +22,7 @@ export interface FeedRankMini {
   id: number;
   name: string;
   image: string | null;
+  thumb: string | null; // webp leve (256px) p/ badge de patente
 }
 
 export interface FeedActiveAvatar {
