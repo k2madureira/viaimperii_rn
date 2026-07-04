@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
+import i18n from '../../../../../i18n';
 import { loginRequest } from '../../../../../api/auth/authApi';
 import { useAuth } from '../../../../../contexts/AuthContext';
 
@@ -21,6 +22,7 @@ export function useLoginMutation(onIncompleteSignup?: (email: string) => void) {
         mastery: data.mastery,
         legion_id: data.legion_id,
         province_id: data.province_id,
+        streak: data.streak ?? null,
       });
     },
     onError: (error: Error, variables) => {
@@ -30,8 +32,8 @@ export function useLoginMutation(onIncompleteSignup?: (email: string) => void) {
       }
       Toast.show({
         type: 'error',
-        text1: 'Erro ao fazer login',
-        text2: error.message ?? 'Ocorreu um erro. Tente novamente.',
+        text1: i18n.t('toasts.loginError'),
+        text2: error.message ?? i18n.t('common.genericError'),
       });
     },
   });

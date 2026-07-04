@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { getLegion } from '../../../../api/legion/legionApi';
+import { getLegion, LegionDetail } from '../../../../api/legion/legionApi';
 
 export function useLegionDetail(legionId: number | null | undefined) {
-  return useQuery({
+  return useQuery<LegionDetail>({
     queryKey: ['legion-detail', legionId],
     queryFn: () => getLegion(legionId as number),
     enabled: legionId != null,

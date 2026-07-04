@@ -1,5 +1,6 @@
 import React from 'react';
 import { Image, Platform, Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { UserLegion } from '../../../../api/users/userApi';
 
 interface Props {
@@ -10,27 +11,33 @@ interface Props {
 }
 
 export default function LegionCard({ legion, color, onPress }: Props) {
+  const { t } = useTranslation();
+  const Wrapper: any = onPress ? TouchableOpacity : View;
+
   // Sem legião: card no mesmo formato, porém vazio/informativo.
   if (!legion) {
     return (
-      <View className="bg-laurel rounded-[16px] p-5 min-h-[132px] justify-center">
-        <Text className="text-[11px] font-semibold text-white/70 tracking-[3px] uppercase">
-          Sua legião
-        </Text>
+      <Wrapper
+        className="bg-laurel rounded-[16px] p-5 min-h-[132px] justify-center"
+        {...(onPress ? { onPress, activeOpacity: 0.9 } : {})}>
+        <View className="flex-row items-center justify-between">
+          <Text className="text-[11px] font-semibold text-white/70 tracking-[3px] uppercase">
+            {t('legionCard.yourLegion')}
+          </Text>
+          {onPress ? <Text className="text-white/60 text-[20px]">›</Text> : null}
+        </View>
         <View className="h-1.5" />
         <Text
           className="text-[20px] font-extrabold text-white"
           style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-          Nenhuma legião
+          {t('legionCard.noLegion')}
         </Text>
         <Text className="text-[12px] text-white/80 mt-1.5">
-          Conclua sua primeira missão para escolher uma legião.
+          {t('legionCard.completeFirstMission')}
         </Text>
-      </View>
+      </Wrapper>
     );
   }
-
-  const Wrapper: any = onPress ? TouchableOpacity : View;
 
   return (
     <Wrapper
@@ -40,9 +47,9 @@ export default function LegionCard({ legion, color, onPress }: Props) {
       <View className="flex-row items-center">
         {/* Insígnia da legião */}
         <View className="w-16 h-16 rounded-full bg-white/15 items-center justify-center mr-4 overflow-hidden">
-          {legion.image_url ? (
+          {legion.thumb_url ?? legion.image_url ? (
             <Image
-              source={{ uri: legion.image_url }}
+              source={{ uri: (legion.thumb_url ?? legion.image_url) as string }}
               style={{ width: 52, height: 52 }}
               resizeMode="contain"
             />
@@ -53,7 +60,7 @@ export default function LegionCard({ legion, color, onPress }: Props) {
 
         <View className="flex-1">
           <Text className="text-[11px] font-semibold text-white/70 tracking-[3px] uppercase">
-            Sua legião
+            {t('legionCard.yourLegion')}
           </Text>
           <View className="h-1" />
           <Text
@@ -73,7 +80,7 @@ export default function LegionCard({ legion, color, onPress }: Props) {
       ) : null}
 
       {onPress ? (
-        <Text className="text-[11px] text-white/70 mt-2">Toque para ver todas as legiões ›</Text>
+        <Text className="text-[11px] text-white/70 mt-2">{t('legionCard.tapToSeeAll')}</Text>
       ) : null}
     </Wrapper>
   );

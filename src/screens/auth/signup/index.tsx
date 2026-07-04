@@ -1,6 +1,6 @@
 import { useRoute, RouteProp } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Platform, Text, View } from 'react-native';
+import { Platform, Text, View, Animated } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { LogoIcon } from '../../../components';
 import AuthContainer from '../components/AuthContainer';
@@ -30,6 +30,8 @@ export default function SignupScreen() {
     setStep(3);
   };
 
+  const TOTAL_STEPS = 3;
+
   return (
     <AuthContainer>
       <LogoIcon size={40} color="#111" />
@@ -40,7 +42,28 @@ export default function SignupScreen() {
         {t('common.appName')}
       </Text>
 
-      <View className="h-5" />
+      <View className="h-4" />
+
+      {/* Indicador de progresso */}
+      <View className="items-center">
+        <View className="flex-row gap-2">
+          {Array.from({ length: TOTAL_STEPS }).map((_, i) => {
+            const done = i < step - 1;
+            const active = i === step - 1;
+            return (
+              <View
+                key={i}
+                className={`h-1.5 rounded-full ${active ? 'w-8 bg-primary-500' : done ? 'w-4 bg-primary-500/40' : 'w-4 bg-[#e0e0e0]'}`}
+              />
+            );
+          })}
+        </View>
+        <Text className="text-[11px] text-[#aaa] mt-1.5">
+          {t('auth.signup.stepProgress', { step, total: TOTAL_STEPS })}
+        </Text>
+      </View>
+
+      <View className="h-4" />
 
       {step === 1 && (
         <>

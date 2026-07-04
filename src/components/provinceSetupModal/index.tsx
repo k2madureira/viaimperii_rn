@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import * as Location from 'expo-location';
+import { useTranslation } from 'react-i18next';
 import { getProvinces, Province } from '../../api/provinces/provincesApi';
 
 type Step = 'intro' | 'locating' | 'confirm' | 'manual';
@@ -22,6 +23,7 @@ interface Props {
 }
 
 export default function ProvinceSetupModal({ visible, pending = false, onConfirm, onClose }: Props) {
+  const { t } = useTranslation();
   const [step, setStep] = useState<Step>('intro');
   const [detected, setDetected] = useState<Province | null>(null);
   const [search, setSearch] = useState('');
@@ -67,7 +69,7 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setError('Permissão de localização negada.');
+        setError(t('provinceSetup.locationDenied'));
         setStep('manual');
         return;
       }
@@ -95,7 +97,7 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
         setStep('manual');
       }
     } catch {
-      setError('Não foi possível obter sua localização.');
+      setError(t('provinceSetup.locationError'));
       setStep('manual');
     }
   };
@@ -106,13 +108,13 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
         <View className="w-full bg-white rounded-[20px] p-6" style={{ maxHeight: '80%' }}>
           {/* Cabeçalho */}
           <View className="items-center">
-            <View className="w-12 h-12 rounded-full bg-primary/10 items-center justify-center mb-3">
+            <View className="w-12 h-12 rounded-full bg-primary-500/10 items-center justify-center mb-3">
               <Text className="text-[22px]">📍</Text>
             </View>
             <Text
               className="text-[18px] font-extrabold text-[#111] text-center"
               style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-              Onde fica seu domínio?
+              {t('provinceSetup.title')}
             </Text>
           </View>
 
@@ -120,20 +122,19 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
           {step === 'intro' && (
             <View>
               <Text className="text-[13px] text-[#555] leading-[19px] text-center mt-3">
-                Precisamos da sua localização para situar você em uma província do Império e mostrar
-                a presença das legiões na sua região.
+                {t('provinceSetup.introDescription')}
               </Text>
               <TouchableOpacity
                 onPress={locate}
                 activeOpacity={0.9}
-                className="w-full bg-primary rounded-[12px] py-3.5 items-center mt-5">
-                <Text className="text-[15px] font-bold text-white">Permitir localização</Text>
+                className="w-full bg-primary-500 rounded-[12px] py-3.5 items-center mt-5">
+                <Text className="text-[15px] font-bold text-white">{t('provinceSetup.allowLocation')}</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={() => setStep('manual')}
                 activeOpacity={0.85}
                 className="w-full py-3 items-center mt-1">
-                <Text className="text-[14px] font-bold text-[#888]">Escolher manualmente</Text>
+                <Text className="text-[14px] font-bold text-[#888]">{t('provinceSetup.chooseManually')}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -142,7 +143,7 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
           {step === 'locating' && (
             <View className="py-8 items-center">
               <ActivityIndicator color="#8B1A2B" />
-              <Text className="text-[13px] text-[#888] mt-3">Localizando você no Império…</Text>
+              <Text className="text-[13px] text-[#888] mt-3">{t('provinceSetup.locating')}</Text>
             </View>
           )}
 
@@ -150,10 +151,10 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
           {step === 'confirm' && detected && (
             <View>
               <Text className="text-[13px] text-[#555] text-center mt-3">
-                Detectamos que você está em:
+                {t('provinceSetup.detectedYouAt')}
               </Text>
-              <View className="bg-primary/10 rounded-[12px] px-4 py-3 mt-2 items-center">
-                <Text className="text-[17px] font-extrabold text-primary">
+              <View className="bg-primary-500/10 rounded-[12px] px-4 py-3 mt-2 items-center">
+                <Text className="text-[17px] font-extrabold text-primary-500">
                   {detected.name}
                   {detected.abbreviation ? ` · ${detected.abbreviation}` : ''}
                 </Text>
@@ -162,11 +163,11 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
                 onPress={() => onConfirm(detected.id)}
                 disabled={pending}
                 activeOpacity={0.9}
-                className="w-full bg-primary rounded-[12px] py-3.5 items-center mt-5">
+                className="w-full bg-primary-500 rounded-[12px] py-3.5 items-center mt-5">
                 {pending ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text className="text-[15px] font-bold text-white">Confirmar</Text>
+                  <Text className="text-[15px] font-bold text-white">{t('common.confirm')}</Text>
                 )}
               </TouchableOpacity>
               <TouchableOpacity
@@ -177,7 +178,7 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
                 disabled={pending}
                 activeOpacity={0.85}
                 className="w-full py-3 items-center mt-1">
-                <Text className="text-[14px] font-bold text-[#888]">Escolher outra</Text>
+                <Text className="text-[14px] font-bold text-[#888]">{t('provinceSetup.chooseOther')}</Text>
               </TouchableOpacity>
             </View>
           )}
@@ -191,7 +192,7 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
               <TextInput
                 value={search}
                 onChangeText={setSearch}
-                placeholder="Buscar província/estado…"
+                placeholder={t('provinceSetup.searchPlaceholder')}
                 placeholderTextColor="#aaa"
                 className="border border-[#e0dada] rounded-[12px] px-3.5 py-2.5 text-[14px] text-[#111]"
               />
@@ -218,7 +219,7 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
                     ))}
                     {results.length === 0 && (
                       <Text className="text-[13px] text-[#999] text-center py-6">
-                        Nenhuma província encontrada.
+                        {t('provinceSetup.noProvinceFound')}
                       </Text>
                     )}
                   </ScrollView>

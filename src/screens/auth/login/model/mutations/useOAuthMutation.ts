@@ -6,6 +6,7 @@ import {
 } from 'expo-auth-session';
 import { useEffect } from 'react';
 import Toast from 'react-native-toast-message';
+import i18n from '../../../../../i18n';
 import { oauthRequest } from '../../../../../api/auth/authApi';
 
 const redirectUri = makeRedirectUri({ scheme: 'viaimperii' });
@@ -20,12 +21,12 @@ function useOAuthMutation(provider: 'google' | 'github') {
   return useMutation({
     mutationFn: (accessToken: string) => oauthRequest(provider, accessToken),
     onSuccess: () => {
-      Toast.show({ type: 'success', text1: 'Login realizado com sucesso!' });
+      Toast.show({ type: 'success', text1: i18n.t('toasts.oauthSuccess') });
     },
     onError: (error: Error) => {
       Toast.show({
         type: 'error',
-        text1: `Erro ao entrar com ${provider === 'google' ? 'Google' : 'GitHub'}`,
+        text1: i18n.t('toasts.oauthError', { provider: provider === 'google' ? 'Google' : 'GitHub' }),
         text2: error.message,
       });
     },
@@ -49,7 +50,7 @@ export function useGoogleAuth() {
     if (response?.type === 'success' && response.authentication?.accessToken) {
       mutate(response.authentication.accessToken);
     } else if (response?.type === 'error') {
-      Toast.show({ type: 'error', text1: 'Autenticação com Google cancelada ou falhou.' });
+      Toast.show({ type: 'error', text1: i18n.t('toasts.oauthGoogleCancelled') });
     }
   }, [response]);
 
@@ -72,7 +73,7 @@ export function useGithubAuth() {
     if (response?.type === 'success' && response.params?.code) {
       mutate(response.params.code);
     } else if (response?.type === 'error') {
-      Toast.show({ type: 'error', text1: 'Autenticação com GitHub cancelada ou falhou.' });
+      Toast.show({ type: 'error', text1: i18n.t('toasts.oauthGithubCancelled') });
     }
   }, [response]);
 

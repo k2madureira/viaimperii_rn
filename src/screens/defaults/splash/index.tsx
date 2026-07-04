@@ -38,7 +38,7 @@ export default function SplashScreen({ onFinish }: Props) {
   }, [onFinish, opacity, scale]);
 
   return (
-    <View className="flex-1 bg-primary items-center justify-center">
+    <View className="flex-1 bg-primary-500 items-center justify-center">
       <StatusBar style="light" />
       <Animated.View style={{ opacity, transform: [{ scale }] }} className="items-center">
         <LogoIcon size={72} color="#fff" />

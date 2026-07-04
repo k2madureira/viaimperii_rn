@@ -1,18 +1,24 @@
-import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import { Platform, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ChangePasswordModal } from '../../screens/dashboard/components';
 import LogoIcon from '../logoIcon';
 import UserMenu from '../userMenu';
  
+interface Props {
+  // Slot opcional à direita (antes do UserMenu) — usado pela Home/Perfil para
+  // o botão de carteira, sem criar um header customizado.
+  rightExtra?: React.ReactNode;
+}
+
 /**
  * Navbar usada nas telas internas (Missions, Ranking, etc.):
  * logo + nome do app à esquerda, UserMenu à direita.
  * A navegação principal agora é a bottom tab bar — sem botão de menu/drawer.
  */
-export default function Navbar() {
+export default function Navbar({ rightExtra }: Props) {
+  const { t } = useTranslation();
   const [showPasswordModal, setShowPasswordModal] = useState(false);
-  const navigation = useNavigation<any>();
 
   return (
     <>
@@ -22,13 +28,13 @@ export default function Navbar() {
           <Text
             className="text-sm font-semibold text-[#111] tracking-[3px] ml-2"
             style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-            VIA IMPERII
+            {t('common.appName')}
           </Text>
         </View>
-        <UserMenu
-          onChangePassword={() => setShowPasswordModal(true)}
-          onEdit={() => navigation.navigate('Home', { screen: 'Profile' })}
-        />
+        <View className="flex-row items-center">
+          {rightExtra ? <View style={{ marginRight: 16 }}>{rightExtra}</View> : null}
+          <UserMenu onChangePassword={() => setShowPasswordModal(true)} />
+        </View>
       </View>
 
       {/* Modal de troca de senha (acionado manualmente pelo UserMenu) */}

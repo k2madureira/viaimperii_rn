@@ -98,7 +98,7 @@ export default function LoginForm() {
 
       <View className="items-end">
         <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-          <Text className="text-primary text-[13px] font-medium">
+          <Text className="text-primary-500 text-[13px] font-medium">
             {t('auth.login.forgotPassword')}
           </Text>
         </TouchableOpacity>
@@ -109,7 +109,7 @@ export default function LoginForm() {
       <form.Subscribe selector={(state) => state.isSubmitting}>
         {(isSubmitting) => (
           <TouchableOpacity
-            className="bg-primary rounded-[10px] py-[15px] items-center"
+            className="bg-primary-500 rounded-[10px] py-[15px] items-center"
             activeOpacity={0.85}
             disabled={isSubmitting || isPending}
             onPress={form.handleSubmit}>
@@ -129,7 +129,7 @@ export default function LoginForm() {
       <View className="flex-row justify-center items-center">
         <Text className="text-[13px] text-[#555]">{t('auth.login.noAccount')} </Text>
         <TouchableOpacity onPress={() => navigation.navigate('Signup')}>
-          <Text className="text-[13px] text-primary font-semibold">{t('auth.login.signup')}</Text>
+          <Text className="text-[13px] text-primary-500 font-semibold">{t('auth.login.signup')}</Text>
         </TouchableOpacity>
       </View>
 

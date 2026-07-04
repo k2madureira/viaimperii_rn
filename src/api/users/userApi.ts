@@ -24,6 +24,7 @@ export interface RankImage {
   level: number;
   icon_url: string | null;
   image_url: string | null;
+  thumb_url: string | null; // webp leve (256px) p/ listas/grids
 }
 
 // Asset cosmético equipado (avatar) — retornado no login e no detail do usuário.
@@ -32,6 +33,7 @@ export interface UserAsset {
   name: string;
   slug: string;
   url: string | null;
+  thumb_url: string | null; // webp leve p/ listas/ícones
   type: string;
   is_free: boolean;
   price: number;
@@ -72,7 +74,14 @@ export interface UserLegion {
   symbol: string | null;
   description: string | null;
   image_url: string | null;
+  thumb_url: string | null; // webp leve (256px) p/ listas/grids
   specialty_id: number | null;
+}
+
+export interface UserCountry {
+  id: number;
+  name: string;
+  icon_url: string | null;
 }
 
 export interface UserProvince {
@@ -80,6 +89,8 @@ export interface UserProvince {
   name: string;
   abbreviation: string | null;
   country_id: number | null;
+  // O detalhe do usuário aninha o country (com ícone) — opcional p/ segurança.
+  country?: UserCountry | null;
 }
 
 export interface GetUserResponse {

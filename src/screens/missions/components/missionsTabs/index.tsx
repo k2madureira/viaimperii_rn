@@ -1,5 +1,6 @@
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 export type MissionsTab = 'available' | 'history' | 'inprogress';
 
@@ -9,11 +10,7 @@ interface Props {
   missionType?: 'daily' | 'monthly';
 }
 
-const TABS: { key: MissionsTab; label: string }[] = [
-  { key: 'available', label: 'Disponíveis' },
-  { key: 'inprogress', label: 'Ativas' },
-  { key: 'history', label: 'Histórico' },
-];
+const TAB_KEYS: MissionsTab[] = ['available', 'inprogress', 'history'];
 
 // Cor do tab ativo reflete o tipo de missão selecionado.
 const ACTIVE_COLOR: Record<string, string> = {
@@ -22,23 +19,24 @@ const ACTIVE_COLOR: Record<string, string> = {
 };
 
 export default function MissionsTabs({ value, onChange, missionType = 'daily' }: Props) {
+  const { t } = useTranslation();
   const activeColor = ACTIVE_COLOR[missionType];
 
   return (
     <View className="flex-row bg-[#f4f4f4] rounded-[12px] p-1">
-      {TABS.map((tab) => {
-        const active = value === tab.key;
+      {TAB_KEYS.map((key) => {
+        const active = value === key;
         return (
           <TouchableOpacity
-            key={tab.key}
+            key={key}
             activeOpacity={0.85}
-            onPress={() => onChange(tab.key)}
+            onPress={() => onChange(key)}
             className={`flex-1 py-2.5 rounded-[9px] items-center ${active ? 'bg-white' : ''}`}
             style={active ? { shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 } : undefined}>
             <Text
               className={`text-[13px] font-bold ${active ? '' : 'text-[#aaa]'}`}
               style={active ? { color: activeColor } : undefined}>
-              {tab.label}
+              {t(`missionsTabs.${key}`)}
             </Text>
           </TouchableOpacity>
         );

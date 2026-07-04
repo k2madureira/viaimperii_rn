@@ -2,6 +2,9 @@ import { apiFetch, readContent, readError } from '../config/defaultApi';
 
 export type MissionStatus = 'available' | 'in_progress' | 'pending_review' | 'completed';
 
+// Tipo de evidência exigida para concluir a missão.
+export type ProofType = 'none' | 'link' | 'image' | 'text' | 'any';
+
 export interface Mission {
   id: number;
   slug: string;
@@ -10,17 +13,27 @@ export interface Mission {
   difficulty: 'easy' | 'medium' | 'hard' | null;
   xp_reward: number;
   mastery_reward: number;
+  // Preview do que a missão paga em moeda ao completar (valor atômico, em "asses").
+  // Não é o valor efetivamente creditado — isso só existe após a finalização.
+  coin_reward: number;
+  coin_reward_display: string;
   specialty_id: number | null;
   specialty_name: string | null;
   track_id: number | null;
   status: MissionStatus;
+  proof_type: ProofType;
+  acceptance_criteria: string | null;
+  // Tags temáticas derivadas da cópia (migration 0049); sempre presente ([] quando sem tema).
+  tags: string[];
   // Preenchidos apenas enquanto status === 'pending_review' (janela de revisão).
   completable_at: string | null;
   remaining_seconds: number | null;
   approvals_count: number;
   approvals_required: number;
-  // Preenchido apenas quando status === 'completed' (data/hora da finalização, UTC).
+  // Preenchidos apenas quando status === 'completed' (creditados na finalização).
   completed_at: string | null;
+  xp_earned: number | null;
+  mastery_earned: number | null;
 }
 
 export interface RecommendedLegion {
@@ -97,6 +110,18 @@ export async function getMissions(
     : data;
 }
 
+// Status ao vivo de UMA missão (finaliza na leitura se a janela já venceu).
+// Usado para pollar uma missão específica após o /complete.
+export async function getMission(slug: string): Promise<Mission> {
+  const response = await apiFetch(`/missions/${slug}`);
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao carregar a missão'));
+  }
+
+  return readContent<Mission>(response);
+}
+
 export type MissionDifficulty = 'easy' | 'medium' | 'hard';
 
 export async function getAvailableMissions(
@@ -118,12 +143,70 @@ export async function getAvailableMissions(
   return readContent<PaginatedMissions>(response);
 }
 
+// ── Missões recomendadas (content-based, GET /missions/recommended) ───────────
+
+// Missão do feed de recomendação: além dos campos base, traz o resultado do
+// ranqueamento (score 0..1, motivos em PT-BR e tags que casaram com o perfil).
+export interface RecommendedMission extends Mission {
+  score: number;
+  reasons: string[];
+  matched_tags: string[];
+}
+
+export interface RecommendedMissions {
+  page: number;
+  perPage: number;
+  totalItems: number;
+  // false em cold start (usuário sem histórico) — ordem padrão do catálogo, sem score.
+  personalized: boolean;
+  items: RecommendedMission[];
+  availableMissions?: MissionAllowance;
+}
+
+export async function getRecommendedMissions(
+  specialtyId?: number,
+  difficulty?: MissionDifficulty,
+  type?: 'daily' | 'monthly',
+  page = 1,
+  perPage = 50,
+): Promise<RecommendedMissions> {
+  const parts = [`page=${page}`, `perPage=${perPage}`];
+  if (specialtyId != null) parts.push(`specialtyId=${specialtyId}`);
+  if (difficulty != null) parts.push(`difficulty=${difficulty}`);
+  if (type != null) parts.push(`type=${type}`);
+
+  const response = await apiFetch(`/missions/recommended?${parts.join('&')}`);
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao carregar missões recomendadas'));
+  }
+
+  return readContent<RecommendedMissions>(response);
+}
+
 export async function startMission(slug: string): Promise<void> {
   const response = await apiFetch(`/missions/${slug}/start`, { method: 'POST' });
 
   if (!response.ok) {
     throw new Error(await readError(response, 'Erro ao iniciar missão'));
   }
+}
+
+export interface AbandonMissionResult {
+  message: string;
+  mission_slug: string;
+  status: string;
+}
+
+// Desiste de uma missão já aceita (in_progress ou pending_review) — sem afetar XP.
+export async function abandonMission(slug: string): Promise<AbandonMissionResult> {
+  const response = await apiFetch(`/missions/${slug}/abandon`, { method: 'POST' });
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao desistir da missão'));
+  }
+
+  return readContent<AbandonMissionResult>(response);
 }
 
 export async function registerRewardedVideo(): Promise<RewardedVideoResult> {
@@ -136,8 +219,21 @@ export async function registerRewardedVideo(): Promise<RewardedVideoResult> {
   return readContent<RewardedVideoResult>(response);
 }
 
-export async function completeMission(slug: string): Promise<CompleteMissionResult> {
-  const response = await apiFetch(`/missions/${slug}/complete`, { method: 'POST' });
+// Evidência enviada no pedido de conclusão (conforme o proof_type da missão).
+export interface MissionEvidence {
+  link?: string;
+  text?: string;
+  image_key?: string; // key retornada por presignUpload + upload ao S3
+}
+
+export async function completeMission(
+  slug: string,
+  evidence?: MissionEvidence,
+): Promise<CompleteMissionResult> {
+  const response = await apiFetch(`/missions/${slug}/complete`, {
+    method: 'POST',
+    body: JSON.stringify(evidence ?? {}),
+  });
 
   if (!response.ok) {
     throw new Error(await readError(response, 'Erro ao concluir missão'));
@@ -146,12 +242,55 @@ export async function completeMission(slug: string): Promise<CompleteMissionResu
   return readContent<CompleteMissionResult>(response);
 }
 
+// ── Upload de evidência (imagem) ──────────────────────────────────────────────
+
+export type EvidenceContentType = 'image/jpeg' | 'image/png' | 'image/webp';
+
+interface PresignResult {
+  upload_url: string;
+  key: string;
+  expires_in: number;
+}
+
+export async function presignEvidenceUpload(contentType: EvidenceContentType): Promise<PresignResult> {
+  const response = await apiFetch('/uploads/presign', {
+    method: 'POST',
+    body: JSON.stringify({ content_type: contentType }),
+  });
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao preparar o envio da imagem'));
+  }
+  return readContent<PresignResult>(response);
+}
+
+/**
+ * Faz upload do arquivo local direto ao S3 via presigned PUT e retorna a `key`
+ * para enviar como `image_key` no /complete. O PUT vai direto ao bucket (sem auth).
+ */
+export async function uploadEvidenceImage(
+  localUri: string,
+  contentType: EvidenceContentType,
+): Promise<string> {
+  const { upload_url, key } = await presignEvidenceUpload(contentType);
+  const blob = await (await fetch(localUri)).blob();
+  const put = await fetch(upload_url, {
+    method: 'PUT',
+    headers: { 'Content-Type': contentType },
+    body: blob,
+  });
+  if (!put.ok) {
+    throw new Error('Falha ao enviar a imagem para o armazenamento.');
+  }
+  return key;
+}
+
 // ── Revisão de missões (aprovação de pares) ───────────────────────────────────
 
 export interface RankMini {
   id: number;
   name: string;
   image: string | null;
+  thumb: string | null; // webp leve (256px) p/ badge de patente
 }
 
 export interface ActiveAvatar {
@@ -159,6 +298,7 @@ export interface ActiveAvatar {
   name: string;
   slug: string;
   url: string | null;
+  thumb_url: string | null; // webp leve p/ listas/ícones
   type: string;
 }
 
@@ -171,13 +311,23 @@ export interface ToReviewExecutor {
   legion_id: number | null;
 }
 
+// Evidência submetida pelo executor, exibida ao revisor.
+export interface MissionSubmission {
+  kind: 'link' | 'image' | 'text';
+  content: string | null; // URL do link ou texto livre
+  image_url: string | null; // presigned GET temporário (objeto privado)
+  submitted_at: string | null;
+}
+
 export interface ToReviewItem {
   mission_slug: string;
   mission_name: string;
   difficulty: 'easy' | 'medium' | 'hard' | null;
   specialty_id: number | null;
   xp_reward: number;
+  acceptance_criteria: string | null;
   executor: ToReviewExecutor;
+  submission: MissionSubmission | null;
   completable_at: string | null;
   remaining_seconds: number | null;
   approvals_count: number;
@@ -219,4 +369,27 @@ export async function approveMission(slug: string, executorId: string): Promise<
   }
 
   return readContent<ApproveMissionResult>(response);
+}
+
+export interface RejectMissionResult {
+  message: string;
+  mission_slug: string;
+  status: string;
+}
+
+export async function rejectMission(
+  slug: string,
+  executorId: string,
+  reason?: string,
+): Promise<RejectMissionResult> {
+  const response = await apiFetch(`/missions/${slug}/reject`, {
+    method: 'POST',
+    body: JSON.stringify({ executor_id: executorId, reason: reason ?? null }),
+  });
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao rejeitar missão'));
+  }
+
+  return readContent<RejectMissionResult>(response);
 }

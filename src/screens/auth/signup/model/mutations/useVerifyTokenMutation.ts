@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
+import i18n from '../../../../../i18n';
 import { verifyTokenRequest, VerifyTokenResponse } from '../../../../../api/auth/authApi';
 
 export function useVerifyTokenMutation(
@@ -12,8 +13,8 @@ export function useVerifyTokenMutation(
     onError: (error: Error) => {
       Toast.show({
         type: 'error',
-        text1: 'Verificação falhou',
-        text2: error.message ?? 'Código inválido ou expirado.',
+        text1: i18n.t('toasts.verifyFailedTitle'),
+        text2: error.message ?? i18n.t('toasts.verifyFailedBody'),
       });
     },
   });

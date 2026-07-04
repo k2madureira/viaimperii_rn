@@ -1,10 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
+import i18n from '../../../../i18n';
 import { joinLegion } from '../../../../api/legions/legionsApi';
 
 const BALANCE_LABEL: Record<string, string> = {
-  shortage: 'Sua especialidade reforça o equilíbrio da legião.',
-  excess: 'Sua especialidade já é bem representada aqui.',
+  shortage: i18n.t('toasts.balanceShortage'),
+  excess: i18n.t('toasts.balanceExcess'),
   balanced: '',
 };
 
@@ -16,13 +17,13 @@ export function useJoinLegion(userId: string | undefined) {
     onSuccess: (result) => {
       Toast.show({
         type: 'success',
-        text1: `Bem-vindo à ${result.legion_name}!`,
+        text1: i18n.t('toasts.joinLegionWelcome', { name: result.legion_name }),
         text2: BALANCE_LABEL[result.balance_status ?? 'balanced'] || undefined,
       });
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
     },
     onError: (error: Error) => {
-      Toast.show({ type: 'error', text1: 'Erro ao ingressar na legião', text2: error.message });
+      Toast.show({ type: 'error', text1: i18n.t('toasts.joinLegionError'), text2: error.message });
     },
   });
 }

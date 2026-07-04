@@ -1,21 +1,22 @@
-import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Alert, Text, TouchableOpacity, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
+import Toast from 'react-native-toast-message';
 import { Mission } from '../../../../api/missions/missionsApi';
-import { parseBackendDate, formatBackendDateTime } from '../../../../utils/date';
+import { formatBackendDateTime } from '../../../../utils/date';
+import { useMissionStatus } from '../../model/queries/useMissionStatus';
+import { useAuth } from '../../../../contexts/AuthContext';
+import { ArrowUpIcon, CoinAmount } from '../../../../components/icons';
 
 interface Props {
   mission: Mission;
   onStart: (slug: string) => void;
-  onComplete: (slug: string) => void;
+  onComplete: (mission: Mission) => void;
+  onAbandon: (mission: Mission) => void;
   pending: boolean;
+  abandonPending: boolean;
 }
-
-const DIFFICULTY_LABEL: Record<string, string> = {
-  easy: 'Fácil',
-  medium: 'Médio',
-  hard: 'Difícil',
-};
 
 const DIFFICULTY_COLOR: Record<string, string> = {
   easy: '#2F7A52',
@@ -37,84 +38,111 @@ function formatRemaining(totalSeconds: number): string {
 // Painel exibido enquanto a missão está em revisão (pending_review):
 // countdown até a finalização automática + progresso de aprovações de pares.
 function ReviewPanel({ mission }: { mission: Mission }) {
-  const targetMs = parseBackendDate(mission.completable_at)?.getTime() ?? null;
-
-  const computeRemaining = () => {
-    if (targetMs != null) return Math.max(0, Math.round((targetMs - Date.now()) / 1000));
-    return mission.remaining_seconds ?? 0;
-  };
-
-  const [remaining, setRemaining] = useState<number>(computeRemaining);
-
-  useEffect(() => {
-    setRemaining(computeRemaining());
-    if (targetMs == null) return;
-    const id = setInterval(() => {
-      setRemaining(Math.max(0, Math.round((targetMs - Date.now()) / 1000)));
-    }, 1000);
-    return () => clearInterval(id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [targetMs, mission.remaining_seconds]);
-
+  const { t } = useTranslation();
   const needsApproval = mission.approvals_required > 0;
 
-  // Estado transitório: a janela acabou mas a lista ainda não trouxe `completed`.
-  // Evita exibir contador zerado — mostra "Finalizando…" até o próximo refresh.
-  const isFinalizing = remaining <= 0;
-
-  // Ao entrar em "Finalizando…": primeiro refresh após 2s e, se a missão ainda não
-  // finalizou (skew de relógio cliente↔servidor), tenta de novo a cada 3s — com teto
-  // de tentativas. O backend finaliza de forma LAZY na leitura de /missions, então o
-  // refetch é o gatilho. IMPORTANTE: invalida APENAS as queries de missões (refetchType
-  // 'active', deduplicadas pelo React Query) — nunca o app inteiro; era a invalidação
-  // global que travava a tela. O card desmonta ao virar `completed`, encerrando o ciclo.
+  // Polla GET /missions/{slug} enquanto a missão está em revisão (este painel só
+  // existe em pending_review). A leitura finaliza a missão no backend se a janela já
+  // venceu; também detecta aprovação (→ completed) ou rejeição (→ in_progress) por pares.
   const queryClient = useQueryClient();
+  const statusQuery = useMissionStatus(mission.slug, true);
+  const liveStatus = statusQuery.data?.status;
+
+  // Countdown ANCORADO no remaining_seconds do backend (fonte fresca = poll; fallback =
+  // prop da lista) e decrementado pelo tempo decorrido LOCAL. Não usa o relógio absoluto
+  // (completable_at) para não sofrer com skew do relógio do dispositivo — era isso que
+  // fazia o contador do front zerar antes do backend.
+  const backendRemaining = statusQuery.data?.remaining_seconds ?? mission.remaining_seconds ?? 0;
+  const anchorRef = useRef({ remaining: backendRemaining, at: Date.now() });
+  const [remaining, setRemaining] = useState<number>(Math.max(0, backendRemaining));
+
+  // Reancora sempre que o backend trouxer um remaining_seconds novo (cada poll).
   useEffect(() => {
-    if (!isFinalizing) return;
-    let attempts = 0;
-    let timer: ReturnType<typeof setTimeout>;
-    const tick = () => {
-      const opts = { refetchType: 'active' as const };
-      queryClient.invalidateQueries({ queryKey: ['missions'], ...opts });
-      queryClient.invalidateQueries({ queryKey: ['missions-available'], ...opts });
-      queryClient.invalidateQueries({ queryKey: ['user-stats'], ...opts });
-      attempts += 1;
-      if (attempts < 6) timer = setTimeout(tick, 3000);
-    };
-    timer = setTimeout(tick, 2000);
-    return () => clearTimeout(timer);
-  }, [isFinalizing, queryClient]);
+    anchorRef.current = { remaining: backendRemaining, at: Date.now() };
+    setRemaining(Math.max(0, backendRemaining));
+  }, [backendRemaining]);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      const a = anchorRef.current;
+      const elapsed = (Date.now() - a.at) / 1000;
+      setRemaining(Math.max(0, Math.round(a.remaining - elapsed)));
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Ao virar status terminal, invalida as listas UMA vez para o card sair de "Ativas"
+  // e refletir o novo estado (Histórico se completed / volta a iniciar se rejeitada).
+  useEffect(() => {
+    if (!liveStatus || liveStatus === 'pending_review') return;
+    const opts = { refetchType: 'active' as const };
+    queryClient.invalidateQueries({ queryKey: ['missions'], ...opts });
+    queryClient.invalidateQueries({ queryKey: ['missions-available'], ...opts });
+    queryClient.invalidateQueries({ queryKey: ['user-stats'], ...opts });
+    queryClient.invalidateQueries({ queryKey: ['user-profile'], ...opts });
+
+    if (liveStatus === 'completed') {
+      const xp = statusQuery.data?.xp_earned ?? mission.xp_reward;
+      Toast.show({
+        type: 'success',
+        text1: t('missionItem.toastCompletedTitle'),
+        text2: t('missionItem.toastCompletedXp', { xp }),
+      });
+    } else if (liveStatus === 'in_progress') {
+      Toast.show({
+        type: 'error',
+        text1: t('missionItem.toastRejectedTitle'),
+        text2: t('missionItem.toastRejectedBody'),
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [liveStatus, queryClient]);
+
+  // "Finalizando…": a janela acabou (remaining <= 0) mas ainda está em revisão —
+  // o próximo poll trará completed.
+  const isFinalizing = remaining <= 0 && (liveStatus ?? 'pending_review') === 'pending_review';
 
   if (isFinalizing) {
     return (
       <View className="mt-3 bg-laurel/10 border border-laurel/30 rounded-[12px] p-3 flex-row items-center gap-2">
         <ActivityIndicator size="small" color="#2F7A52" />
-        <Text className="text-[12px] font-bold text-laurel">Finalizando…</Text>
+        <Text className="text-[12px] font-bold text-laurel">{t('missionItem.finalizing')}</Text>
       </View>
     );
   }
 
   return (
-    <View className="mt-3 bg-gold/10 border border-gold/30 rounded-[12px] p-3 gap-2.5">
+    <View className="mt-3 bg-accent-500/10 border border-accent-500/30 rounded-[12px] p-3 gap-2.5">
+      {/* Confirmação de envio + timer */}
       <View className="flex-row items-center justify-between">
         <Text className="text-[11px] font-bold text-[#9a7b1f] uppercase tracking-[1px]">
-          ⏳ Em revisão
+          ⏳ {needsApproval ? t('missionItem.reviewLabel') : t('missionItem.pointsPendingLabel')}
         </Text>
         <Text className="text-[13px] font-extrabold text-[#7a5b00]">
           {formatRemaining(remaining)}
         </Text>
       </View>
 
+      {/* "Aguardando validação" só faz sentido quando há revisão de pares (medium/hard) —
+          fáceis são só um timer, sem ninguém validando. */}
+      {needsApproval && (
+        <Text className="text-[11px] text-[#7a5b00] leading-[16px]">
+          ✓ {t('missionItem.reviewSubmitted')}
+        </Text>
+      )}
+
+      {/* Fáceis não passam por revisão de pares — evita a palavra "revisão"/"validação"
+          e diz diretamente quando os pontos caem, âncorado no mesmo contador acima. */}
       <Text className="text-[11px] text-[#9a7b1f] leading-[15px]">
         {needsApproval
-          ? 'Conclui automaticamente quando o tempo acabar — ou na hora com 2 aprovações de pares.'
-          : 'Conclui automaticamente quando o tempo de revisão acabar.'}
+          ? t('missionItem.autoCompleteWithApproval')
+          : t('missionItem.pointsCreditIn', { time: formatRemaining(remaining) })}
       </Text>
 
       {needsApproval && (
         <View className="gap-1.5">
           <View className="flex-row items-center justify-between">
-            <Text className="text-[11px] font-semibold text-[#7a5b00]">Aprovações de pares</Text>
+            <Text className="text-[11px] font-semibold text-[#7a5b00]">{t('missionItem.peerApprovals')}</Text>
             <Text className="text-[12px] font-extrabold text-[#7a5b00]">
               {mission.approvals_count}/{mission.approvals_required}
             </Text>
@@ -124,7 +152,7 @@ function ReviewPanel({ mission }: { mission: Mission }) {
               <View
                 key={i}
                 className={`flex-1 h-1.5 rounded-full ${
-                  i < mission.approvals_count ? 'bg-gold' : 'bg-gold/25'
+                  i < mission.approvals_count ? 'bg-accent-500' : 'bg-accent-500/25'
                 }`}
               />
             ))}
@@ -135,20 +163,39 @@ function ReviewPanel({ mission }: { mission: Mission }) {
   );
 }
 
-export default function MissionItem({ mission, onStart, onComplete, pending }: Props) {
+export default function MissionItem({ mission, onStart, onComplete, onAbandon, pending, abandonPending }: Props) {
+  const { t } = useTranslation();
+  const { user } = useAuth();
   const isCompleted = mission.status === 'completed';
   const isInProgress = mission.status === 'in_progress';
   const isPendingReview = mission.status === 'pending_review';
+  // Só medium/hard passam por aprovação de pares (§7); fáceis são só um timer.
+  const needsApproval = mission.approvals_required > 0;
   const diffColor = DIFFICULTY_COLOR[mission.difficulty ?? ''] ?? '#aaa';
   const completedAtLabel = formatBackendDateTime(mission.completed_at);
+  // Qualquer ação em andamento neste card trava as outras (evita duplo tap).
+  const busy = pending || abandonPending;
+
+  // Desistir é permitido em in_progress e pending_review (o backend não concede
+  // XP em nenhum dos dois, então nada é perdido além do progresso/evidência).
+  const confirmAbandon = () => {
+    Alert.alert(t('missionItem.abandonConfirmTitle'), t('missionItem.abandonConfirmBody'), [
+      { text: t('evidenceModal.cancel'), style: 'cancel' },
+      { text: t('missionItem.abandonConfirmAction'), style: 'destructive', onPress: () => onAbandon(mission) },
+    ]);
+  };
+
+  // Bônus de XP por sequência de login — mesmo percentual aplicado pelo backend
+  // em finalize_pending_mission().
+  const streakBonusPct = user?.streak?.bonus_pct ?? 0;
 
   return (
     <View
       className={`border rounded-[14px] p-4 ${
         isPendingReview
-          ? 'border-gold/40 bg-[#fffdf5]'
+          ? 'border-accent-500/40 bg-[#fffdf5]'
           : isInProgress
-            ? 'border-primary bg-[#fdf7f8]'
+            ? 'border-primary-500 bg-[#fdf7f8]'
             : isCompleted
               ? 'border-laurel/30 bg-[#f4faf6]'
               : 'border-[#f0eded] bg-white'
@@ -165,57 +212,110 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
                 className="px-1.5 py-0.5 rounded-full"
                 style={{ backgroundColor: `${diffColor}18` }}>
                 <Text className="text-[10px] font-bold" style={{ color: diffColor }}>
-                  {DIFFICULTY_LABEL[mission.difficulty] ?? mission.difficulty}
+                  {t(`missionItem.difficulty.${mission.difficulty}`, { defaultValue: mission.difficulty })}
                 </Text>
               </View>
             )}
             {mission.type && (
               <Text className="text-[10px] text-[#bbb]">
-                {mission.type === 'daily' ? 'Diária' : 'Semanal'}
+                {mission.type === 'daily' ? t('missionItem.typeDaily') : t('missionItem.typeWeekly')}
               </Text>
+            )}
+            {mission.proof_type && mission.proof_type !== 'none' && (
+              <View className="px-1.5 py-0.5 rounded-full bg-[#eef2f7] flex-row items-center gap-1">
+                <Text className="text-[9px]">📎</Text>
+                <Text className="text-[10px] font-bold text-[#5b6b7f]">
+                  {t('missionItem.requiresProof', {
+                    type: t(`missionItem.proof.${mission.proof_type}`, {
+                      defaultValue: t('missionItem.proofFallback'),
+                    }),
+                  })}
+                </Text>
+              </View>
             )}
           </View>
 
           {isCompleted && completedAtLabel && (
             <Text className="text-[11px] text-laurel mt-1.5">
-              Concluída em {completedAtLabel}
+              {t('missionItem.completedAt', { date: completedAtLabel })}
             </Text>
           )}
         </View>
 
         <View className="items-end gap-1">
-          <Text className="text-[13px] font-extrabold text-gold">+{mission.xp_reward} XP</Text>
+          <View className="flex-row items-center gap-1">
+            <Text className="text-[13px] font-extrabold text-accent-500">+{mission.xp_reward}{t('common.xp')}</Text>
+            {streakBonusPct > 0 && !isCompleted && (
+              <>
+                <ArrowUpIcon size={11} color="#2F7A52" />
+                <Text className="text-[12px] font-extrabold text-laurel">+{streakBonusPct}%</Text>
+              </>
+            )}
+          </View>
+          {mission.coin_reward > 0 && (
+            <CoinAmount atomic={mission.coin_reward} size={11} textColor="#9a7b1f" />
+          )}
           {isCompleted && (
             <View className="bg-laurel/15 rounded-full px-2 py-0.5">
-              <Text className="text-[10px] font-bold text-laurel">Concluída</Text>
+              <Text className="text-[10px] font-bold text-laurel">{t('missionItem.completed')}</Text>
             </View>
           )}
           {isInProgress && (
-            <View className="bg-primary/10 rounded-full px-2 py-0.5">
-              <Text className="text-[10px] font-bold text-primary">Em andamento</Text>
+            <View className="bg-primary-500/10 rounded-full px-2 py-0.5">
+              <Text className="text-[10px] font-bold text-primary-500">{t('missionItem.inProgress')}</Text>
             </View>
           )}
           {isPendingReview && (
-            <View className="bg-gold/20 rounded-full px-2 py-0.5">
-              <Text className="text-[10px] font-bold text-[#9a7b1f]">Em revisão</Text>
+            <View className="bg-accent-500/20 rounded-full px-2 py-0.5">
+              <Text className="text-[10px] font-bold text-[#9a7b1f]">
+                {needsApproval ? t('missionItem.inReview') : t('missionItem.pointsPendingLabel')}
+              </Text>
             </View>
           )}
         </View>
       </View>
 
-      {isPendingReview && <ReviewPanel mission={mission} />}
+      {isPendingReview && (
+        <>
+          <ReviewPanel mission={mission} />
+          <View className="mt-2">
+            <TouchableOpacity
+              disabled={busy}
+              activeOpacity={0.85}
+              onPress={confirmAbandon}
+              className="rounded-[10px] py-2 items-center border border-[#e0e0e0]">
+              {abandonPending ? (
+                <ActivityIndicator color="#888" size="small" />
+              ) : (
+                <Text className="text-[12px] font-bold text-[#888]">{t('missionItem.abandonMission')}</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
 
       {isInProgress && (
-        <View className="mt-3">
+        <View className="mt-3 flex-row gap-2">
           <TouchableOpacity
-            disabled={pending}
+            disabled={busy}
             activeOpacity={0.85}
-            onPress={() => onComplete(mission.slug)}
-            className="rounded-[10px] py-2.5 items-center bg-primary">
+            onPress={() => onComplete(mission)}
+            className="flex-1 rounded-[10px] py-2.5 items-center bg-primary-500">
             {pending ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text className="text-[13px] font-bold text-white">Concluir missão</Text>
+              <Text className="text-[13px] font-bold text-white">{t('missionItem.completeMission')}</Text>
+            )}
+          </TouchableOpacity>
+          <TouchableOpacity
+            disabled={busy}
+            activeOpacity={0.85}
+            onPress={confirmAbandon}
+            className="rounded-[10px] py-2.5 px-4 items-center border border-[#e0c9cb]">
+            {abandonPending ? (
+              <ActivityIndicator color="#9E1B32" size="small" />
+            ) : (
+              <Text className="text-[13px] font-bold text-primary-500">{t('missionItem.abandonMission')}</Text>
             )}
           </TouchableOpacity>
         </View>
@@ -231,7 +331,7 @@ export default function MissionItem({ mission, onStart, onComplete, pending }: P
             {pending ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
-              <Text className="text-[13px] font-bold text-white">Iniciar missão</Text>
+              <Text className="text-[13px] font-bold text-white">{t('missionItem.startMission')}</Text>
             )}
           </TouchableOpacity>
         </View>

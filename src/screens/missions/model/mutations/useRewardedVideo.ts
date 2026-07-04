@@ -8,6 +8,7 @@ import {
 import { registerRewardedVideo } from '../../../../api/missions/missionsApi';
 import { REWARDED_AD_UNIT_ID } from '../../../../constants/admob';
 import Toast from 'react-native-toast-message';
+import i18n from '../../../../i18n';
 
 export type AdState = 'idle' | 'loading' | 'ready' | 'showing' | 'error';
 
@@ -39,11 +40,11 @@ export function useRewardedVideo() {
         ]);
         Toast.show({
           type: 'success',
-          text1: '+2 missões desbloqueadas!',
-          text2: 'Suas missões diárias foram renovadas.',
+          text1: i18n.t('toasts.rewardedVideoTitle'),
+          text2: i18n.t('toasts.rewardedVideoBody'),
         });
       } catch {
-        Toast.show({ type: 'error', text1: 'Erro ao registrar vídeo assistido.' });
+        Toast.show({ type: 'error', text1: i18n.t('toasts.rewardedVideoRegisterError') });
       } finally {
         setAdState('idle');
         adRef.current = null;
@@ -58,7 +59,7 @@ export function useRewardedVideo() {
     const unsubError = ad.addAdEventListener(AdEventType.ERROR, () => {
       setAdState('error');
       adRef.current = null;
-      Toast.show({ type: 'error', text1: 'Anúncio indisponível no momento.' });
+      Toast.show({ type: 'error', text1: i18n.t('toasts.rewardedVideoUnavailable') });
     });
 
     adRef.current = ad;
