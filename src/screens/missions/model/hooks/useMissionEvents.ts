@@ -35,6 +35,7 @@ export function useMissionEvents(enabled = true) {
         // Refresh all mission lists so status badges update.
         queryClient.invalidateQueries({ queryKey: ['missions'] });
         queryClient.invalidateQueries({ queryKey: ['missions-available'] });
+        queryClient.invalidateQueries({ queryKey: ['daily-briefing'] });
         queryClient.invalidateQueries({ queryKey: ['missions-to-review'] });
         queryClient.invalidateQueries({ queryKey: ['user-profile'] });
         queryClient.invalidateQueries({ queryKey: ['user-stats'] });

@@ -22,6 +22,11 @@ import {
   uploadEvidenceImage,
 } from '../../../../api/missions/missionsApi';
 import { EVIDENCE_COMPRESS, MAX_EVIDENCE_WIDTH } from '../../../../constants/evidence';
+import {
+  MIN_EVIDENCE_TEXT_LENGTH,
+  validateLink,
+  validateText,
+} from '../../../../utils/evidenceValidation';
 
 /**
  * Redimensiona (sem upscale) e comprime a imagem para JPEG antes do upload,
@@ -92,10 +97,16 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
   const hasLink = link.trim().length > 0;
   const hasText = text.trim().length > 0;
   const hasImage = imageUri != null;
-  const canSubmit =
+
+  // Validação por campo (só reclama de conteúdo preenchido). O backend continua
+  // sendo a autoridade final (formato, NSFW, dedup).
+  const linkError = validateLink(link);
+  const textError = validateText(text);
+  const hasEvidence =
     proof === 'any'
       ? hasLink || hasText || hasImage
       : (!wantsLink || hasLink) && (!wantsText || hasText) && (!wantsImage || hasImage);
+  const canSubmit = hasEvidence && linkError == null && textError == null;
 
   const handleSubmit = async () => {
     if (!mission || !canSubmit || submitting || uploading) return;
@@ -157,8 +168,15 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
                 placeholderTextColor="#aaa"
                 autoCapitalize="none"
                 keyboardType="url"
-                className="border border-[#e0e0e0] rounded-[10px] px-3 py-2.5 text-[14px] text-charcoal"
+                className={`border rounded-[10px] px-3 py-2.5 text-[14px] text-charcoal ${
+                  linkError ? 'border-primary-500' : 'border-[#e0e0e0]'
+                }`}
               />
+              {linkError && (
+                <Text className="text-[11px] text-primary-500">
+                  {t(`evidenceModal.error.${linkError}`)}
+                </Text>
+              )}
             </View>
           )}
 
@@ -171,9 +189,20 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
                 placeholder={t('evidenceModal.descriptionPlaceholder')}
                 placeholderTextColor="#aaa"
                 multiline
-                className="border border-[#e0e0e0] rounded-[10px] px-3 py-2.5 text-[14px] text-charcoal min-h-[80px]"
+                className={`border rounded-[10px] px-3 py-2.5 text-[14px] text-charcoal min-h-[80px] ${
+                  textError ? 'border-primary-500' : 'border-[#e0e0e0]'
+                }`}
                 style={{ textAlignVertical: 'top' }}
               />
+              {textError ? (
+                <Text className="text-[11px] text-primary-500">
+                  {t(`evidenceModal.error.${textError}`, { min: MIN_EVIDENCE_TEXT_LENGTH })}
+                </Text>
+              ) : (
+                <Text className="text-[11px] text-[#888]">
+                  {t('evidenceModal.textHint', { min: MIN_EVIDENCE_TEXT_LENGTH })}
+                </Text>
+              )}
             </View>
           )}
 

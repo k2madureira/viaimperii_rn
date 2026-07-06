@@ -1,4 +1,5 @@
 import { apiFetch, readContent, readError } from '../config/defaultApi';
+import { LoginStreak } from '../auth/authApi';
 
 export type MissionStatus = 'available' | 'in_progress' | 'pending_review' | 'completed';
 
@@ -20,6 +21,9 @@ export interface Mission {
   specialty_id: number | null;
   specialty_name: string | null;
   track_id: number | null;
+  // Prioridade no catálogo: 0 = comum, 1 = universal (missão de trilha, hábito
+  // diário genérico). Universais lideram as listagens; as `easy` concluem na hora.
+  priority: number;
   status: MissionStatus;
   proof_type: ProofType;
   acceptance_criteria: string | null;
@@ -182,6 +186,33 @@ export async function getRecommendedMissions(
   }
 
   return readContent<RecommendedMissions>(response);
+}
+
+// ── Briefing do dia (B2, GET /missions/daily-briefing) ────────────────────────
+// Uma chamada que compõe sugeridas + meta + streak + bônus ativo p/ o hero da Home.
+
+export interface DailyBriefingActiveBonus {
+  streak_bonus_pct: number;
+  rewarded_video_available: boolean;
+}
+
+export interface DailyBriefing {
+  date: string;
+  personalized: boolean;
+  suggested_missions: RecommendedMission[];
+  goal: MissionAllowance;
+  streak: LoginStreak;
+  active_bonus: DailyBriefingActiveBonus;
+}
+
+export async function getDailyBriefing(suggestions = 3): Promise<DailyBriefing> {
+  const response = await apiFetch(`/missions/daily-briefing?suggestions=${suggestions}`);
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao carregar o briefing do dia'));
+  }
+
+  return readContent<DailyBriefing>(response);
 }
 
 export async function startMission(slug: string): Promise<void> {

@@ -154,16 +154,21 @@ export function CoinAmount({
   textColor = '#3d2900',
   compact = false,
   showSigla = false,
+  omitAs = false,
 }: {
   atomic: number;
   size?: number;
   textColor?: string;
   compact?: boolean;
   showSigla?: boolean;
+  omitAs?: boolean; // esconde a denominação `as` (ex.: carteira, que tem linha própria)
 }) {
-  const parts = compact ? coinParts(atomic).slice(0, 1) : coinParts(atomic);
+  let parts = compact ? coinParts(atomic).slice(0, 1) : coinParts(atomic);
+  if (omitAs) parts = parts.filter((p) => p.name !== 'as');
   return (
-    <View className="flex-row items-center" style={{ gap: 7 }}>
+    // flexWrap evita estouro horizontal quando o container tem largura limitada
+    // (ex.: popover da carteira com 3 denominações + sigla).
+    <View className="flex-row items-center" style={{ gap: 7, flexWrap: 'wrap' }}>
       {parts.map((p) => (
         <View key={p.name} className="flex-row items-center" style={{ gap: 3 }}>
           <CoinIcon denom={p.name} size={size} />

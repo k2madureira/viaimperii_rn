@@ -4,3 +4,5 @@ export { default as ChangePasswordModal } from './changePasswordModal';
 export { default as StreakButton } from './streakButton';
 export { default as WalletButton } from './walletButton';
 export { default as NotificationsButton } from './notificationsButton';
+export { default as DailyMissionsHero } from './dailyMissionsHero';
+export { default as RewardsButton } from './rewardsButton';

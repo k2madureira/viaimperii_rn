@@ -37,6 +37,7 @@ export function useRewardedVideo() {
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ['missions-available'] }),
           queryClient.invalidateQueries({ queryKey: ['missions'] }),
+          queryClient.invalidateQueries({ queryKey: ['daily-briefing'] }),
         ]);
         Toast.show({
           type: 'success',

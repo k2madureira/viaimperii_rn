@@ -1,6 +1,20 @@
 export const XP_PER_RANK = 500;
 export const MASTERY_FOR_MEDAL = 100;
 
+// Cotas de missões por janela (espelham DAILY_MISSION_LIMIT / WEEKLY_MISSION_LIMIT
+// do backend). Usadas para derivar "quantas já concluí hoje" a partir do saldo.
+export const DAILY_MISSION_LIMIT = 10;
+export const WEEKLY_MISSION_LIMIT = 2;
+
+// Meta diária de hábito (menor que a cota máxima): alvo alcançável que alimenta
+// o anel de progresso do dia na Home e na tela de Missões. Só no front.
+export const DAILY_MISSION_GOAL = 5;
+
+// Bônus ao bater a meta diária de missões. O crédito é feito pelo BACKEND
+// (carteira é derivada do ledger; 1 denário = 100 asses), idempotente por dia (SP).
+export const DAILY_GOAL_REWARD_DENARIUS = 20;
+export const DAILY_GOAL_REWARD_ATOMIC = DAILY_GOAL_REWARD_DENARIUS * 100;
+
 export const SPECIALTIES = [
   'Engineering',
   'Strategy',

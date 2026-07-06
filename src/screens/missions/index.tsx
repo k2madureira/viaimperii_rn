@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Platform, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Modal, Platform, RefreshControl, ScrollView, Text, TouchableOpacity, Vibration, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import * as SecureStore from 'expo-secure-store';
 import { useRewardedVideo } from './model/mutations/useRewardedVideo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionSelectModal, Navbar } from '../../components';
-import { Mission, MissionDifficulty, MissionEvidence, ToReviewItem } from '../../api/missions/missionsApi';
+import { Mission, MissionDifficulty, MissionEvidence, RecommendedMission, ToReviewItem } from '../../api/missions/missionsApi';
 import { StatsPeriod } from '../../api/users/userApi';
 import { useAuth } from '../../contexts/AuthContext';
 import { XP_PER_RANK } from '../../constants/game';
 import { useUserProfile } from '../dashboard/model/queries/useUserProfile';
+import { useWallet } from '../dashboard/model/queries/useWallet';
+import WalletButton from '../dashboard/components/walletButton';
+import { CreatePostModal } from '../dashboard/components/feed';
 import { parseBackendDate } from '../../utils/date';
 
 // Ordenação por dificuldade: fácil → médio → difícil (nulos por último).
@@ -19,16 +23,20 @@ const sortByDifficulty = (list: Mission[]) =>
       (DIFFICULTY_ORDER[a.difficulty ?? ''] ?? 99) - (DIFFICULTY_ORDER[b.difficulty ?? ''] ?? 99),
   );
 import {
+  DailyGoalHeader,
   DifficultyFilter,
   LoadMoreButton,
   MissionItem,
+  MissionCelebration,
   EvidenceModal,
   MissionsTab,
   MissionsTabs,
+  MissionsOnboarding,
   PeriodStats,
   ReviewItem,
   SpecialtyFilter,
   StatsFilter,
+  UserSummary,
 } from './components';
 
 const PAGE_SIZE = 5;
@@ -43,9 +51,11 @@ import { useMissions } from './model/queries/useMissions';
 import { useMissionsToReview } from './model/queries/useMissionsToReview';
 import { useSpecialties } from './model/queries/useSpecialties';
 import { useUserStats } from './model/queries/useUserStats';
+import { useUserSummary } from './model/queries/useUserSummary';
+import { useTracks } from '../ranks/model/queries/useTracks';
 import { useMissionEvents } from './model/hooks/useMissionEvents';
 
-type ViewMode = 'missions' | 'review';
+type ViewMode = 'missions' | 'progress' | 'review';
 
 const FIRST_TRACK_RANK: Record<string, string> = {
   legionarios: 'Legionary I',
@@ -64,6 +74,8 @@ export default function MissionsScreen() {
 
   const profileQuery = useUserProfile(user?.user_id);
   const userTrack = profileQuery.data?.track ?? null;
+  const walletQuery = useWallet(!!user);
+  const tracksQuery = useTracks();
 
   const [viewMode, setViewMode] = useState<ViewMode>('missions');
   const [period, setPeriod] = useState<StatsPeriod>('monthly');
@@ -74,9 +86,15 @@ export default function MissionsScreen() {
   // Aba "Disponíveis": ordena por recomendação (padrão) ou lista completa.
   const [availableMode, setAvailableMode] = useState<'recommended' | 'all'>('recommended');
   const [visible, setVisible] = useState(PAGE_SIZE);
+  // F4: filtros de especialidade/nível colapsados por padrão (reduz o ruído visual).
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  // F3: celebração ao creditar XP (request completed ou finalização por tempo/aprovação).
+  const [celebration, setCelebration] = useState<{ xp: number; coins?: number } | null>(null);
+  // F9: mini-tour na primeira visita (null = carregando o flag, evita flash).
+  const [onboardingSeen, setOnboardingSeen] = useState<boolean | null>(null);
   const isReview = viewMode === 'review';
+  const isProgress = viewMode === 'progress';
 
-  const isHistory = tab === 'history';
   const isInProgress = tab === 'inprogress';
 
   // Abaixo de Recruta IV (nível 4 → 1500 XP), só missões de nível fácil.
@@ -91,21 +109,33 @@ export default function MissionsScreen() {
     if (isBelowRecruitIV) setDifficultyFilter(null);
   }, [isBelowRecruitIV]);
 
+  // F9: carrega o flag do mini-tour uma vez (só mostra a quem nunca viu).
+  useEffect(() => {
+    SecureStore.getItemAsync('onboarding_missions_seen').then((v) => setOnboardingSeen(v === 'true'));
+  }, []);
+  const dismissOnboarding = () => {
+    setOnboardingSeen(true);
+    SecureStore.setItemAsync('onboarding_missions_seen', 'true');
+  };
+
   // Reinicia a paginação ao trocar de aba, tipo, especialidade, nível ou modo.
   useEffect(() => setVisible(PAGE_SIZE), [tab, missionType, specialtyId, difficultyFilter, availableMode]);
 
   const isRecommended = availableMode === 'recommended';
+  const hasActiveFilter = specialtyId != null || difficultyFilter != null;
 
   const statsQuery = useUserStats(user?.user_id, period);
+  // Resumo do usuário logado (aba Progresso) — mesmo filtro de período.
+  const summaryQuery = useUserSummary(period, isProgress);
   const specialtiesQuery = useSpecialties();
-  // Mantida sempre viva (fora do histórico) para o saldo/allowance, mesmo no modo recomendado.
-  const availableQuery = useAvailableMissions(specialtyId, effectiveDifficulty, !isHistory);
+  // Mantida viva no modo Missões para o saldo/allowance (não no Progresso/Revisão).
+  const availableQuery = useAvailableMissions(specialtyId, effectiveDifficulty, !isProgress);
   // Feed recomendado (content-based) — só quando a aba "Disponíveis" está em modo recomendado.
   const recommendedQuery = useRecommendedMissions(
     specialtyId,
     effectiveDifficulty,
     missionType,
-    tab === 'available' && isRecommended,
+    !isProgress && tab === 'available' && isRecommended,
   );
   // Catálogo completo (já filtrado por trilha no backend) — usado para derivar
   // quais especialidades pertencem à trilha do usuário, sem o efeito da cota diária.
@@ -113,7 +143,8 @@ export default function MissionsScreen() {
   // pois trilhas com mais de 100 missões (ex.: Patrícios, 132) truncariam o resultado.
   const catalogQuery = useMissions(undefined, true);
   // Histórico = missões concluídas (status=completed), mais recentes primeiro.
-  const completedQuery = useMissions('completed', isHistory, {
+  // Agora vive na aba Progresso.
+  const completedQuery = useMissions('completed', isProgress, {
     sortField: 'completed_at',
     sortOrder: 'desc',
   });
@@ -139,7 +170,18 @@ export default function MissionsScreen() {
   const [recommendedIds, setRecommendedIds] = useState<number[]>([]);
   // Modal de evidência (missões com proof_type != none).
   const [evidenceMission, setEvidenceMission] = useState<Mission | null>(null);
+  // Missão em confirmação de "compartilhar como post" / missão sendo compartilhada.
+  const [shareConfirm, setShareConfirm] = useState<Mission | null>(null);
+  const [shareMission, setShareMission] = useState<Mission | null>(null);
   const rejectM = useRejectMission();
+
+  // Texto inicial do post (editável) a partir dos dados da missão.
+  const buildShareText = (m: Mission) => {
+    const tag = m.specialty_name
+      ? ` #${m.specialty_name.toLowerCase().replace(/\s+/g, '')}`
+      : '';
+    return t('missionShare.template', { name: m.name }) + tag;
+  };
 
   const submitComplete = (mission: Mission, evidence?: MissionEvidence) => {
     completeM.mutate(
@@ -147,9 +189,18 @@ export default function MissionsScreen() {
       {
         onSuccess: (result) => {
           setEvidenceMission(null);
+          // Feedback tátil ao enviar a conclusão.
+          Vibration.vibrate(20);
+          // XP creditado na hora (raro; normal é pending_review) → celebra já.
+          if (result.status === 'completed') {
+            setCelebration({ xp: result.xp_earned, coins: mission.coin_reward });
+          }
           if (result.requires_legion_selection) {
             setRecommendedIds((result.recommended_legions ?? []).map((l) => l.id));
             setLegionModalVisible(true);
+          } else {
+            // Oferece compartilhar a conquista como post (revisar antes de publicar).
+            setShareConfirm(mission);
           }
         },
         onError: (err: Error) => {
@@ -222,11 +273,12 @@ export default function MissionsScreen() {
 
   if (isReview) {
     refreshing = toReviewQuery.isRefetching;
-  } else if(isHistory) {
-    refreshing = completedQuery.isRefetching;
+  } else if (isProgress) {
+    refreshing =
+      statsQuery.isRefetching || summaryQuery.isRefetching || completedQuery.isRefetching;
   } else if(isInProgress){
     refreshing = inProgressActiveQuery.isRefetching || pendingReviewQuery.isRefetching;
-  } else if (!isHistory && !isInProgress) {
+  } else {
     refreshing = isRecommended ? recommendedQuery.isRefetching : availableQuery.isRefetching;
   }
 
@@ -235,10 +287,13 @@ export default function MissionsScreen() {
       toReviewQuery.refetch();
       return;
     }
-    statsQuery.refetch();
-    if (isHistory) {
+    if (isProgress) {
+      statsQuery.refetch();
+      summaryQuery.refetch();
       completedQuery.refetch();
-    } else if (isInProgress) {
+      return;
+    }
+    if (isInProgress) {
       inProgressActiveQuery.refetch();
       pendingReviewQuery.refetch();
     } else if (isRecommended) {
@@ -256,6 +311,12 @@ export default function MissionsScreen() {
       onStart={(slug) => startM.mutate(slug)}
       onComplete={handleComplete}
       onAbandon={(mission) => abandonM.mutate(mission.slug)}
+      onCompleted={(xp) => {
+        Vibration.vibrate(30);
+        setCelebration({ xp });
+      }}
+      reasons={(m as Partial<RecommendedMission>).reasons}
+      trackLabel={tracksQuery.data?.find((tr) => tr.id === m.track_id)?.name}
       pending={pendingSlug === m.slug}
       abandonPending={abandonPendingSlug === m.slug}
     />
@@ -279,19 +340,26 @@ export default function MissionsScreen() {
 
   return (
     <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
-      <Navbar />
+      <Navbar
+        rightExtra={walletQuery.data ? <WalletButton balance={walletQuery.data.balance} /> : null}
+      />
       <ScrollView
         contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 32, gap: 16 }}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8B1A2B" />
         }>
-        {/* ── Troca de abas: Minhas Missões | Revisão ─────────────────────── */}
+        {/* ── Troca de abas: Missões | Progresso | Revisão ────────────────── */}
         <View className="flex-row bg-[#efeaea] rounded-[12px] p-1">
           <ModeTab
             label={t('missions.tabMyMissions')}
-            active={!isReview}
+            active={viewMode === 'missions'}
             onPress={() => setViewMode('missions')}
+          />
+          <ModeTab
+            label={t('missions.tabProgress')}
+            active={isProgress}
+            onPress={() => setViewMode('progress')}
           />
           <ModeTab
             label={t('missions.tabReview')}
@@ -314,11 +382,34 @@ export default function MissionsScreen() {
                   : null
             }
           />
+        ) : isProgress ? (
+          /* Aba "Progresso": resumo do usuário + estatísticas + histórico. */
+          <>
+            <StatsFilter value={period} onChange={setPeriod} />
+            <UserSummary summary={summaryQuery.data} isLoading={summaryQuery.isLoading} />
+            <PeriodStats stats={statsQuery.data} isLoading={statsQuery.isLoading} />
+
+            <View className="bg-white border border-[#f0eded] rounded-[20px] p-3 gap-3">
+              <Text className="text-[14px] font-extrabold text-charcoal px-1 pt-1">
+                {t('missions.historyTitle')}
+              </Text>
+              {historyLoading ? (
+                <View className="py-10 items-center">
+                  <ActivityIndicator color="#8B1A2B" />
+                </View>
+              ) : historyError ? (
+                <ErrorBox text={t('missions.errorHistory')} />
+              ) : historyMissions.length === 0 ? (
+                <EmptyBox text={t('missions.emptyHistory')} emoji="📜" />
+              ) : (
+                renderList(historyMissions)
+              )}
+            </View>
+          </>
         ) : (
         <>
-        {/* Filtro de período + estatísticas */}
-        <StatsFilter value={period} onChange={setPeriod} />
-        <PeriodStats stats={statsQuery.data} isLoading={statsQuery.isLoading} />
+        {/* Meta diária + ofensiva (F2) */}
+        <DailyGoalHeader allowance={allowance} streak={user?.streak} />
 
         {/* ── Seletor de tipo: Diárias | Semanais ────────────────────────── */}
         <View className="bg-[#6B1221] rounded-[16px] p-4 gap-3">
@@ -407,20 +498,34 @@ export default function MissionsScreen() {
                   />
                 </View>
 
-                {/* Filtros empilhados: especialidade (chips) + nível (chips visíveis).
-                    O nível antes era um ícone de funil escondido — usuários não o
-                    encontravam; agora é uma linha de chips rotulada e clara. */}
+                {/* F4: filtros colapsados atrás de "Filtrar" — a tela abre já nas
+                    recomendadas, com menos ruído. Um ponto sinaliza filtro ativo. */}
                 {(filteredSpecialties.length > 0 || !isBelowRecruitIV) && (
-                  <View className="gap-3">
-                    {filteredSpecialties.length > 0 && (
-                      <SpecialtyFilter
-                        specialties={filteredSpecialties}
-                        value={specialtyId}
-                        onChange={setSpecialtyId}
-                      />
-                    )}
-                    {!isBelowRecruitIV && (
-                      <DifficultyFilter value={difficultyFilter} onChange={setDifficultyFilter} />
+                  <View className="gap-2.5">
+                    <TouchableOpacity
+                      activeOpacity={0.8}
+                      onPress={() => setFiltersOpen((o) => !o)}
+                      className="flex-row items-center justify-center gap-1.5 py-2 rounded-[10px] bg-[#f4f4f4]">
+                      <Text className="text-[12px] font-bold text-[#666]">
+                        {t('missions.filtersButton')}
+                      </Text>
+                      {hasActiveFilter && <View className="w-1.5 h-1.5 rounded-full bg-primary-500" />}
+                      <Text className="text-[11px] text-[#888]">{filtersOpen ? '▲' : '▼'}</Text>
+                    </TouchableOpacity>
+
+                    {filtersOpen && (
+                      <View className="gap-3">
+                        {filteredSpecialties.length > 0 && (
+                          <SpecialtyFilter
+                            specialties={filteredSpecialties}
+                            value={specialtyId}
+                            onChange={setSpecialtyId}
+                          />
+                        )}
+                        {!isBelowRecruitIV && (
+                          <DifficultyFilter value={difficultyFilter} onChange={setDifficultyFilter} />
+                        )}
+                      </View>
                     )}
                   </View>
                 )}
@@ -442,7 +547,7 @@ export default function MissionsScreen() {
                   ) : recommendedQuery.isError ? (
                     <ErrorBox text={t('missions.errorRecommended')} />
                   ) : recommendedMissions.length === 0 ? (
-                    <EmptyBox text={t('missions.emptyAvailable')} />
+                    <EmptyBox text={t('missions.emptyAvailable')} emoji="⚔️" />
                   ) : (
                     renderList(recommendedMissions)
                   )
@@ -453,7 +558,7 @@ export default function MissionsScreen() {
                 ) : availableQuery.isError ? (
                   <ErrorBox text={t('missions.errorAvailable')} />
                 ) : availableMissions.length === 0 ? (
-                  <EmptyBox text={t('missions.emptyAvailable')} />
+                  <EmptyBox text={t('missions.emptyAvailable')} emoji="⚔️" />
                 ) : (
                   renderList(availableMissions)
                 )}
@@ -469,28 +574,13 @@ export default function MissionsScreen() {
                 ) : inProgressError ? (
                   <ErrorBox text={t('missions.errorInProgress')} />
                 ) : inProgressMissions.length === 0 ? (
-                  <EmptyBox text={t('missions.emptyInProgress')} />
+                  <EmptyBox text={t('missions.emptyInProgress')} emoji="🛡️" />
                 ) : (
                   renderList(inProgressMissions)
                 )}
               </>
             )}
 
-            {tab === 'history' && (
-              <>
-                {historyLoading ? (
-                  <View className="py-12 items-center">
-                    <ActivityIndicator color="#8B1A2B" />
-                  </View>
-                ) : historyError ? (
-                  <ErrorBox text={t('missions.errorHistory')} />
-                ) : historyMissions.length === 0 ? (
-                  <EmptyBox text={t('missions.emptyHistory')} />
-                ) : (
-                  renderList(historyMissions)
-                )}
-              </>
-            )}
           </View>
         </View>
         </>
@@ -515,6 +605,75 @@ export default function MissionsScreen() {
         submitting={completeM.isPending}
         onClose={() => setEvidenceMission(null)}
         onSubmit={(evidence) => evidenceMission && submitComplete(evidenceMission, evidence)}
+      />
+
+      {/* F3: celebração de XP (camada absoluta, não bloqueia toques). */}
+      <MissionCelebration
+        visible={celebration != null}
+        xp={celebration?.xp ?? 0}
+        coins={celebration?.coins}
+        onDone={() => setCelebration(null)}
+      />
+
+      {/* F9: mini-tour na primeira visita */}
+      <MissionsOnboarding visible={onboardingSeen === false} onClose={dismissOnboarding} />
+
+      {/* Confirmação: transformar a conclusão em post (modal padrão do app) */}
+      <Modal
+        visible={shareConfirm != null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShareConfirm(null)}>
+        <View className="flex-1 bg-black/60 items-center justify-center px-6">
+          <View className="w-full bg-white rounded-[20px] p-6">
+            <View className="items-center">
+              <View className="w-14 h-14 rounded-full bg-primary-500/10 items-center justify-center mb-3">
+                <Text className="text-[26px]">📣</Text>
+              </View>
+              <Text
+                className="text-[18px] font-extrabold text-charcoal text-center"
+                style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
+                {t('missionShare.promptTitle')}
+              </Text>
+            </View>
+            <Text className="text-[13px] text-[#555] leading-[19px] text-center mt-3">
+              {t('missionShare.promptBody')}
+            </Text>
+            <View className="flex-row gap-3 mt-5">
+              <TouchableOpacity
+                onPress={() => setShareConfirm(null)}
+                activeOpacity={0.85}
+                className="flex-1 border border-[#e0dada] rounded-[12px] py-3 items-center">
+                <Text className="text-[14px] font-bold text-[#666]">{t('missionShare.decline')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  const m = shareConfirm;
+                  setShareConfirm(null);
+                  if (m) setShareMission(m);
+                }}
+                activeOpacity={0.9}
+                className="flex-1 bg-primary-500 rounded-[12px] py-3 items-center">
+                <Text className="text-[14px] font-bold text-white">{t('missionShare.accept')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Compartilhar missão concluída como post (pré-preenchido, editável) */}
+      <CreatePostModal
+        key={shareMission?.slug ?? 'share-none'}
+        visible={shareMission != null}
+        initialText={shareMission ? buildShareText(shareMission) : ''}
+        canLegion={profileQuery.data?.legion != null}
+        canProvince={profileQuery.data?.province != null}
+        authorAvatarUrl={
+          profileQuery.data?.active_avatar?.thumb_url ??
+          profileQuery.data?.active_avatar?.url ??
+          null
+        }
+        onClose={() => setShareMission(null)}
       />
     </View>
   );
@@ -637,10 +796,11 @@ function AllowanceBar({
   );
 }
 
-function EmptyBox({ text }: { text: string }) {
+function EmptyBox({ text, emoji = '🏛️' }: { text: string; emoji?: string }) {
   return (
     <View className="bg-white border border-[#f0eded] rounded-[14px] py-10 items-center px-6">
-      <Text className="text-[13px] text-[#999] text-center">{text}</Text>
+      <Text className="text-[26px] mb-2">{emoji}</Text>
+      <Text className="text-[13px] text-[#777] text-center leading-[18px]">{text}</Text>
     </View>
   );
 }
@@ -733,7 +893,7 @@ function ReviewSection({
       ) : query.isError ? (
         <ErrorBox text={t('missions.errorReview')} />
       ) : items.length === 0 ? (
-        <EmptyBox text={t('missions.emptyReview')} />
+        <EmptyBox text={t('missions.emptyReview')} emoji="✅" />
       ) : (
         <View className="gap-3">
           {items.map((item) => (

@@ -7,13 +7,20 @@ import { Mission } from '../../../../api/missions/missionsApi';
 import { formatBackendDateTime } from '../../../../utils/date';
 import { useMissionStatus } from '../../model/queries/useMissionStatus';
 import { useAuth } from '../../../../contexts/AuthContext';
-import { ArrowUpIcon, CoinAmount } from '../../../../components/icons';
+import { ArrowUpIcon, CoinAmount, MASTERY_ICONS } from '../../../../components/icons';
 
 interface Props {
   mission: Mission;
   onStart: (slug: string) => void;
   onComplete: (mission: Mission) => void;
   onAbandon: (mission: Mission) => void;
+  // Chamado quando a missão finaliza (→ completed) durante a revisão, com o XP
+  // creditado — usado para disparar a celebração na tela de Missões.
+  onCompleted?: (xp: number) => void;
+  // Motivos da recomendação (só missões do feed recomendado) — chips "por que" (F7).
+  reasons?: string[];
+  // Nome da trilha da missão (Legionários/Patrícios) — exibido nas de trilha (priority > 0).
+  trackLabel?: string;
   pending: boolean;
   abandonPending: boolean;
 }
@@ -23,6 +30,13 @@ const DIFFICULTY_COLOR: Record<string, string> = {
   medium: '#D4AF37',
   hard: '#9E1B32',
 };
+
+// Ícone temático por especialidade (case-insensitive; MASTERY_ICONS usa "Engineering"…).
+function resolveSpecialtyIcon(name?: string | null) {
+  if (!name) return undefined;
+  const key = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+  return MASTERY_ICONS[key];
+}
 
 // Formata segundos restantes em "Xh Ymin", "Ymin Zs" ou "Zs".
 function formatRemaining(totalSeconds: number): string {
@@ -37,7 +51,7 @@ function formatRemaining(totalSeconds: number): string {
 
 // Painel exibido enquanto a missão está em revisão (pending_review):
 // countdown até a finalização automática + progresso de aprovações de pares.
-function ReviewPanel({ mission }: { mission: Mission }) {
+function ReviewPanel({ mission, onCompleted }: { mission: Mission; onCompleted?: (xp: number) => void }) {
   const { t } = useTranslation();
   const needsApproval = mission.approvals_required > 0;
 
@@ -78,16 +92,23 @@ function ReviewPanel({ mission }: { mission: Mission }) {
     const opts = { refetchType: 'active' as const };
     queryClient.invalidateQueries({ queryKey: ['missions'], ...opts });
     queryClient.invalidateQueries({ queryKey: ['missions-available'], ...opts });
+    queryClient.invalidateQueries({ queryKey: ['daily-briefing'], ...opts });
     queryClient.invalidateQueries({ queryKey: ['user-stats'], ...opts });
     queryClient.invalidateQueries({ queryKey: ['user-profile'], ...opts });
 
     if (liveStatus === 'completed') {
       const xp = statusQuery.data?.xp_earned ?? mission.xp_reward;
-      Toast.show({
-        type: 'success',
-        text1: t('missionItem.toastCompletedTitle'),
-        text2: t('missionItem.toastCompletedXp', { xp }),
-      });
+      // Com callback (tela de Missões) a celebração cobre o feedback; sem ele,
+      // cai no toast tradicional.
+      if (onCompleted) {
+        onCompleted(xp);
+      } else {
+        Toast.show({
+          type: 'success',
+          text1: t('missionItem.toastCompletedTitle'),
+          text2: t('missionItem.toastCompletedXp', { xp }),
+        });
+      }
     } else if (liveStatus === 'in_progress') {
       Toast.show({
         type: 'error',
@@ -163,7 +184,7 @@ function ReviewPanel({ mission }: { mission: Mission }) {
   );
 }
 
-export default function MissionItem({ mission, onStart, onComplete, onAbandon, pending, abandonPending }: Props) {
+export default function MissionItem({ mission, onStart, onComplete, onAbandon, onCompleted, reasons, trackLabel, pending, abandonPending }: Props) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const isCompleted = mission.status === 'completed';
@@ -188,41 +209,70 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, p
   // Bônus de XP por sequência de login — mesmo percentual aplicado pelo backend
   // em finalize_pending_mission().
   const streakBonusPct = user?.streak?.bonus_pct ?? 0;
+  const SpecialtyIcon = resolveSpecialtyIcon(mission.specialty_name);
+
+  // "Ativas" (em andamento / em revisão): o fundo e a borda usam um tom sutil da
+  // própria cor da dificuldade — harmoniza com a faixa lateral (antes brigava com
+  // os pastéis rosa/amarelo). O status fica a cargo do chip abaixo do cabeçalho.
+  const isActive = isInProgress || isPendingReview;
+  const cardStyle: {
+    borderLeftWidth: number;
+    borderLeftColor: string;
+    backgroundColor?: string;
+    borderColor?: string;
+  } = { borderLeftWidth: 4, borderLeftColor: diffColor };
+  if (isActive) {
+    cardStyle.backgroundColor = `${diffColor}0D`; // ~5%
+    cardStyle.borderColor = `${diffColor}33`; // ~20%
+  }
 
   return (
     <View
-      className={`border rounded-[14px] p-4 ${
-        isPendingReview
-          ? 'border-accent-500/40 bg-[#fffdf5]'
-          : isInProgress
-            ? 'border-primary-500 bg-[#fdf7f8]'
-            : isCompleted
-              ? 'border-laurel/30 bg-[#f4faf6]'
-              : 'border-[#f0eded] bg-white'
-      }`}>
-      <View className="flex-row items-start justify-between">
-        <View className="flex-1 pr-3">
-          <Text className="text-[14px] font-bold text-[#222]">{mission.name}</Text>
-          <View className="flex-row items-center flex-wrap gap-x-2 mt-1.5">
-            {mission.specialty_name && (
-              <Text className="text-[11px] text-[#999]">{mission.specialty_name}</Text>
-            )}
+      className={`border rounded-[16px] p-4 ${
+        isCompleted
+          ? 'border-laurel/30 bg-[#f4faf6]'
+          : !isActive
+            ? 'border-[#f0eded] bg-white'
+            : ''
+      }`}
+      // Faixa lateral colorida pela dificuldade — dá identidade forte ao card (D6).
+      style={cardStyle}>
+      <View className="flex-row items-start">
+        {/* Ícone temático da especialidade (identidade romana) */}
+        <View
+          className="w-11 h-11 rounded-[12px] items-center justify-center mr-3"
+          style={{ backgroundColor: '#f4eeec' }}>
+          {SpecialtyIcon ? (
+            <SpecialtyIcon size={22} color="#6B1221" />
+          ) : (
+            <Text className="text-[18px]">⚔️</Text>
+          )}
+        </View>
+
+        {/* Nome + metadados */}
+        <View className="flex-1 pr-2">
+          <Text className="text-[15px] font-extrabold text-[#1c1c1c] leading-[19px]">
+            {mission.name}
+          </Text>
+          {/* Linha 1 — pílulas (mesmo formato): dificuldade · trilha · prova */}
+          <View className="flex-row items-center flex-wrap gap-1.5 mt-2">
             {mission.difficulty && (
-              <View
-                className="px-1.5 py-0.5 rounded-full"
-                style={{ backgroundColor: `${diffColor}18` }}>
-                <Text className="text-[10px] font-bold" style={{ color: diffColor }}>
+              <View className="px-2 py-0.5 rounded-full" style={{ backgroundColor: diffColor }}>
+                <Text className="text-[10px] font-extrabold text-white uppercase tracking-[0.5px]">
                   {t(`missionItem.difficulty.${mission.difficulty}`, { defaultValue: mission.difficulty })}
                 </Text>
               </View>
             )}
-            {mission.type && (
-              <Text className="text-[10px] text-[#bbb]">
-                {mission.type === 'daily' ? t('missionItem.typeDaily') : t('missionItem.typeWeekly')}
-              </Text>
+            {(mission.priority ?? 0) > 0 && (
+              <View className="px-2 py-0.5 rounded-full bg-[#eaeef7] flex-row items-center gap-1">
+                <Text className="text-[9px]">🛡️</Text>
+                <Text className="text-[10px] font-bold text-[#4a5a8a]">
+                  {trackLabel ?? t('missionItem.trackBadge')}
+                </Text>
+              </View>
             )}
             {mission.proof_type && mission.proof_type !== 'none' && (
-              <View className="px-1.5 py-0.5 rounded-full bg-[#eef2f7] flex-row items-center gap-1">
+              <View className="px-2 py-0.5 rounded-full bg-[#eef2f7] flex-row items-center gap-1">
                 <Text className="text-[9px]">📎</Text>
                 <Text className="text-[10px] font-bold text-[#5b6b7f]">
                   {t('missionItem.requiresProof', {
@@ -235,6 +285,25 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, p
             )}
           </View>
 
+          {/* Linha 2 — metadados sutis: especialidade · tipo */}
+          {(mission.specialty_name || mission.type) && (
+            <View className="flex-row items-center flex-wrap gap-1.5 mt-1.5">
+              {mission.specialty_name && (
+                <Text className="text-[10px] font-semibold text-[#9a9a9a]">
+                  {mission.specialty_name}
+                </Text>
+              )}
+              {mission.specialty_name && mission.type && (
+                <View className="w-1 h-1 rounded-full bg-[#d0c8c8]" />
+              )}
+              {mission.type && (
+                <Text className="text-[10px] text-[#9a9a9a]">
+                  {mission.type === 'daily' ? t('missionItem.typeDaily') : t('missionItem.typeWeekly')}
+                </Text>
+              )}
+            </View>
+          )}
+
           {isCompleted && completedAtLabel && (
             <Text className="text-[11px] text-laurel mt-1.5">
               {t('missionItem.completedAt', { date: completedAtLabel })}
@@ -242,42 +311,72 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, p
           )}
         </View>
 
-        <View className="items-end gap-1">
-          <View className="flex-row items-center gap-1">
-            <Text className="text-[13px] font-extrabold text-accent-500">+{mission.xp_reward}{t('common.xp')}</Text>
-            {streakBonusPct > 0 && !isCompleted && (
-              <>
-                <ArrowUpIcon size={11} color="#2F7A52" />
-                <Text className="text-[12px] font-extrabold text-laurel">+{streakBonusPct}%</Text>
-              </>
-            )}
+        {/* Recompensa em destaque */}
+        <View className="items-end ml-1">
+          <View className="bg-accent-500/10 rounded-[10px] px-2.5 py-1.5 items-center">
+            <Text className="text-[16px] font-extrabold text-accent-500 leading-none">
+              +{mission.xp_reward}
+            </Text>
+            <Text className="text-[8px] font-extrabold text-accent-500/70 tracking-[1.5px] mt-0.5">
+              {t('common.xp').trim().toUpperCase()}
+            </Text>
           </View>
           {mission.coin_reward > 0 && (
-            <CoinAmount atomic={mission.coin_reward} size={11} textColor="#9a7b1f" />
+            <View className="mt-1">
+              <CoinAmount atomic={mission.coin_reward} size={11} textColor="#9a7b1f" />
+            </View>
           )}
+          {streakBonusPct > 0 && !isCompleted && (
+            <View className="flex-row items-center gap-0.5 mt-1">
+              <ArrowUpIcon size={10} color="#2F7A52" />
+              <Text className="text-[11px] font-extrabold text-laurel">+{streakBonusPct}%</Text>
+            </View>
+          )}
+        </View>
+      </View>
+
+      {/* Chip de status (abaixo do cabeçalho) */}
+      {(isCompleted || isInProgress || isPendingReview) && (
+        <View className="flex-row mt-2.5">
           {isCompleted && (
-            <View className="bg-laurel/15 rounded-full px-2 py-0.5">
+            <View className="bg-laurel/15 rounded-full px-2.5 py-0.5">
               <Text className="text-[10px] font-bold text-laurel">{t('missionItem.completed')}</Text>
             </View>
           )}
           {isInProgress && (
-            <View className="bg-primary-500/10 rounded-full px-2 py-0.5">
+            <View className="bg-primary-500/10 rounded-full px-2.5 py-0.5">
               <Text className="text-[10px] font-bold text-primary-500">{t('missionItem.inProgress')}</Text>
             </View>
           )}
           {isPendingReview && (
-            <View className="bg-accent-500/20 rounded-full px-2 py-0.5">
+            <View className="bg-accent-500/20 rounded-full px-2.5 py-0.5">
               <Text className="text-[10px] font-bold text-[#9a7b1f]">
                 {needsApproval ? t('missionItem.inReview') : t('missionItem.pointsPendingLabel')}
               </Text>
             </View>
           )}
         </View>
-      </View>
+      )}
+
+      {/* Por que recomendada (F7) — só para missões disponíveis do feed recomendado */}
+      {reasons && reasons.length > 0 && !isCompleted && !isInProgress && !isPendingReview && (
+        <View className="flex-row items-center flex-wrap gap-1.5 mt-2.5">
+          {reasons.slice(0, 2).map((r, i) => (
+            <View
+              key={i}
+              className="flex-row items-center gap-1 bg-accent-500/10 rounded-full px-2 py-0.5">
+              <Text className="text-[9px]">✨</Text>
+              <Text className="text-[10px] font-semibold text-[#9a7b1f]" numberOfLines={1}>
+                {r}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       {isPendingReview && (
         <>
-          <ReviewPanel mission={mission} />
+          <ReviewPanel mission={mission} onCompleted={onCompleted} />
           <View className="mt-2">
             <TouchableOpacity
               disabled={busy}
@@ -296,22 +395,25 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, p
 
       {isInProgress && (
         <View className="mt-3 flex-row gap-2">
+          {/* Concluir = ação positiva (verde laurel), casa com o estado "Concluída". */}
           <TouchableOpacity
             disabled={busy}
             activeOpacity={0.85}
             onPress={() => onComplete(mission)}
-            className="flex-1 rounded-[10px] py-2.5 items-center bg-primary-500">
+            className="flex-1 rounded-[10px] py-2.5 items-center bg-laurel">
             {pending ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
               <Text className="text-[13px] font-bold text-white">{t('missionItem.completeMission')}</Text>
             )}
           </TouchableOpacity>
+          {/* Desistir = destrutivo (vermelho de contorno). Agora que "Concluir" é
+              verde, o vermelho aqui contrasta bem (avançar x recuar) sem competir. */}
           <TouchableOpacity
             disabled={busy}
             activeOpacity={0.85}
             onPress={confirmAbandon}
-            className="rounded-[10px] py-2.5 px-4 items-center border border-[#e0c9cb]">
+            className="rounded-[10px] py-2.5 px-4 items-center border-[1.5px] border-primary-500/50">
             {abandonPending ? (
               <ActivityIndicator color="#9E1B32" size="small" />
             ) : (

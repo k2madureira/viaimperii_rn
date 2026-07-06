@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 
-export type MissionsTab = 'available' | 'history' | 'inprogress';
+export type MissionsTab = 'available' | 'inprogress';
 
 interface Props {
   value: MissionsTab;
@@ -10,7 +10,8 @@ interface Props {
   missionType?: 'daily' | 'monthly';
 }
 
-const TAB_KEYS: MissionsTab[] = ['available', 'inprogress', 'history'];
+// Histórico foi movido para a aba "Progresso" (reduz opções na aba de missões).
+const TAB_KEYS: MissionsTab[] = ['available', 'inprogress'];
 
 // Cor do tab ativo reflete o tipo de missão selecionado.
 const ACTIVE_COLOR: Record<string, string> = {
