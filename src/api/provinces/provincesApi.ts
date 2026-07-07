@@ -40,7 +40,8 @@ export async function updateUserProvince(
   userId: string,
   provinceId: number,
 ): Promise<UpdateProvinceResult> {
-  const response = await apiFetch(`/users/${userId}/province`, {
+  // Consolidado em PATCH /users/{id} (o antigo /users/{id}/province foi removido).
+  const response = await apiFetch(`/users/${userId}`, {
     method: 'PATCH',
     body: JSON.stringify({ province_id: provinceId }),
   });

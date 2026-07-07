@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Modal, Platform, RefreshControl, ScrollView, Text, TouchableOpacity, Vibration, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import * as SecureStore from 'expo-secure-store';
@@ -33,6 +33,7 @@ import {
   MissionsTabs,
   MissionsOnboarding,
   PeriodStats,
+  RankUpModal,
   ReviewItem,
   SpecialtyFilter,
   StatsFilter,
@@ -94,6 +95,8 @@ export default function MissionsScreen() {
   const [onboardingSeen, setOnboardingSeen] = useState<boolean | null>(null);
   const isReview = viewMode === 'review';
   const isProgress = viewMode === 'progress';
+  // Modo "Missões" (não Progresso/Revisão) — mantém as ativas vivas p/ o badge de contagem.
+  const inMissionsMode = !isReview && !isProgress;
 
   const isInProgress = tab === 'inprogress';
 
@@ -151,8 +154,9 @@ export default function MissionsScreen() {
   // "Ativas" = em andamento + em revisão. Consultadas via filtro de status no backend
   // (em vez de derivar do catalogQuery paginado) para não perder missões do usuário
   // que ficariam fora da primeira página do catálogo.
-  const inProgressActiveQuery = useMissions('in_progress', isInProgress);
-  const pendingReviewQuery = useMissions('pending_review', isInProgress);
+  // Ativas ficam vivas em todo o modo Missões (não só na aba) para o badge de contagem.
+  const inProgressActiveQuery = useMissions('in_progress', inMissionsMode);
+  const pendingReviewQuery = useMissions('pending_review', inMissionsMode);
 
   // Fila de revisão de pares (só carrega quando o modo "Revisão" está ativo).
   const toReviewQuery = useMissionsToReview(isReview);
@@ -173,7 +177,33 @@ export default function MissionsScreen() {
   // Missão em confirmação de "compartilhar como post" / missão sendo compartilhada.
   const [shareConfirm, setShareConfirm] = useState<Mission | null>(null);
   const [shareMission, setShareMission] = useState<Mission | null>(null);
+  // Promoção de patente ao concluir (nomes das patentes anterior/nova).
+  const [rankUp, setRankUp] = useState<{ previous: string; current: string } | null>(null);
   const rejectM = useRejectMission();
+
+  // Imagem de uma patente pelo nome (do ladder do perfil — estático por trilha).
+  const rankImageByName = (name?: string): string | null => {
+    if (!name) return null;
+    const r = profileQuery.data?.ranks?.find((x) => x.name === name);
+    return r?.image_url ?? r?.thumb_url ?? null;
+  };
+
+  // Detecção de promoção pelo perfil: cobre a finalização ASSÍNCRONA (média/difícil
+  // por tempo/aprovação), que não traz `promoted` no poll. Quando o `current_rank.level`
+  // sobe entre refetches, dispara o modal (a patente anterior vem do ladder pelo nível).
+  const lastRankLevelRef = useRef<number | null>(null);
+  useEffect(() => {
+    const cr = profileQuery.data?.current_rank;
+    if (!cr) return;
+    const level = cr.level;
+    const prev = lastRankLevelRef.current;
+    if (prev != null && level > prev) {
+      const previousName = profileQuery.data?.ranks?.find((r) => r.level === prev)?.name ?? '';
+      setRankUp({ previous: previousName, current: cr.name });
+    }
+    lastRankLevelRef.current = level;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profileQuery.data?.current_rank?.level]);
 
   // Texto inicial do post (editável) a partir dos dados da missão.
   const buildShareText = (m: Mission) => {
@@ -191,14 +221,17 @@ export default function MissionsScreen() {
           setEvidenceMission(null);
           // Feedback tátil ao enviar a conclusão.
           Vibration.vibrate(20);
-          // XP creditado na hora (raro; normal é pending_review) → celebra já.
-          if (result.status === 'completed') {
+          // Se subiu de patente na conclusão imediata, o modal de promoção vem do
+          // watch de perfil (single source) — aqui só evitamos ruído (celebração/
+          // compartilhar) sobre esse momento maior.
+          const rankedUp = result.status === 'completed' && result.promoted;
+          if (result.status === 'completed' && !rankedUp) {
             setCelebration({ xp: result.xp_earned, coins: mission.coin_reward });
           }
           if (result.requires_legion_selection) {
             setRecommendedIds((result.recommended_legions ?? []).map((l) => l.id));
             setLegionModalVisible(true);
-          } else {
+          } else if (!rankedUp) {
             // Oferece compartilhar a conquista como post (revisar antes de publicar).
             setShareConfirm(mission);
           }
@@ -478,7 +511,12 @@ export default function MissionsScreen() {
         <View className="bg-white border border-[#f0eded] rounded-[20px] overflow-hidden">
           {/* Tabs de status */}
           <View className="px-3 pt-3">
-            <MissionsTabs value={tab} onChange={setTab} missionType={missionType} />
+            <MissionsTabs
+              value={tab}
+              onChange={setTab}
+              missionType={missionType}
+              activeCount={inProgressMissions.length}
+            />
           </View>
 
           <View className="p-3 gap-3">
@@ -617,6 +655,16 @@ export default function MissionsScreen() {
 
       {/* F9: mini-tour na primeira visita */}
       <MissionsOnboarding visible={onboardingSeen === false} onClose={dismissOnboarding} />
+
+      {/* Promoção de patente ao concluir missão */}
+      <RankUpModal
+        visible={rankUp != null}
+        previousRank={rankUp?.previous}
+        previousImage={rankImageByName(rankUp?.previous)}
+        newRank={rankUp?.current ?? ''}
+        newImage={rankImageByName(rankUp?.current)}
+        onClose={() => setRankUp(null)}
+      />
 
       {/* Confirmação: transformar a conclusão em post (modal padrão do app) */}
       <Modal

@@ -15,12 +15,18 @@ export function useJoinLegion(userId: string | undefined) {
   return useMutation({
     mutationFn: (legionId: number) => joinLegion(userId as string, legionId),
     onSuccess: (result) => {
-      Toast.show({
-        type: 'success',
-        text1: i18n.t('toasts.joinLegionWelcome', { name: result.legion_name }),
-        text2: BALANCE_LABEL[result.balance_status ?? 'balanced'] || undefined,
-      });
+      // Sem nome (caso do 409 "já pertence") não mostra o toast de boas-vindas.
+      if (result.legion_name) {
+        Toast.show({
+          type: 'success',
+          text1: i18n.t('toasts.joinLegionWelcome', { name: result.legion_name }),
+          text2: BALANCE_LABEL[result.balance_status ?? 'balanced'] || undefined,
+        });
+      }
+      // Atualiza perfil (legião do usuário) + contagens de membros + detalhe da legião.
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['legions'] });
+      queryClient.invalidateQueries({ queryKey: ['legion-detail'] });
     },
     onError: (error: Error) => {
       Toast.show({ type: 'error', text1: i18n.t('toasts.joinLegionError'), text2: error.message });

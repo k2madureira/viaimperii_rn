@@ -11,4 +11,5 @@ export { default as DailyGoalHeader } from './dailyGoalHeader';
 export { default as MissionCelebration } from './missionCelebration';
 export { default as UserSummary } from './userSummary';
 export { default as MissionsOnboarding } from './missionsOnboarding';
+export { default as RankUpModal } from './rankUpModal';
 export type { MissionsTab } from './missionsTabs';

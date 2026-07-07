@@ -37,6 +37,9 @@ export function useRewardedVideo() {
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ['missions-available'] }),
           queryClient.invalidateQueries({ queryKey: ['missions'] }),
+          // A aba padrão "Disponíveis" usa o feed recomendado (capado pela cota) —
+          // sem invalidar, as vagas extras do vídeo não apareciam.
+          queryClient.invalidateQueries({ queryKey: ['missions-recommended'] }),
           queryClient.invalidateQueries({ queryKey: ['daily-briefing'] }),
         ]);
         Toast.show({

@@ -347,6 +347,11 @@ export default {
   hashtagFeed: {
     empty: 'Nenhum post com #{{tag}} por aqui ainda.',
   },
+  rankUp: {
+    title: 'Você subiu de patente!',
+    subtitle: 'Parabéns, legionário! ⚔️',
+    continue: 'Continuar',
+  },
   missionShare: {
     promptTitle: 'Missão concluída! ⚔️',
     promptBody: 'Quer compartilhar essa conquista como um post?',

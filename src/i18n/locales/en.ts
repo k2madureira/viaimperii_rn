@@ -347,6 +347,11 @@ export default {
   hashtagFeed: {
     empty: 'No posts with #{{tag}} yet.',
   },
+  rankUp: {
+    title: 'You ranked up!',
+    subtitle: 'Congratulations, legionary! ⚔️',
+    continue: 'Continue',
+  },
   missionShare: {
     promptTitle: 'Mission complete! ⚔️',
     promptBody: 'Want to share this achievement as a post?',
