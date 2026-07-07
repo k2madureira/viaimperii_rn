@@ -3,7 +3,11 @@ import { isTokenExpired } from './jwt';
 import { ACCESS_KEY, refreshAccessToken } from './tokenManager';
 
 const API_HOST = process.env.EXPO_PUBLIC_API_HOST;
-const TIMEOUT_MS = 10000;
+// 60s cobre o cold start do backend em produção (Railway hiberna quando ocioso; o
+// 1º request após a hibernação — incl. claims/rewards — pode levar 30–60s até o
+// serviço acordar). Vale para TODAS as requests que passam por apiFetch. Em dev é
+// instantâneo, então não atrapalha.
+const TIMEOUT_MS = 60000;
 
 export async function apiFetch(path: string, options: RequestInit = {}): Promise<Response> {
   return requestWithAuth(path, options, true);

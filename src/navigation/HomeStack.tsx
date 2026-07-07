@@ -7,6 +7,8 @@ import LegionsScreen from '../screens/legions';
 import WarRoomScreen from '../screens/legions/WarRoom';
 import ProfileScreen from '../screens/profile';
 import PostDetailScreen from '../screens/postDetail';
+import RewardsScreen from '../screens/rewards';
+import HashtagFeedScreen from '../screens/hashtagFeed';
 import { FeedItem } from '../api/feed/feedApi';
 
 export type HomeStackParamList = {
@@ -16,6 +18,8 @@ export type HomeStackParamList = {
   WarRoom: { legionId: number };
   Profile: { userId?: string } | undefined;
   PostDetail: { post: FeedItem };
+  Rewards: undefined;
+  HashtagFeed: { tag: string };
 };
 
 export type HomeNavigationProp = NativeStackNavigationProp<HomeStackParamList>;
@@ -31,6 +35,8 @@ export default function HomeStack() {
       <Stack.Screen name="WarRoom" component={WarRoomScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="PostDetail" component={PostDetailScreen} />
+      <Stack.Screen name="Rewards" component={RewardsScreen} />
+      <Stack.Screen name="HashtagFeed" component={HashtagFeedScreen} />
     </Stack.Navigator>
   );
 }

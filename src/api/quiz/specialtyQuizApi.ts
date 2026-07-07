@@ -72,7 +72,8 @@ export async function updateUserSpecialty(
   userId: string,
   specialtyId: number,
 ): Promise<void> {
-  const response = await apiFetch(`/users/${userId}/specialty`, {
+  // Consolidado em PATCH /users/{id} (o antigo /users/{id}/specialty foi removido).
+  const response = await apiFetch(`/users/${userId}`, {
     method: 'PATCH',
     body: JSON.stringify({ specialty_id: specialtyId }),
   });

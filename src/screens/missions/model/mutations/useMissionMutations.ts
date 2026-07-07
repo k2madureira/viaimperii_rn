@@ -16,6 +16,10 @@ export function useStartMission() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['missions'] });
       queryClient.invalidateQueries({ queryKey: ['missions-available'] });
+      // Hero "Missões do dia" (Home) consome as recomendadas / o briefing — sem
+      // isso a missão iniciada continuava aparecendo na lista.
+      queryClient.invalidateQueries({ queryKey: ['missions-recommended'] });
+      queryClient.invalidateQueries({ queryKey: ['daily-briefing'] });
     },
     onError: (error: Error) => {
       Toast.show({ type: 'error', text1: i18n.t('toasts.startMissionError'), text2: error.message });
@@ -53,6 +57,7 @@ export function useCompleteMission() {
       }
       queryClient.invalidateQueries({ queryKey: ['missions'] });
       queryClient.invalidateQueries({ queryKey: ['missions-available'] });
+      queryClient.invalidateQueries({ queryKey: ['daily-briefing'] });
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
       queryClient.invalidateQueries({ queryKey: ['ranking'] });
       queryClient.invalidateQueries({ queryKey: ['user-stats'] });
@@ -72,6 +77,7 @@ export function useAbandonMission() {
       Toast.show({ type: 'success', text1: i18n.t('toasts.abandonTitle'), text2: i18n.t('toasts.abandonBody') });
       queryClient.invalidateQueries({ queryKey: ['missions'] });
       queryClient.invalidateQueries({ queryKey: ['missions-available'] });
+      queryClient.invalidateQueries({ queryKey: ['daily-briefing'] });
     },
     onError: (error: Error) => {
       Toast.show({ type: 'error', text1: i18n.t('toasts.abandonError'), text2: error.message });

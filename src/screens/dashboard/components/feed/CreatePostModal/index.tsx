@@ -16,6 +16,8 @@ interface Props {
   canLegion?: boolean;
   canProvince?: boolean;
   authorAvatarUrl?: string | null;
+  // Texto inicial (ex.: compartilhar missão concluída) — editável antes de publicar.
+  initialText?: string;
   onClose: () => void;
 }
 
@@ -28,6 +30,7 @@ export default function CreatePostModal({
   canLegion,
   canProvince,
   authorAvatarUrl,
+  initialText,
   onClose,
 }: Props) {
   const { t } = useTranslation();
@@ -70,6 +73,7 @@ export default function CreatePostModal({
                 canProvince={canProvince}
                 large
                 authorAvatarUrl={authorAvatarUrl}
+                initialText={initialText}
                 onPosted={onClose}
                 onCancel={onClose}
               />

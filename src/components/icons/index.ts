@@ -22,6 +22,9 @@ export { AureusCoin, DenariusCoin, AsCoin, CoinIcon, CoinAmount } from './coins'
 // Chama do streak de login
 export { default as FireIcon } from './fire';
 
+// Presente colorido — gatilho da tela de Prêmios
+export { default as GiftIcon } from './gift';
+
 // Sino de notificações
 export { default as BellIcon } from './bell';
 

@@ -21,11 +21,11 @@ import {
 } from '../../components';
 import { PrimusPilusEmblem } from '../../components/icons';
 import { useAuth } from '../../contexts/AuthContext';
-import { ChangePasswordModal, NotificationsButton, StreakButton, WalletButton } from './components';
+import { ChangePasswordModal, DailyMissionsHero, NotificationsButton, RewardsButton, StreakButton, WalletButton } from './components';
 import { CommentsModal, FeedCard } from './components/feed';
 import { FeedItem } from '../../api/feed/feedApi';
 import { useLegions } from '../missions/model/queries/useLegions';
-import { useAvailableMissions } from '../missions/model/queries/useAvailableMissions';
+import { useDailyBriefing } from '../missions/model/queries/useDailyBriefing';
 import { useJoinLegion } from '../missions/model/mutations/useJoinLegion';
 import { useUserProfile } from './model/queries/useUserProfile';
 import { useWallet } from './model/queries/useWallet';
@@ -49,7 +49,9 @@ export default function DashboardScreen() {
 
   const profileQuery = useUserProfile(user?.user_id);
   const walletQuery = useWallet(!!user);
-  const availableQuery = useAvailableMissions(null, null);
+  // Meta diária do hero (só o progresso). Reusa o briefing (traz `goal`); como o
+  // hero não lista mais missões, pedimos o mínimo de sugestões.
+  const briefingQuery = useDailyBriefing(1, !!user);
   const campaignsQuery = useCampaigns();
   const legionsQuery = useLegions();
 
@@ -64,12 +66,12 @@ export default function DashboardScreen() {
   const legion = data?.legion ?? null;
 
   const refreshing =
-    profileQuery.isRefetching || availableQuery.isRefetching || feedQuery.isRefetching;
+    profileQuery.isRefetching || briefingQuery.isRefetching || feedQuery.isRefetching;
 
   const onRefresh = () => {
     profileQuery.refetch();
     walletQuery.refetch();
-    availableQuery.refetch();
+    briefingQuery.refetch();
     campaignsQuery.refetch();
     feedQuery.refetch();
   };
@@ -144,10 +146,17 @@ export default function DashboardScreen() {
           </Text>
         </View>
         <View className="flex-row items-center gap-3">
+          <RewardsButton />
           {streak && streak.current_streak > 0 && <StreakButton streak={streak} />}
           <NotificationsButton />
         </View>
       </View>
+
+      {/* 2 — HERO: MISSÕES DO DIA (progresso da meta, acima do feed) */}
+      <DailyMissionsHero
+        allowance={briefingQuery.data?.goal}
+        onSeeAll={() => navigation.navigate('Missions')}
+      />
 
       {/* 3 — CAMPANHA ATUAL */}
       {activeCampaign && (
