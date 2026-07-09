@@ -1,10 +1,8 @@
 import { useForm } from '@tanstack/react-form';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  Animated,
-  Dimensions,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -17,8 +15,6 @@ import EyeIcon from '../../../auth/components/icons/EyeIcon';
 import EyeOffIcon from '../../../auth/components/icons/EyeOffIcon';
 import { changePasswordSchema } from '../../model/contracts/changePasswordSchema';
 import { useUpdatePasswordMutation } from '../../model/mutations/useUpdatePasswordMutation';
-
-const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface Props {
   visible: boolean;
@@ -75,24 +71,6 @@ function PasswordField({
 
 export default function ChangePasswordModal({ visible, isTemporary = false, onClose }: Props) {
   const { t } = useTranslation();
-  const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
-
-  useEffect(() => {
-    if (visible) {
-      Animated.spring(slideAnim, {
-        toValue: 0,
-        useNativeDriver: true,
-        bounciness: 0,
-        speed: 20,
-      }).start();
-    } else {
-      Animated.timing(slideAnim, {
-        toValue: SCREEN_HEIGHT,
-        duration: 220,
-        useNativeDriver: true,
-      }).start();
-    }
-  }, [visible]);
 
   const { mutate: updatePassword, isPending } = useUpdatePasswordMutation(onClose);
 
@@ -107,21 +85,15 @@ export default function ChangePasswordModal({ visible, isTemporary = false, onCl
   return (
     <Modal
       visible={visible}
-      animationType="none"
+      animationType="fade"
       transparent
       statusBarTranslucent
       onRequestClose={isTemporary ? undefined : onClose}>
-      {/* Backdrop instantâneo — sem animação */}
-      <View className="flex-1 bg-black/50 justify-end">
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          {/* Sheet animado */}
-          <Animated.View
-            className="bg-white rounded-t-[20px] px-6 pt-5 pb-10"
-            style={{ transform: [{ translateY: slideAnim }] }}>
-
-            <View className="items-center mb-4">
-              <View className="w-10 h-1 bg-[#ddd] rounded-full" />
-            </View>
+      <View className="flex-1 bg-black/60 items-center justify-center px-6">
+        <KeyboardAvoidingView
+          className="w-full"
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          <View className="w-full bg-white rounded-[20px] p-6">
 
             <View className="flex-row items-center justify-between mb-5">
               <View className="flex-1 pr-4">
@@ -201,7 +173,7 @@ export default function ChangePasswordModal({ visible, isTemporary = false, onCl
                 </TouchableOpacity>
               )}
             </form.Subscribe>
-          </Animated.View>
+          </View>
         </KeyboardAvoidingView>
       </View>
     </Modal>
