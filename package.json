@@ -11,6 +11,7 @@
     "@tanstack/react-query": "^5.101.0",
     "expo": "~54.0.35",
     "expo-auth-session": "~7.0.11",
+    "expo-build-properties": "~1.0.10",
     "expo-crypto": "~15.0.9",
     "expo-dev-client": "~6.0.21",
     "expo-image-manipulator": "~14.0.8",
@@ -30,7 +31,7 @@
     "react-native": "0.81.5",
     "react-native-css-interop": "0.2.5",
     "react-native-gesture-handler": "~2.28.0",
-    "react-native-google-mobile-ads": "^16.3.4",
+    "react-native-google-mobile-ads": "16.3.4",
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
@@ -51,7 +52,8 @@
     "dev": "npx expo start --dev-client --clear",
     "android": "expo run:android",
     "ios": "expo run:ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "buildprev": "eas build --profile preview --platform android --non-interactive"
   },
   "private": true
 }
