@@ -4,6 +4,7 @@ export type AuthStackParamList = {
   Login: undefined;
   Signup: { step?: number; email?: string } | undefined;
   ForgotPassword: undefined;
+  ResetPassword: { email?: string } | undefined;
   SpecialtyQuiz: { testCode: string; userId: string };
 };
 
