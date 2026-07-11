@@ -211,6 +211,8 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
   // em finalize_pending_mission().
   const streakBonusPct = user?.streak?.bonus_pct ?? 0;
   const SpecialtyIcon = resolveSpecialtyIcon(mission.specialty_name);
+  // Cor da especialidade (vinda do backend); fallback para o vinho imperial.
+  const specColor = mission.specialty_color ?? '#6B1221';
 
   // "Ativas" (em andamento / em revisão): o fundo e a borda usam um tom sutil da
   // própria cor da dificuldade — harmoniza com a faixa lateral (antes brigava com
@@ -242,9 +244,9 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
         {/* Ícone temático da especialidade (identidade romana) */}
         <View
           className="w-11 h-11 rounded-[12px] items-center justify-center mr-3"
-          style={{ backgroundColor: '#f4eeec' }}>
+          style={{ backgroundColor: `${specColor}1A` }}>
           {SpecialtyIcon ? (
-            <SpecialtyIcon size={22} color="#6B1221" />
+            <SpecialtyIcon size={22} color={specColor} />
           ) : (
             <Text className="text-[18px]">⚔️</Text>
           )}
@@ -290,9 +292,13 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
           {(mission.specialty_name || mission.type) && (
             <View className="flex-row items-center flex-wrap gap-1.5 mt-1.5">
               {mission.specialty_name && (
-                <Text className="text-[10px] font-semibold text-[#9a9a9a]">
-                  {mission.specialty_name}
-                </Text>
+                <View
+                  className="rounded-full px-2 py-0.5"
+                  style={{ backgroundColor: `${specColor}1A` }}>
+                  <Text className="text-[10px] font-bold" style={{ color: specColor }}>
+                    {mission.specialty_name}
+                  </Text>
+                </View>
               )}
               {mission.specialty_name && mission.type && (
                 <View className="w-1 h-1 rounded-full bg-[#d0c8c8]" />

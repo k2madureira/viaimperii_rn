@@ -548,6 +548,7 @@ export default {
     redeemError: 'Erro ao resgatar',
     professions: {
       hint: 'Compre uma profissão para desbloquear as missões exclusivas dela.',
+      allSpecialties: 'Todas',
       trackLocked: 'Escolha sua trilha de carreira para desbloquear as missões de profissão.',
       lockedShort: 'Bloqueada',
       missionCount: '{{n}} missões',

@@ -1,11 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { getProfessions, getUserProfessions } from '../../../../api/professions/professionsApi';
 
-// Catálogo de profissões do mercado.
+// Catálogo de profissões do mercado (todas; o filtro por trilha/especialidade é
+// aplicado no cliente para derivar as especialidades disponíveis da trilha).
 export function useProfessions(enabled = true) {
   return useQuery({
     queryKey: ['professions'],
-    queryFn: getProfessions,
+    queryFn: () => getProfessions({ perPage: 100 }),
     enabled,
   });
 }

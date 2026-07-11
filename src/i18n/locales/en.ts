@@ -548,6 +548,7 @@ export default {
     redeemError: 'Redeem failed',
     professions: {
       hint: 'Buy a profession to unlock its exclusive missions.',
+      allSpecialties: 'All',
       trackLocked: 'Choose your career track to unlock profession missions.',
       lockedShort: 'Locked',
       missionCount: '{{n}} missions',

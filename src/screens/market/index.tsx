@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,6 +16,7 @@ import { useProfessions, useUserProfessions } from './model/queries/useProfessio
 import { useRedeemProduct } from './model/mutations/useRedeemProduct';
 import { useBuyProfession } from './model/mutations/useBuyProfession';
 import TypeFilter from './components/typeFilter';
+import SpecialtyFilter, { SpecialtyOption } from './components/specialtyFilter';
 import ProductCard from './components/productCard';
 import ProfessionCard from './components/professionCard';
 import BuyConfirmModal from './components/buyConfirmModal';
@@ -31,6 +32,8 @@ export default function MarketScreen() {
 
   const [section, setSection] = useState<MarketSection>('professions');
   const [type, setType] = useState<ProductType | null>(null);
+  // Filtro por especialidade da seção de missões (profissões).
+  const [specialtyId, setSpecialtyId] = useState<number | null>(null);
   // Profissão aguardando confirmação de compra (abre o modal padrão).
   const [confirmProf, setConfirmProf] = useState<Profession | null>(null);
 
@@ -60,6 +63,32 @@ export default function MarketScreen() {
   const professions = hasTrack
     ? allProfessions.filter((p) => p.track_id == null || p.track_id === userTrack!.id)
     : allProfessions;
+
+  // Especialidades disponíveis na trilha do usuário (derivadas das profissões
+  // visíveis), com a cor de cada especialidade — alimentam o filtro por chips.
+  const specialtyOptions = useMemo<SpecialtyOption[]>(() => {
+    const map = new Map<number, SpecialtyOption>();
+    for (const p of professions) {
+      if (p.specialty_id != null && !map.has(p.specialty_id)) {
+        map.set(p.specialty_id, {
+          id: p.specialty_id,
+          name: p.specialty_name ?? '—',
+          color: p.specialty_color ?? '#5B6B7A',
+        });
+      }
+    }
+    return Array.from(map.values());
+  }, [professions]);
+
+  // Zera o filtro quando a especialidade selecionada não existe mais (troca de trilha).
+  useEffect(() => {
+    if (specialtyId != null && !specialtyOptions.some((s) => s.id === specialtyId)) {
+      setSpecialtyId(null);
+    }
+  }, [specialtyOptions, specialtyId]);
+
+  const shownProfessions =
+    specialtyId == null ? professions : professions.filter((p) => p.specialty_id === specialtyId);
 
   const redeemingSlug = redeemM.isPending ? redeemM.variables?.slug ?? null : null;
   const buyingId = buyProfM.isPending ? buyProfM.variables ?? null : null;
@@ -114,7 +143,7 @@ export default function MarketScreen() {
           <SectionBody
             isLoading={professionsQuery.isLoading}
             isError={professionsQuery.isError}
-            isEmpty={professions.length === 0}
+            isEmpty={shownProfessions.length === 0}
             errorText={t('market.professions.loadError')}
             emptyText={t('market.professions.empty')}
             onRetry={() => professionsQuery.refetch()}>
@@ -131,7 +160,11 @@ export default function MarketScreen() {
                   </Text>
                 </View>
               )}
-              {professions.map((p) => (
+
+              {/* Filtro por especialidade — segue a trilha do usuário */}
+              <SpecialtyFilter options={specialtyOptions} value={specialtyId} onChange={setSpecialtyId} />
+
+              {shownProfessions.map((p) => (
                 <ProfessionCard
                   key={p.id}
                   profession={p}
