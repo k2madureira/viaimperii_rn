@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Modal, Platform, RefreshControl, ScrollView, Text, TouchableOpacity, Vibration, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
 import { useRewardedVideo } from './model/mutations/useRewardedVideo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionSelectModal, Navbar } from '../../components';
+import { ShopIcon } from '../../components/icons';
 import { Mission, MissionDifficulty, MissionEvidence, RecommendedMission, ToReviewItem } from '../../api/missions/missionsApi';
 import { StatsPeriod } from '../../api/users/userApi';
 import { useAuth } from '../../contexts/AuthContext';
@@ -66,6 +68,7 @@ const FIRST_TRACK_RANK: Record<string, string> = {
 export default function MissionsScreen() {
   const insets = useSafeAreaInsets();
   const { t } = useTranslation();
+  const navigation = useNavigation<any>();
   const { user } = useAuth();
 
   // Keeps a persistent SSE connection open so mission status changes (approvals,
@@ -442,7 +445,27 @@ export default function MissionsScreen() {
         ) : (
         <>
         {/* Meta diária + ofensiva (F2) */}
-        <DailyGoalHeader allowance={allowance} streak={user?.streak} />
+        <DailyGoalHeader allowance={allowance} streak={user?.streak} /> 
+
+        {/* Atalho para o Mercado — compra de missões de profissão com moedas */}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          onPress={() => navigation.navigate('Market')}
+          accessibilityRole="button"
+          className="bg-white border border-[#f0eded] rounded-[16px] p-3.5 flex-row items-center gap-3">
+          <View className="w-11 h-11 rounded-[12px] bg-primary-500/10 items-center justify-center">
+            <ShopIcon size={22} color="#9E1B32" />
+          </View>
+          <View className="flex-1">
+            <Text className="text-[14px] font-extrabold text-charcoal">
+              {t('missions.marketShortcutTitle')}
+            </Text>
+            <Text className="text-[12px] text-[#888] mt-0.5 leading-[16px]">
+              {t('missions.marketShortcutSubtitle')}
+            </Text>
+          </View>
+          <Text className="text-[18px] text-[#c9b7b7] font-bold">›</Text>
+        </TouchableOpacity>
 
         {/* ── Seletor de tipo: Diárias | Semanais ────────────────────────── */}
         <View className="bg-[#6B1221] rounded-[16px] p-4 gap-3">

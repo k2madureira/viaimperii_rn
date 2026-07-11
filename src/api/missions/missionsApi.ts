@@ -20,6 +20,7 @@ export interface Mission {
   coin_reward_display: string;
   specialty_id: number | null;
   specialty_name: string | null;
+  specialty_color: string | null; // cor da especialidade (#RRGGBB) — badge/ícone
   track_id: number | null;
   // Prioridade no catálogo: 0 = comum, 1 = universal (missão de trilha, hábito
   // diário genérico). Universais lideram as listagens; as `easy` concluem na hora.

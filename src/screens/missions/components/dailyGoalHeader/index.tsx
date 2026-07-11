@@ -30,7 +30,7 @@ export default function DailyGoalHeader({ allowance, streak }: Props) {
   const progress = DAILY_MISSION_GOAL > 0 ? completedToday / DAILY_MISSION_GOAL : 0;
   const missing = Math.max(0, DAILY_MISSION_GOAL - completedToday);
   const streakDays = streak?.current_streak ?? 0;
-
+ 
   return (
     <View className="bg-white border border-[#f0eded] rounded-[16px] p-4 flex-row items-center gap-3.5">
       <ProgressRing
