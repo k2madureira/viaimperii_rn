@@ -134,7 +134,11 @@ export default function DashboardScreen() {
     <View style={{ gap: 18 }}>
       {/* 1 — HEADER */}
       <View className="flex-row items-center justify-between">
-        <View className="flex-1">
+        <TouchableOpacity
+          className="flex-1"
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          onPress={() => navigation.navigate('Profile')}>
           <Text
             className="text-[26px] font-extrabold text-charcoal"
             style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
@@ -144,7 +148,7 @@ export default function DashboardScreen() {
             {rankName}
             {legion ? ` • ${legion.name}` : ''}
           </Text>
-        </View>
+        </TouchableOpacity>
         <View className="flex-row items-center gap-3">
           <RewardsButton />
           {streak && streak.current_streak > 0 && <StreakButton streak={streak} />}

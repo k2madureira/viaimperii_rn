@@ -92,6 +92,7 @@ function ReviewPanel({ mission, onCompleted }: { mission: Mission; onCompleted?:
     const opts = { refetchType: 'active' as const };
     queryClient.invalidateQueries({ queryKey: ['missions'], ...opts });
     queryClient.invalidateQueries({ queryKey: ['missions-available'], ...opts });
+    queryClient.invalidateQueries({ queryKey: ['missions-recommended'], ...opts });
     queryClient.invalidateQueries({ queryKey: ['daily-briefing'], ...opts });
     queryClient.invalidateQueries({ queryKey: ['user-stats'], ...opts });
     queryClient.invalidateQueries({ queryKey: ['user-profile'], ...opts });
