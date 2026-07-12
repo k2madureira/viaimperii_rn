@@ -539,64 +539,8 @@ export default function MissionsScreen() {
           />
         )}
 
-        {/* ── Missões de profissão + compra (dois cards lado a lado) ──────── */}
-        <View className="flex-row items-stretch gap-3">
-          {/* Card que abre as missões de profissão do usuário. Habilitado (tem
-              profissão): destaque vinho + logo dourado. Desabilitado: cinza + cadeado. */}
-          <TouchableOpacity
-            disabled={!hasActiveProfessions}
-            activeOpacity={0.9}
-            onPress={() =>
-              navigation.navigate('ProfessionMissions', { profession: activeProfessions[0] })
-            }
-            accessibilityRole="button"
-            className="flex-1 rounded-[16px] p-3.5 flex-row items-center gap-3 overflow-hidden"
-            style={
-              hasActiveProfessions
-                ? { backgroundColor: '#6B1221', borderWidth: 1, borderColor: '#D4AF37' }
-                : { backgroundColor: '#f2eeee', borderWidth: 1, borderColor: '#e7e0e0' }
-            }>
-            {/* Estrelas cintilantes — só no estado de destaque (tem profissão) */}
-            {hasActiveProfessions && <SparkleOverlay />}
-            <View
-              className="w-11 h-11 rounded-[12px] items-center justify-center"
-              style={{ backgroundColor: hasActiveProfessions ? 'rgba(212,175,55,0.18)' : '#e6dede' }}>
-              {hasActiveProfessions ? (
-                <LogoIcon size={24} color="#D4AF37" />
-              ) : (
-                <LockIcon size={20} color="#a89a9a" />
-              )}
-            </View>
-            <View className="flex-1">
-              <Text
-                className="text-[14px] font-extrabold"
-                style={{ color: hasActiveProfessions ? '#fff' : '#9a8f8f' }}>
-                {t('missions.professionAccessTitle')}
-              </Text>
-              <Text
-                className="text-[12px] mt-0.5 leading-[16px]"
-                style={{ color: hasActiveProfessions ? 'rgba(255,255,255,0.7)' : '#b3a9a9' }}>
-                {hasActiveProfessions
-                  ? t('missions.professionAccessSubtitle')
-                  : t('missions.professionAccessLocked')}
-              </Text>
-            </View>
-          </TouchableOpacity>
-
-          {/* Card separado à direita — compra de missões de profissão no mercado */}
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => navigation.navigate('Market')}
-            accessibilityRole="button"
-            accessibilityLabel={t('missions.marketShortcutTitle')}
-            className="rounded-[16px] px-4 items-center justify-center gap-1"
-            style={{ backgroundColor: '#D4AF37' }}>
-            <ShopIcon size={22} color="#6B1221" />
-            <Text className="text-[11px] font-extrabold" style={{ color: '#6B1221' }}>
-              {t('market.professions.buy')}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {/* M3: os atalhos de profissão/loja saíram daqui (interrompiam o fluxo
+            principal) e foram para o FIM do modo Missões, após a lista. */}
 
         {/* ── C4: "Ativas" vira card colapsável com badge (só quando há ativas),
             acima da lista de Disponíveis, que passa a ser o foco da tela. ──────── */}
@@ -723,6 +667,66 @@ export default function MissionsScreen() {
               renderList(availableMissions)
             )}
           </View>
+        </View>
+
+        {/* M3: atalhos de profissão + loja no FIM do fluxo (fora do caminho da ação
+            principal). Dois cards lado a lado. */}
+        <View className="flex-row items-stretch gap-3">
+          {/* Card que abre as missões de profissão do usuário. Habilitado (tem
+              profissão): destaque vinho + logo dourado. Desabilitado: cinza + cadeado. */}
+          <TouchableOpacity
+            disabled={!hasActiveProfessions}
+            activeOpacity={0.9}
+            onPress={() =>
+              navigation.navigate('ProfessionMissions', { profession: activeProfessions[0] })
+            }
+            accessibilityRole="button"
+            className="flex-1 rounded-[16px] p-3.5 flex-row items-center gap-3 overflow-hidden"
+            style={
+              hasActiveProfessions
+                ? { backgroundColor: '#6B1221', borderWidth: 1, borderColor: '#D4AF37' }
+                : { backgroundColor: '#f2eeee', borderWidth: 1, borderColor: '#e7e0e0' }
+            }>
+            {/* Estrelas cintilantes — só no estado de destaque (tem profissão) */}
+            {hasActiveProfessions && <SparkleOverlay />}
+            <View
+              className="w-11 h-11 rounded-[12px] items-center justify-center"
+              style={{ backgroundColor: hasActiveProfessions ? 'rgba(212,175,55,0.18)' : '#e6dede' }}>
+              {hasActiveProfessions ? (
+                <LogoIcon size={24} color="#D4AF37" />
+              ) : (
+                <LockIcon size={20} color="#a89a9a" />
+              )}
+            </View>
+            <View className="flex-1">
+              <Text
+                className="text-[14px] font-extrabold"
+                style={{ color: hasActiveProfessions ? '#fff' : '#9a8f8f' }}>
+                {t('missions.professionAccessTitle')}
+              </Text>
+              <Text
+                className="text-[12px] mt-0.5 leading-[16px]"
+                style={{ color: hasActiveProfessions ? 'rgba(255,255,255,0.7)' : '#b3a9a9' }}>
+                {hasActiveProfessions
+                  ? t('missions.professionAccessSubtitle')
+                  : t('missions.professionAccessLocked')}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* Card separado à direita — compra de missões de profissão no mercado */}
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('Market')}
+            accessibilityRole="button"
+            accessibilityLabel={t('missions.marketShortcutTitle')}
+            className="rounded-[16px] px-4 items-center justify-center gap-1"
+            style={{ backgroundColor: '#D4AF37' }}>
+            <ShopIcon size={22} color="#6B1221" />
+            <Text className="text-[11px] font-extrabold" style={{ color: '#6B1221' }}>
+              {t('market.professions.buy')}
+            </Text>
+          </TouchableOpacity>
         </View>
         </>
         )}
