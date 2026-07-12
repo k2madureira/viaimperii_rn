@@ -92,8 +92,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = useCallback(async () => {
     // Encerra a sessão SSE no servidor ANTES de apagar o token (o DELETE precisa
-    // do header de auth). Best-effort — não bloqueia o logout se falhar.
-    await Promise.all([closeMissionEvents(), closeFeedEvents(), closeNotificationEvents()]);
+    // do header de auth). Best-effort e com TETO DE TEMPO: o apiFetch tem timeout
+    // de 60s, então sem esse race o logout ficaria preso enquanto o backend não
+    // respondesse. Damos ~2s para o DELETE sair com o token válido e seguimos —
+    // a request pendente é abortada sozinha depois, sem efeito colateral.
+    const closeStreams = Promise.all([
+      closeMissionEvents(),
+      closeFeedEvents(),
+      closeNotificationEvents(),
+    ]).catch(() => {});
+    await Promise.race([
+      closeStreams,
+      new Promise<void>((resolve) => setTimeout(resolve, 2000)),
+    ]);
     await Promise.all([
       SecureStore.deleteItemAsync(ACCESS_KEY),
       SecureStore.deleteItemAsync(REFRESH_KEY),
