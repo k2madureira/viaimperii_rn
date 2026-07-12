@@ -234,6 +234,7 @@ export default {
       streak_other: '{{count}} days',
     },
     missionType: 'Mission type',
+    activeMissions: 'Active missions',
     dailyMissions: 'Daily Missions',
     weeklyMissions: 'Weekly Missions',
     exhausted: 'Exhausted',
