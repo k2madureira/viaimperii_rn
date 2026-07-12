@@ -5,10 +5,12 @@ export function useAvailableMissions(
   specialtyId: number | null,
   difficulty: MissionDifficulty | null,
   enabled = true,
+  professionId?: number | null,
 ) {
   return useQuery({
-    queryKey: ['missions-available', specialtyId, difficulty],
-    queryFn: () => getAvailableMissions(specialtyId ?? undefined, difficulty ?? undefined),
+    queryKey: ['missions-available', specialtyId, difficulty, professionId ?? null],
+    queryFn: () =>
+      getAvailableMissions(specialtyId ?? undefined, difficulty ?? undefined, 1, 50, professionId ?? undefined),
     enabled,
   });
 }
