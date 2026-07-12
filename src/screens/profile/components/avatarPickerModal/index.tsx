@@ -114,10 +114,10 @@ export default function AvatarPickerModal({ visible, onClose }: Props) {
           <Text className="text-[11px] font-bold text-[#999] tracking-[2px] uppercase">
             {t('avatarPicker.chooseTitle')}
           </Text>
-          {/* Saldo da carteira */}
+          {/* Saldo da carteira — pill compacto: moedas numa única linha (sem quebrar) */}
           <View className="bg-[#6B1221] rounded-full px-3.5 py-1.5 mt-2">
             {walletQuery.data ? (
-              <CoinAmount atomic={balanceAtomic} size={15} textColor="#E8C36B" />
+              <CoinAmount atomic={balanceAtomic} size={15} textColor="#E8C36B" wrap={false} />
             ) : (
               <Text className="text-[12px] font-extrabold text-accent-500">—</Text>
             )}
