@@ -34,8 +34,6 @@ import {
   MissionItem,
   MissionCelebration,
   EvidenceModal,
-  MissionsTab,
-  MissionsTabs,
   MissionsOnboarding,
   PeriodStats,
   RankUpModal,
@@ -94,7 +92,9 @@ export default function MissionsScreen() {
 
   const [viewMode, setViewMode] = useState<ViewMode>('missions');
   const [period, setPeriod] = useState<StatsPeriod>('monthly');
-  const [tab, setTab] = useState<MissionsTab>('available');
+  // C4: "Ativas" deixou de ser uma aba — virou um card colapsável (com badge) acima
+  // da lista de Disponíveis, que passa a ser o foco. Este flag abre/fecha esse card.
+  const [activeOpen, setActiveOpen] = useState(false);
   const [missionType, setMissionType] = useState<'daily' | 'monthly'>('daily');
   const [specialtyId, setSpecialtyId] = useState<number | null>(null);
   const [difficultyFilter, setDifficultyFilter] = useState<MissionDifficulty | null>(null);
@@ -114,8 +114,6 @@ export default function MissionsScreen() {
   const isProgress = viewMode === 'progress';
   // Modo "Missões" (não Progresso/Revisão) — mantém as ativas vivas p/ o badge de contagem.
   const inMissionsMode = !isReview && !isProgress;
-
-  const isInProgress = tab === 'inprogress';
 
   // Abaixo de Recruta IV (nível 4 → 1500 XP), só missões de nível fácil.
   const isBelowRecruitIV = (user?.total_xp ?? 0) < XP_PER_RANK * 3;
@@ -138,8 +136,8 @@ export default function MissionsScreen() {
     SecureStore.setItemAsync('onboarding_missions_seen', 'true');
   };
 
-  // Reinicia a paginação ao trocar de aba, tipo, especialidade, nível ou modo.
-  useEffect(() => setVisible(PAGE_SIZE), [tab, missionType, specialtyId, difficultyFilter, availableMode]);
+  // Reinicia a paginação ao trocar de tipo, especialidade, nível ou modo de ordenação.
+  useEffect(() => setVisible(PAGE_SIZE), [missionType, specialtyId, difficultyFilter, availableMode]);
 
   const isRecommended = availableMode === 'recommended';
   const hasActiveFilter = specialtyId != null || difficultyFilter != null;
@@ -150,12 +148,12 @@ export default function MissionsScreen() {
   const specialtiesQuery = useSpecialties();
   // Mantida viva no modo Missões para o saldo/allowance (não no Progresso/Revisão).
   const availableQuery = useAvailableMissions(specialtyId, effectiveDifficulty, !isProgress);
-  // Feed recomendado (content-based) — só quando a aba "Disponíveis" está em modo recomendado.
+  // Feed recomendado (content-based) — só no modo Missões e com ordenação recomendada.
   const recommendedQuery = useRecommendedMissions(
     specialtyId,
     effectiveDifficulty,
     missionType,
-    !isProgress && tab === 'available' && isRecommended,
+    !isProgress && !isReview && isRecommended,
   );
   // Catálogo completo (já filtrado por trilha no backend) — usado para derivar
   // quais especialidades pertencem à trilha do usuário, sem o efeito da cota diária.
@@ -358,10 +356,12 @@ export default function MissionsScreen() {
   } else if (isProgress) {
     refreshing =
       statsQuery.isRefetching || summaryQuery.isRefetching || completedQuery.isRefetching;
-  } else if(isInProgress){
-    refreshing = inProgressActiveQuery.isRefetching || pendingReviewQuery.isRefetching;
   } else {
-    refreshing = isRecommended ? recommendedQuery.isRefetching : availableQuery.isRefetching;
+    // Modo Missões: lista de disponíveis + as ativas (card colapsável).
+    refreshing =
+      (isRecommended ? recommendedQuery.isRefetching : availableQuery.isRefetching) ||
+      inProgressActiveQuery.isRefetching ||
+      pendingReviewQuery.isRefetching;
   }
 
   const onRefresh = () => {
@@ -375,15 +375,10 @@ export default function MissionsScreen() {
       completedQuery.refetch();
       return;
     }
-    if (isInProgress) {
-      inProgressActiveQuery.refetch();
-      pendingReviewQuery.refetch();
-    } else if (isRecommended) {
-      recommendedQuery.refetch();
-      availableQuery.refetch();
-    } else {
-      availableQuery.refetch();
-    }
+    availableQuery.refetch();
+    if (isRecommended) recommendedQuery.refetch();
+    inProgressActiveQuery.refetch();
+    pendingReviewQuery.refetch();
   };
 
   const renderItem = (m: Mission) => (
@@ -493,43 +488,17 @@ export default function MissionsScreen() {
         {/* Meta diária + ofensiva (F2) */}
         <DailyGoalHeader allowance={allowance} streak={user?.streak} />
 
-        {/* ── Seletor de tipo: Diárias | Semanais ────────────────────────── */}
-        <View className="bg-[#6B1221] rounded-[16px] p-4 gap-3">
-          {/* Header */}
-          <View className="flex-row items-center justify-between">
-            <View>
-              <Text className="text-[10px] font-bold text-white/40 tracking-[2px] uppercase">
-                {t('missions.missionType')}
-              </Text>
-              <Text
-                className="text-[18px] font-extrabold text-white mt-0.5"
-                style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-                {missionType === 'daily' ? t('missions.dailyMissions') : t('missions.weeklyMissions')}
-              </Text>
-            </View>
-            {allowance && activeAllowanceCount != null && (
-              <View className={`px-3 py-1.5 rounded-full ${
-                activeAllowanceCount === 0 ? 'bg-white/10' : missionType === 'daily' ? 'bg-accent-500' : 'bg-laurel'
-              }`}>
-                <Text className={`text-[11px] font-bold ${activeAllowanceCount === 0 ? 'text-white/40' : 'text-white'}`}>
-                  {activeAllowanceCount === 0
-                    ? t('missions.exhausted')
-                    : t('missions.remaining', { count: activeAllowanceCount })}
-                </Text>
-              </View>
-            )}
-          </View>
-
-          {/* Abas de tipo */}
-          <View className="flex-row bg-white/10 rounded-[10px] p-1">
-            <TypeTab
-              label={t('missions.daily')}
-              active={missionType === 'daily'}
-              activeColor="#D4AF37"
-              count={allowance?.daily}
-              onPress={() => setMissionType('daily')}
-            />
-            {!isBelowRecruitIV && (
+        {/* ── Seletor de tipo (C4: leve, sem a caixa vinho pesada) ──────────── */}
+        {!isBelowRecruitIV && (
+          <View className="gap-2">
+            <View className="flex-row bg-[#efeaea] rounded-[12px] p-1">
+              <TypeTab
+                label={t('missions.daily')}
+                active={missionType === 'daily'}
+                activeColor="#9a7b1f"
+                count={allowance?.daily}
+                onPress={() => setMissionType('daily')}
+              />
               <TypeTab
                 label={t('missions.weekly')}
                 active={missionType === 'monthly'}
@@ -537,24 +506,38 @@ export default function MissionsScreen() {
                 count={allowance?.weekly}
                 onPress={() => setMissionType('monthly')}
               />
+            </View>
+
+            {/* Reset timer + botão de vídeo quando a cota do tipo ativo esgota */}
+            {allowance && activeAllowanceCount === 0 && activeResetAt && (
+              <AllowanceBar
+                remaining={0}
+                max={missionType === 'daily' ? 10 : 2}
+                resetAt={activeResetAt}
+                label={missionType === 'daily' ? t('missions.dailyMissionsLower') : t('missions.weeklyMissionsLower')}
+                rewardedVideoAvailable={
+                  missionType === 'daily' && (allowance.rewarded_video_available ?? false)
+                }
+                adState={adState}
+                onWatchAd={watchAd}
+              />
             )}
           </View>
+        )}
 
-          {/* Reset timer + botão de vídeo quando cota esgotada */}
-          {allowance && activeAllowanceCount === 0 && activeResetAt && (
-            <AllowanceBar
-              remaining={0}
-              max={missionType === 'daily' ? 10 : 2}
-              resetAt={activeResetAt}
-              label={missionType === 'daily' ? t('missions.dailyMissionsLower') : t('missions.weeklyMissionsLower')}
-              rewardedVideoAvailable={
-                missionType === 'daily' && (allowance.rewarded_video_available ?? false)
-              }
-              adState={adState}
-              onWatchAd={watchAd}
-            />
-          )}
-        </View>
+        {/* Abaixo de Recruta IV só há diárias fáceis — sem seletor de tipo, mas ainda
+            mostramos o aviso de cota esgotada + renovação/vídeo. */}
+        {isBelowRecruitIV && allowance && activeAllowanceCount === 0 && activeResetAt && (
+          <AllowanceBar
+            remaining={0}
+            max={10}
+            resetAt={activeResetAt}
+            label={t('missions.dailyMissionsLower')}
+            rewardedVideoAvailable={allowance.rewarded_video_available ?? false}
+            adState={adState}
+            onWatchAd={watchAd}
+          />
+        )}
 
         {/* ── Missões de profissão + compra (dois cards lado a lado) ──────── */}
         <View className="flex-row items-stretch gap-3">
@@ -615,118 +598,130 @@ export default function MissionsScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* ── Box: status + conteúdo ──────────────────────────────────────── */}
-        <View className="bg-white border border-[#f0eded] rounded-[20px] overflow-hidden">
-          {/* Tabs de status */}
-          <View className="px-3 pt-3">
-            <MissionsTabs
-              value={tab}
-              onChange={setTab}
-              missionType={missionType}
-              activeCount={inProgressMissions.length}
-            />
-          </View>
-
-          <View className="p-3 gap-3">
-            {tab === 'available' && (
-              <>
-                {/* Modo de ordenação: recomendadas (personalizado) x lista completa. */}
-                <View className="flex-row bg-[#f4f4f4] rounded-[10px] p-1">
-                  <SortModeTab
-                    label={t('missions.tabRecommended')}
-                    active={isRecommended}
-                    onPress={() => setAvailableMode('recommended')}
-                  />
-                  <SortModeTab
-                    label={t('missions.tabAll')}
-                    active={!isRecommended}
-                    onPress={() => setAvailableMode('all')}
-                  />
+        {/* ── C4: "Ativas" vira card colapsável com badge (só quando há ativas),
+            acima da lista de Disponíveis, que passa a ser o foco da tela. ──────── */}
+        {inProgressMissions.length > 0 && (
+          <View className="bg-white border border-[#f0eded] rounded-[20px] overflow-hidden">
+            <TouchableOpacity
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              onPress={() => setActiveOpen((o) => !o)}
+              className="flex-row items-center justify-between px-4 py-3.5">
+              <View className="flex-row items-center gap-2">
+                <Text className="text-[14px]">🛡️</Text>
+                <Text className="text-[14px] font-extrabold text-charcoal">
+                  {t('missions.activeMissions')}
+                </Text>
+                <View className="bg-primary-500 rounded-full min-w-[20px] px-1.5 py-0.5 items-center">
+                  <Text className="text-[11px] font-extrabold text-white leading-none">
+                    {inProgressMissions.length > 99 ? '99+' : inProgressMissions.length}
+                  </Text>
                 </View>
+              </View>
+              <Text className="text-[12px] text-primary-500">{activeOpen ? '▲' : '▼'}</Text>
+            </TouchableOpacity>
 
-                {/* F4: filtros colapsados atrás de "Filtrar" — a tela abre já nas
-                    recomendadas, com menos ruído. Um ponto sinaliza filtro ativo. */}
-                {(filteredSpecialties.length > 0 || !isBelowRecruitIV) && (
-                  <View className="gap-2.5">
-                    <TouchableOpacity
-                      activeOpacity={0.8}
-                      onPress={() => setFiltersOpen((o) => !o)}
-                      className="flex-row items-center justify-center gap-1.5 py-2 rounded-[10px] bg-[#f4f4f4]">
-                      <Text className="text-[12px] font-bold text-[#666]">
-                        {t('missions.filtersButton')}
-                      </Text>
-                      {hasActiveFilter && <View className="w-1.5 h-1.5 rounded-full bg-primary-500" />}
-                      <Text className="text-[11px] text-[#888]">{filtersOpen ? '▲' : '▼'}</Text>
-                    </TouchableOpacity>
-
-                    {filtersOpen && (
-                      <View className="gap-3">
-                        {filteredSpecialties.length > 0 && (
-                          <SpecialtyFilter
-                            specialties={filteredSpecialties}
-                            value={specialtyId}
-                            onChange={setSpecialtyId}
-                          />
-                        )}
-                        {!isBelowRecruitIV && (
-                          <DifficultyFilter value={difficultyFilter} onChange={setDifficultyFilter} />
-                        )}
-                      </View>
-                    )}
-                  </View>
-                )}
-
-                {isBelowRecruitIV && (
-                  <View className="bg-accent-500/15 border border-accent-500/40 rounded-[12px] px-4 py-3 flex-row items-center gap-2">
-                    <Text className="text-[14px]">⚔️</Text>
-                    <Text className="flex-1 text-[12px] text-[#7a5b00] leading-[18px]">
-                      {t('missions.belowRecruitInfo', { rank: unlockRankName })}
-                    </Text>
-                  </View>
-                )}
-
-                {isRecommended ? (
-                  recommendedQuery.isLoading ? (
-                    <View className="py-12 items-center">
-                      <ActivityIndicator color="#8B1A2B" />
-                    </View>
-                  ) : recommendedQuery.isError ? (
-                    <ErrorBox text={t('missions.errorRecommended')} />
-                  ) : recommendedMissions.length === 0 ? (
-                    <EmptyBox text={t('missions.emptyAvailable')} emoji="⚔️" />
-                  ) : (
-                    renderList(recommendedMissions)
-                  )
-                ) : availableQuery.isLoading ? (
-                  <View className="py-12 items-center">
-                    <ActivityIndicator color="#8B1A2B" />
-                  </View>
-                ) : availableQuery.isError ? (
-                  <ErrorBox text={t('missions.errorAvailable')} />
-                ) : availableMissions.length === 0 ? (
-                  <EmptyBox text={t('missions.emptyAvailable')} emoji="⚔️" />
-                ) : (
-                  renderList(availableMissions)
-                )}
-              </>
-            )}
-
-            {tab === 'inprogress' && (
-              <>
+            {activeOpen && (
+              <View className="px-3 pb-3 gap-3">
                 {inProgressLoading ? (
-                  <View className="py-12 items-center">
+                  <View className="py-8 items-center">
                     <ActivityIndicator color="#8B1A2B" />
                   </View>
                 ) : inProgressError ? (
                   <ErrorBox text={t('missions.errorInProgress')} />
-                ) : inProgressMissions.length === 0 ? (
-                  <EmptyBox text={t('missions.emptyInProgress')} emoji="🛡️" />
                 ) : (
-                  renderList(inProgressMissions)
+                  <View className="gap-3">{inProgressMissions.map(renderItem)}</View>
                 )}
-              </>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* ── Box: Disponíveis (foco da tela) ─────────────────────────────── */}
+        <View className="bg-white border border-[#f0eded] rounded-[20px] overflow-hidden">
+          <View className="p-3 gap-3">
+            {/* C4/M5: ordenação recomendadas × catálogo é um controle DISCRETO
+                (label do modo atual + link de troca), não uma faixa de abas. */}
+            <View className="flex-row items-center justify-between px-1">
+              <Text className="text-[12px] text-[#888]">
+                {isRecommended ? t('missions.recommendedCaption') : t('missions.allCaption')}
+              </Text>
+              <TouchableOpacity
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                onPress={() => setAvailableMode(isRecommended ? 'all' : 'recommended')}
+                className="flex-row items-center gap-1 py-1">
+                <Text className="text-[12px] font-bold text-primary-500">
+                  {isRecommended ? t('missions.switchToAll') : t('missions.switchToRecommended')}
+                </Text>
+                <Text className="text-[11px] text-primary-500">⇄</Text>
+              </TouchableOpacity>
+            </View>
+
+            {/* F4: filtros colapsados atrás de "Filtrar" — a tela abre já nas
+                recomendadas, com menos ruído. Um ponto sinaliza filtro ativo. */}
+            {(filteredSpecialties.length > 0 || !isBelowRecruitIV) && (
+              <View className="gap-2.5">
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={() => setFiltersOpen((o) => !o)}
+                  className="flex-row items-center justify-center gap-1.5 py-2 rounded-[10px] bg-[#f4f4f4]">
+                  <Text className="text-[12px] font-bold text-[#666]">
+                    {t('missions.filtersButton')}
+                  </Text>
+                  {hasActiveFilter && <View className="w-1.5 h-1.5 rounded-full bg-primary-500" />}
+                  <Text className="text-[11px] text-[#888]">{filtersOpen ? '▲' : '▼'}</Text>
+                </TouchableOpacity>
+
+                {filtersOpen && (
+                  <View className="gap-3">
+                    {filteredSpecialties.length > 0 && (
+                      <SpecialtyFilter
+                        specialties={filteredSpecialties}
+                        value={specialtyId}
+                        onChange={setSpecialtyId}
+                      />
+                    )}
+                    {!isBelowRecruitIV && (
+                      <DifficultyFilter value={difficultyFilter} onChange={setDifficultyFilter} />
+                    )}
+                  </View>
+                )}
+              </View>
             )}
 
+            {isBelowRecruitIV && (
+              <View className="bg-accent-500/15 border border-accent-500/40 rounded-[12px] px-4 py-3 flex-row items-center gap-2">
+                <Text className="text-[14px]">⚔️</Text>
+                <Text className="flex-1 text-[12px] text-[#7a5b00] leading-[18px]">
+                  {t('missions.belowRecruitInfo', { rank: unlockRankName })}
+                </Text>
+              </View>
+            )}
+
+            {isRecommended ? (
+              recommendedQuery.isLoading ? (
+                <View className="py-12 items-center">
+                  <ActivityIndicator color="#8B1A2B" />
+                </View>
+              ) : recommendedQuery.isError ? (
+                <ErrorBox text={t('missions.errorRecommended')} />
+              ) : recommendedMissions.length === 0 ? (
+                <EmptyBox text={t('missions.emptyAvailable')} emoji="⚔️" />
+              ) : (
+                renderList(recommendedMissions)
+              )
+            ) : availableQuery.isLoading ? (
+              <View className="py-12 items-center">
+                <ActivityIndicator color="#8B1A2B" />
+              </View>
+            ) : availableQuery.isError ? (
+              <ErrorBox text={t('missions.errorAvailable')} />
+            ) : availableMissions.length === 0 ? (
+              <EmptyBox text={t('missions.emptyAvailable')} emoji="⚔️" />
+            ) : (
+              renderList(availableMissions)
+            )}
           </View>
         </View>
         </>
@@ -844,10 +839,12 @@ export default function MissionsScreen() {
   );
 }
 
+// Segmented control CLARO de tipo (Diárias/Semanais): ativo = pílula branca com o
+// texto na cor do tipo; inativo = texto cinza sobre o trilho claro.
 function TypeTab({
   label,
   active,
-  activeColor = '#9E1B32',
+  activeColor = '#9a7b1f',
   count,
   onPress,
 }: {
@@ -862,14 +859,19 @@ function TypeTab({
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={onPress}
-      style={active ? { backgroundColor: activeColor } : undefined}
+      accessibilityRole="button"
+      style={active ? { backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 } : undefined}
       className={`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-[9px]`}>
-      <Text className={`text-[13px] font-bold ${active ? 'text-white' : 'text-white/50'}`}>
+      <Text className="text-[13px] font-bold" style={{ color: active ? activeColor : '#9a9a9a' }}>
         {label}
       </Text>
       {count != null && (
-        <View className={`px-1.5 py-0.5 rounded-full ${exhausted ? 'bg-white/10' : 'bg-white/25'}`}>
-          <Text className={`text-[10px] font-bold ${exhausted ? 'text-white/30' : 'text-white'}`}>
+        <View
+          className="px-1.5 py-0.5 rounded-full"
+          style={{ backgroundColor: active ? `${activeColor}22` : '#e2dada' }}>
+          <Text
+            className="text-[10px] font-bold"
+            style={{ color: exhausted ? '#bbb' : active ? activeColor : '#8a8a8a' }}>
             {count}
           </Text>
         </View>
@@ -992,17 +994,17 @@ function AllowanceBar({
   const adButtonDisabled = adState === 'loading' || adState === 'showing';
 
   return (
-    <View className="bg-white/10 rounded-[10px] px-4 py-3 gap-2.5">
+    <View className="bg-accent-500/10 border border-accent-500/30 rounded-[12px] px-4 py-3 gap-2.5">
       <View className="flex-row items-center justify-between">
-        <View>
-          <Text className="text-[11px] font-semibold text-white/40 uppercase tracking-[1px]">
+        <View className="flex-1 pr-2">
+          <Text className="text-[11px] font-semibold text-[#9a7b1f] uppercase tracking-[1px]">
             {label}
           </Text>
-          <Text className="text-[13px] font-bold text-white/50 mt-0.5">{t('missions.quotaExhausted')}</Text>
+          <Text className="text-[13px] font-bold text-[#7a5b00] mt-0.5">{t('missions.quotaExhausted')}</Text>
         </View>
         {resetLabel && (
-          <View className="bg-white/15 rounded-[8px] px-3 py-1.5">
-            <Text className="text-[11px] font-semibold text-white/70">{resetLabel}</Text>
+          <View className="bg-white border border-accent-500/20 rounded-[8px] px-3 py-1.5">
+            <Text className="text-[11px] font-semibold text-[#7a5b00]">{resetLabel}</Text>
           </View>
         )}
       </View>
@@ -1011,15 +1013,16 @@ function AllowanceBar({
         <TouchableOpacity
           disabled={adButtonDisabled}
           activeOpacity={0.85}
+          accessibilityRole="button"
           onPress={onWatchAd}
           className={`rounded-[9px] py-2.5 items-center flex-row justify-center gap-2 ${
-            adButtonDisabled ? 'bg-white/10' : 'bg-[#D4AF37]'
+            adButtonDisabled ? 'bg-[#e9dcae]' : 'bg-[#D4AF37]'
           }`}>
           {adState === 'loading' ? (
-            <ActivityIndicator size="small" color="#fff" />
+            <ActivityIndicator size="small" color="#7a5b00" />
           ) : null}
           <Text
-            className={`text-[13px] font-bold ${adButtonDisabled ? 'text-white/30' : 'text-[#3d2900]'}`}>
+            className={`text-[13px] font-bold ${adButtonDisabled ? 'text-[#9a7b1f]' : 'text-[#3d2900]'}`}>
             {adButtonLabel}
           </Text>
         </TouchableOpacity>
@@ -1070,28 +1073,6 @@ function ModeTab({
           <Text className="text-[10px] font-bold text-white">{badge}</Text>
         </View>
       )}
-    </TouchableOpacity>
-  );
-}
-
-function SortModeTab({
-  label,
-  active,
-  onPress,
-}: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <TouchableOpacity
-      activeOpacity={0.85}
-      onPress={onPress}
-      className={`flex-1 py-2 rounded-[8px] items-center ${active ? 'bg-white' : ''}`}
-      style={active ? { shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 } : undefined}>
-      <Text className={`text-[12px] font-bold ${active ? 'text-primary-500' : 'text-[#aaa]'}`}>
-        {label}
-      </Text>
     </TouchableOpacity>
   );
 }
