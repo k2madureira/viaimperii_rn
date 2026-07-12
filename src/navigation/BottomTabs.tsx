@@ -6,10 +6,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeIcon from './icons/HomeIcon';
 import AchievementsIcon from './icons/AchievementsIcon';
 import { PlusIcon, PrimusPilusEmblem, ShopIcon } from '../components/icons';
-import MissionsScreen from '../screens/missions';
 import AchievementsScreen from '../screens/achievements';
 import MarketScreen from '../screens/market';
 import HomeStack from './HomeStack';
+import MissionsStack from './MissionsStack';
 import { useAuth } from '../contexts/AuthContext';
 import { useAvailableMissions } from '../screens/missions/model/queries/useAvailableMissions';
 import { useUserProfile } from '../screens/dashboard/model/queries/useUserProfile';
@@ -132,7 +132,7 @@ export default function BottomTabs() {
           tabBarLabel: TAB_LABEL[route.name],
         })}>
         <Tab.Screen name="Home" component={HomeStack} />
-        <Tab.Screen name="Missions" component={MissionsScreen} />
+        <Tab.Screen name="Missions" component={MissionsStack} />
         <Tab.Screen
           name="CreatePost"
           component={EmptyScreen}

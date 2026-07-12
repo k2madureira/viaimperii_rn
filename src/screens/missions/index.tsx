@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Modal, Platform, RefreshControl, ScrollView, Text, TouchableOpacity, Vibration, View } from 'react-native';
+import { ActivityIndicator, Animated, Easing, Modal, Platform, RefreshControl, ScrollView, Text, TouchableOpacity, Vibration, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
+import { useUserProfessions } from '../market/model/queries/useProfessions';
 import { useRewardedVideo } from './model/mutations/useRewardedVideo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionSelectModal, Navbar } from '../../components';
-import { ShopIcon } from '../../components/icons';
+import { LockIcon, ShopIcon } from '../../components/icons';
+import LogoIcon from '../../components/logoIcon';
 import { Mission, MissionDifficulty, MissionEvidence, RecommendedMission, ToReviewItem } from '../../api/missions/missionsApi';
 import { StatsPeriod } from '../../api/users/userApi';
 import { useAuth } from '../../contexts/AuthContext';
@@ -81,6 +84,14 @@ export default function MissionsScreen() {
   const walletQuery = useWallet(!!user);
   const tracksQuery = useTracks();
 
+  // Profissões adquiridas e ATIVAS do usuário — cada uma abre uma tela dedicada de
+  // missões de profissão (só aparecem aqui quando há alguma desbloqueada).
+  const userProfessionsQuery = useUserProfessions(user?.user_id, !!user);
+  const activeProfessions = (userProfessionsQuery.data ?? [])
+    .filter((up) => up.is_active)
+    .map((up) => up.profession);
+  const hasActiveProfessions = activeProfessions.length > 0;
+
   const [viewMode, setViewMode] = useState<ViewMode>('missions');
   const [period, setPeriod] = useState<StatsPeriod>('monthly');
   const [tab, setTab] = useState<MissionsTab>('available');
@@ -94,6 +105,9 @@ export default function MissionsScreen() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   // F3: celebração ao creditar XP (request completed ou finalização por tempo/aprovação).
   const [celebration, setCelebration] = useState<{ xp: number; coins?: number } | null>(null);
+  // Ação a executar SÓ quando o confete terminar (abrir legião/compartilhar) — evita
+  // que o modal nativo cubra a animação de celebração.
+  const afterCelebrationRef = useRef<(() => void) | null>(null);
   // F9: mini-tour na primeira visita (null = carregando o flag, evita flash).
   const [onboardingSeen, setOnboardingSeen] = useState<boolean | null>(null);
   const isReview = viewMode === 'review';
@@ -208,12 +222,24 @@ export default function MissionsScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profileQuery.data?.current_rank?.level]);
 
-  // Texto inicial do post (editável) a partir dos dados da missão.
-  const buildShareText = (m: Mission) => {
+  // Evidência enviada pelo usuário na conclusão — reaproveitada para pré-preencher
+  // o post de compartilhamento (texto e link; imagem fica em bucket privado).
+  const shareEvidenceRef = useRef<MissionEvidence | undefined>(undefined);
+
+  // Texto inicial do post (editável): dados da missão + o que o usuário escreveu
+  // como evidência (texto livre e/ou link), para não ter que digitar de novo.
+  const buildShareText = (m: Mission, evidence?: MissionEvidence) => {
     const tag = m.specialty_name
-      ? ` #${m.specialty_name.toLowerCase().replace(/\s+/g, '')}`
+      ? `#${m.specialty_name.toLowerCase().replace(/\s+/g, '')}`
       : '';
-    return t('missionShare.template', { name: m.name }) + tag;
+    // Ordem: frase da conquista → evidência (texto/link) → hashtag por último.
+    const parts = [t('missionShare.template', { name: m.name })];
+    const extraText = evidence?.text?.trim();
+    const extraLink = evidence?.link?.trim();
+    if (extraText) parts.push(extraText);
+    if (extraLink) parts.push(extraLink);
+    if (tag) parts.push(tag);
+    return parts.join('\n\n');
   };
 
   const submitComplete = (mission: Mission, evidence?: MissionEvidence) => {
@@ -228,15 +254,35 @@ export default function MissionsScreen() {
           // watch de perfil (single source) — aqui só evitamos ruído (celebração/
           // compartilhar) sobre esse momento maior.
           const rankedUp = result.status === 'completed' && result.promoted;
-          if (result.status === 'completed' && !rankedUp) {
+          const showCelebration = result.status === 'completed' && !rankedUp;
+          if (showCelebration) {
             setCelebration({ xp: result.xp_earned, coins: mission.coin_reward });
           }
+
+          // Próxima ação (abrir modal): escolher legião (1ª missão) ou compartilhar.
+          let next: (() => void) | null = null;
           if (result.requires_legion_selection) {
-            setRecommendedIds((result.recommended_legions ?? []).map((l) => l.id));
-            setLegionModalVisible(true);
+            const ids = (result.recommended_legions ?? []).map((l) => l.id);
+            next = () => {
+              setRecommendedIds(ids);
+              setLegionModalVisible(true);
+            };
           } else if (!rankedUp) {
-            // Oferece compartilhar a conquista como post (revisar antes de publicar).
-            setShareConfirm(mission);
+            // Oferece compartilhar a conquista como post (revisar antes de publicar),
+            // reaproveitando a evidência que o usuário digitou (texto/link).
+            next = () => {
+              shareEvidenceRef.current = evidence;
+              setShareConfirm(mission);
+            };
+          }
+
+          // Com confete, adia o modal até a animação terminar (não fica atrás dele).
+          if (next) {
+            if (showCelebration) {
+              afterCelebrationRef.current = next;
+            } else {
+              next();
+            }
           }
         },
         onError: (err: Error) => {
@@ -445,27 +491,7 @@ export default function MissionsScreen() {
         ) : (
         <>
         {/* Meta diária + ofensiva (F2) */}
-        <DailyGoalHeader allowance={allowance} streak={user?.streak} /> 
-
-        {/* Atalho para o Mercado — compra de missões de profissão com moedas */}
-        <TouchableOpacity
-          activeOpacity={0.9}
-          onPress={() => navigation.navigate('Market')}
-          accessibilityRole="button"
-          className="bg-white border border-[#f0eded] rounded-[16px] p-3.5 flex-row items-center gap-3">
-          <View className="w-11 h-11 rounded-[12px] bg-primary-500/10 items-center justify-center">
-            <ShopIcon size={22} color="#9E1B32" />
-          </View>
-          <View className="flex-1">
-            <Text className="text-[14px] font-extrabold text-charcoal">
-              {t('missions.marketShortcutTitle')}
-            </Text>
-            <Text className="text-[12px] text-[#888] mt-0.5 leading-[16px]">
-              {t('missions.marketShortcutSubtitle')}
-            </Text>
-          </View>
-          <Text className="text-[18px] text-[#c9b7b7] font-bold">›</Text>
-        </TouchableOpacity>
+        <DailyGoalHeader allowance={allowance} streak={user?.streak} />
 
         {/* ── Seletor de tipo: Diárias | Semanais ────────────────────────── */}
         <View className="bg-[#6B1221] rounded-[16px] p-4 gap-3">
@@ -528,6 +554,65 @@ export default function MissionsScreen() {
               onWatchAd={watchAd}
             />
           )}
+        </View>
+
+        {/* ── Missões de profissão + compra (dois cards lado a lado) ──────── */}
+        <View className="flex-row items-stretch gap-3">
+          {/* Card que abre as missões de profissão do usuário. Habilitado (tem
+              profissão): destaque vinho + logo dourado. Desabilitado: cinza + cadeado. */}
+          <TouchableOpacity
+            disabled={!hasActiveProfessions}
+            activeOpacity={0.9}
+            onPress={() =>
+              navigation.navigate('ProfessionMissions', { profession: activeProfessions[0] })
+            }
+            accessibilityRole="button"
+            className="flex-1 rounded-[16px] p-3.5 flex-row items-center gap-3 overflow-hidden"
+            style={
+              hasActiveProfessions
+                ? { backgroundColor: '#6B1221', borderWidth: 1, borderColor: '#D4AF37' }
+                : { backgroundColor: '#f2eeee', borderWidth: 1, borderColor: '#e7e0e0' }
+            }>
+            {/* Estrelas cintilantes — só no estado de destaque (tem profissão) */}
+            {hasActiveProfessions && <SparkleOverlay />}
+            <View
+              className="w-11 h-11 rounded-[12px] items-center justify-center"
+              style={{ backgroundColor: hasActiveProfessions ? 'rgba(212,175,55,0.18)' : '#e6dede' }}>
+              {hasActiveProfessions ? (
+                <LogoIcon size={24} color="#D4AF37" />
+              ) : (
+                <LockIcon size={20} color="#a89a9a" />
+              )}
+            </View>
+            <View className="flex-1">
+              <Text
+                className="text-[14px] font-extrabold"
+                style={{ color: hasActiveProfessions ? '#fff' : '#9a8f8f' }}>
+                {t('missions.professionAccessTitle')}
+              </Text>
+              <Text
+                className="text-[12px] mt-0.5 leading-[16px]"
+                style={{ color: hasActiveProfessions ? 'rgba(255,255,255,0.7)' : '#b3a9a9' }}>
+                {hasActiveProfessions
+                  ? t('missions.professionAccessSubtitle')
+                  : t('missions.professionAccessLocked')}
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {/* Card separado à direita — compra de missões de profissão no mercado */}
+          <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('Market')}
+            accessibilityRole="button"
+            accessibilityLabel={t('missions.marketShortcutTitle')}
+            className="rounded-[16px] px-4 items-center justify-center gap-1"
+            style={{ backgroundColor: '#D4AF37' }}>
+            <ShopIcon size={22} color="#6B1221" />
+            <Text className="text-[11px] font-extrabold" style={{ color: '#6B1221' }}>
+              {t('market.professions.buy')}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* ── Box: status + conteúdo ──────────────────────────────────────── */}
@@ -673,7 +758,13 @@ export default function MissionsScreen() {
         visible={celebration != null}
         xp={celebration?.xp ?? 0}
         coins={celebration?.coins}
-        onDone={() => setCelebration(null)}
+        onDone={() => {
+          setCelebration(null);
+          // Executa a ação adiada (abrir legião/compartilhar) após o confete.
+          const next = afterCelebrationRef.current;
+          afterCelebrationRef.current = null;
+          next?.();
+        }}
       />
 
       {/* F9: mini-tour na primeira visita */}
@@ -732,11 +823,11 @@ export default function MissionsScreen() {
         </View>
       </Modal>
 
-      {/* Compartilhar missão concluída como post (pré-preenchido, editável) */}
+      {/* Compartilhar missão concluída como post (pré-preenchido com a evidência) */}
       <CreatePostModal
         key={shareMission?.slug ?? 'share-none'}
         visible={shareMission != null}
-        initialText={shareMission ? buildShareText(shareMission) : ''}
+        initialText={shareMission ? buildShareText(shareMission, shareEvidenceRef.current) : ''}
         canLegion={profileQuery.data?.legion != null}
         canProvince={profileQuery.data?.province != null}
         authorAvatarUrl={
@@ -744,7 +835,10 @@ export default function MissionsScreen() {
           profileQuery.data?.active_avatar?.url ??
           null
         }
-        onClose={() => setShareMission(null)}
+        onClose={() => {
+          setShareMission(null);
+          shareEvidenceRef.current = undefined;
+        }}
       />
     </View>
   );
@@ -781,6 +875,73 @@ function TypeTab({
         </View>
       )}
     </TouchableOpacity>
+  );
+}
+
+// Forma de "brilho" (estrela de 4 pontas) usada nas partículas.
+const SPARKLE_PATH =
+  'M12 0 C13.2 8, 16 10.8, 24 12 C16 13.2, 13.2 16, 12 24 C10.8 16, 8 13.2, 0 12 C8 10.8, 10.8 8, 12 0 Z';
+
+interface SparkleSpec {
+  left: `${number}%`;
+  top: number;
+  size: number;
+  color: string;
+  delay: number;
+  duration: number;
+}
+
+// Uma estrela que pisca em loop: aparece (fade+scale+giro) e some, com atraso próprio.
+function Sparkle({ left, top, size, color, delay, duration }: SparkleSpec) {
+  const v = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const anim = Animated.loop(
+      Animated.sequence([
+        Animated.delay(delay),
+        Animated.timing(v, { toValue: 1, duration: duration / 2, easing: Easing.out(Easing.quad), useNativeDriver: true }),
+        Animated.timing(v, { toValue: 0, duration: duration / 2, easing: Easing.in(Easing.quad), useNativeDriver: true }),
+        Animated.delay(2000),
+      ]),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [v, delay, duration]);
+
+  const scale = v.interpolate({ inputRange: [0, 1], outputRange: [0.2, 1] });
+  const rotate = v.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '90deg'] });
+
+  return (
+    <Animated.View
+      pointerEvents="none"
+      style={{ position: 'absolute', left, top, opacity: v, transform: [{ scale }, { rotate }] }}>
+      <Svg width={size} height={size} viewBox="0 0 24 24">
+        <Path d={SPARKLE_PATH} fill={color} />
+      </Svg>
+    </Animated.View>
+  );
+}
+
+// Estrelas cintilantes espalhadas pelo card (efeito "brilho"). Decorativo.
+const SPARKLES: SparkleSpec[] = [
+  { left: '10%', top: 8, size: 12, color: '#FFFFFF', delay: 0, duration: 2400 },
+  { left: '30%', top: 30, size: 8, color: '#F2D98D', delay: 900, duration: 2200 },
+  { left: '50%', top: 12, size: 10, color: '#D4AF37', delay: 1700, duration: 2600 },
+  { left: '64%', top: 34, size: 7, color: '#FFFFFF', delay: 2400, duration: 2100 },
+  { left: '80%', top: 10, size: 11, color: '#D4AF37', delay: 600, duration: 2500 },
+  { left: '90%', top: 40, size: 8, color: '#F2D98D', delay: 1900, duration: 2300 },
+  { left: '20%', top: 46, size: 9, color: '#D4AF37', delay: 3000, duration: 2200 },
+];
+
+function SparkleOverlay({ radius = 16 }: { radius?: number }) {
+  return (
+    <View
+      pointerEvents="none"
+      style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflow: 'hidden', borderRadius: radius }}>
+      {SPARKLES.map((s, i) => (
+        <Sparkle key={i} {...s} />
+      ))}
+    </View>
   );
 }
 

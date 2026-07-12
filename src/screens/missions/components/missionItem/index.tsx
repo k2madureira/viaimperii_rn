@@ -21,6 +21,9 @@ interface Props {
   reasons?: string[];
   // Nome da trilha da missão (Legionários/Patrícios) — exibido nas de trilha (priority > 0).
   trackLabel?: string;
+  // Cor de destaque do botão "Iniciar" — usada na tela de missões de profissão
+  // para o card seguir a cor da profissão. Padrão: vinho imperial (#6B1221).
+  accentColor?: string;
   pending: boolean;
   abandonPending: boolean;
 }
@@ -185,7 +188,7 @@ function ReviewPanel({ mission, onCompleted }: { mission: Mission; onCompleted?:
   );
 }
 
-export default function MissionItem({ mission, onStart, onComplete, onAbandon, onCompleted, reasons, trackLabel, pending, abandonPending }: Props) {
+export default function MissionItem({ mission, onStart, onComplete, onAbandon, onCompleted, reasons, trackLabel, accentColor, pending, abandonPending }: Props) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const isCompleted = mission.status === 'completed';
@@ -436,7 +439,8 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
             disabled={pending}
             activeOpacity={0.85}
             onPress={() => onStart(mission.slug)}
-            className="rounded-[10px] py-2.5 items-center bg-[#6B1221]">
+            className="rounded-[10px] py-2.5 items-center"
+            style={{ backgroundColor: accentColor ?? '#6B1221' }}>
             {pending ? (
               <ActivityIndicator color="#fff" size="small" />
             ) : (
