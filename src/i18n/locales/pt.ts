@@ -230,6 +230,7 @@ export default {
       reached: 'Meta batida! Continue somando XP.',
       missing_one: 'Falta {{count}} missão para bater a meta',
       missing_other: 'Faltam {{count}} missões para bater a meta',
+      slots: '{{done}} de {{limit}} diárias concluídas hoje',
       streak_one: '{{count}} dia',
       streak_other: '{{count}} dias',
     },

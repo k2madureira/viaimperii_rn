@@ -549,6 +549,8 @@ export default function MissionsScreen() {
             <TouchableOpacity
               activeOpacity={0.85}
               accessibilityRole="button"
+              accessibilityState={{ expanded: activeOpen }}
+              accessibilityLabel={t('missions.activeMissions')}
               onPress={() => setActiveOpen((o) => !o)}
               className="flex-row items-center justify-between px-4 py-3.5">
               <View className="flex-row items-center gap-2">
@@ -593,6 +595,7 @@ export default function MissionsScreen() {
               <TouchableOpacity
                 activeOpacity={0.7}
                 accessibilityRole="button"
+                accessibilityLabel={isRecommended ? t('missions.switchToAll') : t('missions.switchToRecommended')}
                 onPress={() => setAvailableMode(isRecommended ? 'all' : 'recommended')}
                 className="flex-row items-center gap-1 py-1">
                 <Text className="text-[12px] font-bold text-primary-500">
@@ -608,6 +611,9 @@ export default function MissionsScreen() {
               <View className="gap-2.5">
                 <TouchableOpacity
                   activeOpacity={0.8}
+                  accessibilityRole="button"
+                  accessibilityState={{ expanded: filtersOpen }}
+                  accessibilityLabel={t('missions.filtersButton')}
                   onPress={() => setFiltersOpen((o) => !o)}
                   className="flex-row items-center justify-center gap-1.5 py-2 rounded-[10px] bg-[#f4f4f4]">
                   <Text className="text-[12px] font-bold text-[#666]">
@@ -863,7 +869,9 @@ function TypeTab({
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={onPress}
-      accessibilityRole="button"
+      accessibilityRole="tab"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={count != null ? `${label}, ${count}` : label}
       style={active ? { backgroundColor: '#fff', shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 } : undefined}
       className={`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-[9px]`}>
       <Text className="text-[13px] font-bold" style={{ color: active ? activeColor : '#9a9a9a' }}>
@@ -1067,6 +1075,8 @@ function ModeTab({
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={onPress}
+      accessibilityRole="tab"
+      accessibilityState={{ selected: active }}
       className={`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-[9px] ${active ? 'bg-white' : ''}`}
       style={active ? { shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 } : undefined}>
       <Text className={`text-[13px] font-bold ${active ? 'text-primary-500' : 'text-[#888]'}`}>
