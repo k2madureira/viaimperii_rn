@@ -455,7 +455,7 @@ export default function MissionsScreen() {
           <ReviewSection
             query={toReviewQuery}
             onApprove={(slug, executorId) => approveM.mutate({ slug, executorId })}
-            onReject={(slug, executorId) => rejectM.mutate({ slug, executorId })}
+            onReject={(slug, executorId, reason) => rejectM.mutate({ slug, executorId, reason })}
             pendingSlug={
               approveM.isPending
                 ? approveM.variables?.slug ?? null
@@ -1104,7 +1104,7 @@ function ReviewSection({
 }: {
   query: { isLoading: boolean; isError: boolean; data?: ToReviewItem[] };
   onApprove: (slug: string, executorId: string) => void;
-  onReject: (slug: string, executorId: string) => void;
+  onReject: (slug: string, executorId: string, reason: string) => void;
   pendingSlug: string | null;
 }) {
   const { t } = useTranslation();

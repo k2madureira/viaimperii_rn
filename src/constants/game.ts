@@ -10,6 +10,11 @@ export const WEEKLY_MISSION_LIMIT = 2;
 // o anel de progresso do dia na Home e na tela de Missões. Só no front.
 export const DAILY_MISSION_GOAL = 5;
 
+// Tamanho mínimo do motivo ao rejeitar a conclusão de outro usuário (espelha
+// REJECTION_REASON_MIN_LENGTH do backend — POST /missions/{slug}/reject retorna
+// 422 abaixo disso, após strip). Garante um feedback útil para quem refaz a missão.
+export const REJECTION_REASON_MIN_LENGTH = 20;
+
 // Bônus ao bater a meta diária de missões. O crédito é feito pelo BACKEND
 // (carteira é derivada do ledger; 1 denário = 100 asses), idempotente por dia (SP).
 export const DAILY_GOAL_REWARD_DENARIUS = 20;

@@ -1,13 +1,25 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Linking, Text, TouchableOpacity, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Image,
+  KeyboardAvoidingView,
+  Linking,
+  Modal,
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { ToReviewItem } from '../../../../api/missions/missionsApi';
 import { parseBackendDate } from '../../../../utils/date';
+import { REJECTION_REASON_MIN_LENGTH } from '../../../../constants/game';
 
 interface Props {
   item: ToReviewItem;
   onApprove: (slug: string, executorId: string) => void;
-  onReject: (slug: string, executorId: string) => void;
+  onReject: (slug: string, executorId: string, reason: string) => void;
   pending: boolean;
 }
 
@@ -41,6 +53,20 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
   const [remaining, setRemaining] = useState<number>(() =>
     targetMs != null ? Math.max(0, Math.round((targetMs - Date.now()) / 1000)) : item.remaining_seconds ?? 0,
   );
+
+  // C3 — rejeitar exige motivo (≥ REJECTION_REASON_MIN_LENGTH após strip). O modal
+  // segue o padrão de overlay do app (nunca Alert nativo) e o autor recebe o motivo.
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [reason, setReason] = useState('');
+  const trimmedReason = reason.trim();
+  const reasonTooShort = trimmedReason.length < REJECTION_REASON_MIN_LENGTH;
+
+  const confirmReject = () => {
+    if (reasonTooShort || pending) return;
+    onReject(item.mission_slug, item.executor.id, trimmedReason);
+    setRejectOpen(false);
+    setReason('');
+  };
 
   useEffect(() => {
     if (targetMs == null) return;
@@ -149,7 +175,8 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
         <TouchableOpacity
           disabled={pending}
           activeOpacity={0.85}
-          onPress={() => onReject(item.mission_slug, item.executor.id)}
+          accessibilityRole="button"
+          onPress={() => setRejectOpen(true)}
           className={`flex-1 rounded-[10px] py-2.5 items-center border ${
             pending ? 'border-primary-500/30' : 'border-primary-500'
           }`}>
@@ -169,6 +196,74 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
           )}
         </TouchableOpacity>
       </View>
+
+      {/* C3 — modal de motivo obrigatório da rejeição (padrão de overlay do app) */}
+      <Modal
+        transparent
+        visible={rejectOpen}
+        animationType="fade"
+        onRequestClose={() => setRejectOpen(false)}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          className="flex-1">
+          <View className="flex-1 bg-black/60 items-center justify-center px-6">
+            <View className="w-full bg-white rounded-[20px] p-6">
+              <Text className="text-[18px] font-extrabold text-charcoal text-center">
+                {t('reviewItem.rejectModalTitle')}
+              </Text>
+              <Text className="text-[13px] text-[#555] leading-[19px] text-center mt-2">
+                {t('reviewItem.rejectModalBody')}
+              </Text>
+
+              <TextInput
+                value={reason}
+                onChangeText={setReason}
+                placeholder={t('reviewItem.rejectReasonPlaceholder')}
+                placeholderTextColor="#aaa"
+                multiline
+                autoFocus
+                className={`border rounded-[10px] px-3 py-2.5 text-[14px] text-charcoal min-h-[90px] mt-4 ${
+                  reason.length > 0 && reasonTooShort ? 'border-primary-500' : 'border-[#e0e0e0]'
+                }`}
+                style={{ textAlignVertical: 'top' }}
+              />
+              <Text
+                className={`text-[11px] mt-1 ${
+                  reason.length > 0 && reasonTooShort ? 'text-primary-500' : 'text-[#888]'
+                }`}>
+                {reason.length > 0 && reasonTooShort
+                  ? t('reviewItem.rejectReasonTooShort', { min: REJECTION_REASON_MIN_LENGTH })
+                  : t('reviewItem.rejectReasonHint', { min: REJECTION_REASON_MIN_LENGTH })}
+              </Text>
+
+              <View className="flex-row gap-3 mt-5">
+                <TouchableOpacity
+                  onPress={() => setRejectOpen(false)}
+                  disabled={pending}
+                  activeOpacity={0.85}
+                  accessibilityRole="button"
+                  className="flex-1 border border-[#e0dada] rounded-[12px] py-3 items-center">
+                  <Text className="text-[14px] font-bold text-[#666]">{t('reviewItem.cancel')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={confirmReject}
+                  disabled={reasonTooShort || pending}
+                  activeOpacity={0.85}
+                  accessibilityRole="button"
+                  className={`flex-1 rounded-[12px] py-3 items-center ${
+                    reasonTooShort || pending ? 'bg-primary-500/40' : 'bg-primary-500'
+                  }`}>
+                  {pending ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <Text className="text-[14px] font-bold text-white">{t('reviewItem.rejectConfirm')}</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 }
