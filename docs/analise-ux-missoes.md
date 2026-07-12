@@ -32,8 +32,9 @@ Pilha de controles **antes** do primeiro card de missão:
 
 ## 🔴 Críticos
 
-> **Status:** C1 e C2 em implementação na branch `feature/missions-ux-c1-c2`
-> (backend já removeu a espera das fáceis e reduziu pela metade a de médias/difíceis).
+> **Status:** C1, C2, **C3** e **M1** implementados na branch `feature/missions-ux-c1-c2`
+> (backend já removeu a espera das fáceis, reduziu pela metade a de médias/difíceis e
+> passou a exigir `reason` ≥ 20 caracteres na rejeição).
 
 ### C1 — Recompensa da conclusão é sempre adiada e silenciosa
 - **Evidência:** `complete` nunca credita XP na hora; vira `pending_review`
@@ -62,7 +63,7 @@ Pilha de controles **antes** do primeiro card de missão:
     visível **antes** de Iniciar.
   - Garantir que toda missão tenha um texto de objetivo (não só `acceptance_criteria`).
 
-### C3 — Rejeição de missão sem motivo (loop de aprendizado quebrado)
+### C3 — Rejeição de missão sem motivo (loop de aprendizado quebrado) — ✅ implementado
 - **Evidência:** `ReviewItem` chama `onReject(slug, executorId)` **sem coletar razão**
   (`reviewItem.tsx:152`), embora o backend aceite `reason?` (CLAUDE.md §7). O executor
   rejeitado recebe só um toast genérico `toastRejectedBody` (`missionItem.tsx:117`).
@@ -91,7 +92,7 @@ Pilha de controles **antes** do primeiro card de missão:
 
 ## 🟠 Médios
 
-### M1 — `Alert.alert` nativo viola o padrão de UI do projeto
+### M1 — `Alert.alert` nativo viola o padrão de UI do projeto — ✅ implementado
 - **Evidência:** confirmação de "desistir" usa `Alert.alert` (`missionItem.tsx:207`).
 - **Regra violada:** CLAUDE.md §0.1 — confirmações devem usar **overlay padrão**
   (estilo `LegionSelectModal`), **"nunca Alert nativo"**.

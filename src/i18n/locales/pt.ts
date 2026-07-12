@@ -351,6 +351,13 @@ export default {
     approvals: 'Aprovações',
     reject: 'Rejeitar',
     approve: 'Aprovar',
+    rejectModalTitle: 'Rejeitar conclusão',
+    rejectModalBody: 'Explique o que faltou — o autor vê o motivo para refazer e reenviar.',
+    rejectReasonPlaceholder: 'Ex.: a imagem não mostra o resultado pedido no critério de aceitação...',
+    rejectReasonHint: 'Mínimo de {{min}} caracteres.',
+    rejectReasonTooShort: 'Descreva o motivo com ao menos {{min}} caracteres.',
+    rejectConfirm: 'Rejeitar',
+    cancel: 'Cancelar',
   },
   evidenceModal: {
     title: 'Comprovar conclusão',

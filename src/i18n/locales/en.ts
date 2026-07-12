@@ -351,6 +351,13 @@ export default {
     approvals: 'Approvals',
     reject: 'Reject',
     approve: 'Approve',
+    rejectModalTitle: 'Reject submission',
+    rejectModalBody: 'Explain what was missing — the author sees the reason to redo and resubmit.',
+    rejectReasonPlaceholder: 'E.g.: the image does not show the result required by the acceptance criteria...',
+    rejectReasonHint: 'Minimum of {{min}} characters.',
+    rejectReasonTooShort: 'Describe the reason with at least {{min}} characters.',
+    rejectConfirm: 'Reject',
+    cancel: 'Cancel',
   },
   evidenceModal: {
     title: 'Prove completion',

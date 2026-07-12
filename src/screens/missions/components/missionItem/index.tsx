@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Modal, Platform, Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
@@ -214,12 +214,9 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
 
   // Desistir é permitido em in_progress e pending_review (o backend não concede
   // XP em nenhum dos dois, então nada é perdido além do progresso/evidência).
-  const confirmAbandon = () => {
-    Alert.alert(t('missionItem.abandonConfirmTitle'), t('missionItem.abandonConfirmBody'), [
-      { text: t('evidenceModal.cancel'), style: 'cancel' },
-      { text: t('missionItem.abandonConfirmAction'), style: 'destructive', onPress: () => onAbandon(mission) },
-    ]);
-  };
+  // M1 — confirmação por overlay padrão do app (§0.1 — nunca Alert nativo).
+  const [abandonOpen, setAbandonOpen] = useState(false);
+  const confirmAbandon = () => setAbandonOpen(true);
 
   // Bônus de XP por sequência de login — mesmo percentual aplicado pelo backend
   // em finalize_pending_mission().
@@ -514,6 +511,45 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
           </TouchableOpacity>
         </View>
       )}
+
+      {/* M1 — confirmação de "desistir" no padrão de overlay do app (nunca Alert nativo). */}
+      <Modal
+        transparent
+        visible={abandonOpen}
+        animationType="fade"
+        onRequestClose={() => setAbandonOpen(false)}>
+        <View className="flex-1 bg-black/60 items-center justify-center px-6">
+          <View className="w-full bg-white rounded-[20px] p-6">
+            <Text
+              className="text-[18px] font-extrabold text-charcoal text-center"
+              style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
+              {t('missionItem.abandonConfirmTitle')}
+            </Text>
+            <Text className="text-[13px] text-[#555] leading-[19px] text-center mt-3">
+              {t('missionItem.abandonConfirmBody')}
+            </Text>
+            <View className="flex-row gap-3 mt-5">
+              <TouchableOpacity
+                onPress={() => setAbandonOpen(false)}
+                activeOpacity={0.85}
+                accessibilityRole="button"
+                className="flex-1 border border-[#e0dada] rounded-[12px] py-3 items-center">
+                <Text className="text-[14px] font-bold text-[#666]">{t('evidenceModal.cancel')}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => {
+                  setAbandonOpen(false);
+                  onAbandon(mission);
+                }}
+                activeOpacity={0.9}
+                accessibilityRole="button"
+                className="flex-1 bg-primary-500 rounded-[12px] py-3 items-center">
+                <Text className="text-[14px] font-bold text-white">{t('missionItem.abandonConfirmAction')}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
