@@ -630,18 +630,23 @@ export default function MissionsScreen() {
           <View className="p-3 gap-3">
             {tab === 'available' && (
               <>
-                {/* Modo de ordenação: recomendadas (personalizado) x lista completa. */}
-                <View className="flex-row bg-[#f4f4f4] rounded-[10px] p-1">
-                  <SortModeTab
-                    label={t('missions.tabRecommended')}
-                    active={isRecommended}
-                    onPress={() => setAvailableMode('recommended')}
-                  />
-                  <SortModeTab
-                    label={t('missions.tabAll')}
-                    active={!isRecommended}
-                    onPress={() => setAvailableMode('all')}
-                  />
+                {/* C4/M5: ordenação recomendadas × catálogo vira um controle DISCRETO
+                    (label do modo atual + link de troca), em vez de uma faixa inteira de
+                    abas — reduz uma camada de segmented control e explica a diferença. */}
+                <View className="flex-row items-center justify-between px-1">
+                  <Text className="text-[12px] text-[#888]">
+                    {isRecommended ? t('missions.recommendedCaption') : t('missions.allCaption')}
+                  </Text>
+                  <TouchableOpacity
+                    activeOpacity={0.7}
+                    accessibilityRole="button"
+                    onPress={() => setAvailableMode(isRecommended ? 'all' : 'recommended')}
+                    className="flex-row items-center gap-1 py-1">
+                    <Text className="text-[12px] font-bold text-primary-500">
+                      {isRecommended ? t('missions.switchToAll') : t('missions.switchToRecommended')}
+                    </Text>
+                    <Text className="text-[11px] text-primary-500">⇄</Text>
+                  </TouchableOpacity>
                 </View>
 
                 {/* F4: filtros colapsados atrás de "Filtrar" — a tela abre já nas
@@ -1070,28 +1075,6 @@ function ModeTab({
           <Text className="text-[10px] font-bold text-white">{badge}</Text>
         </View>
       )}
-    </TouchableOpacity>
-  );
-}
-
-function SortModeTab({
-  label,
-  active,
-  onPress,
-}: {
-  label: string;
-  active: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <TouchableOpacity
-      activeOpacity={0.85}
-      onPress={onPress}
-      className={`flex-1 py-2 rounded-[8px] items-center ${active ? 'bg-white' : ''}`}
-      style={active ? { shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 } : undefined}>
-      <Text className={`text-[12px] font-bold ${active ? 'text-primary-500' : 'text-[#aaa]'}`}>
-        {label}
-      </Text>
     </TouchableOpacity>
   );
 }
