@@ -8,7 +8,7 @@ import { useUserProfessions } from '../market/model/queries/useProfessions';
 import { useRewardedVideo } from './model/mutations/useRewardedVideo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionSelectModal, Navbar } from '../../components';
-import { LockIcon, ShopIcon } from '../../components/icons';
+import { ArrowUpIcon, BellIcon, LockIcon, ShopIcon } from '../../components/icons';
 import LogoIcon from '../../components/logoIcon';
 import { Mission, MissionDifficulty, MissionEvidence, RecommendedMission, ToReviewItem } from '../../api/missions/missionsApi';
 import { StatsPeriod } from '../../api/users/userApi';
@@ -174,7 +174,10 @@ export default function MissionsScreen() {
   const pendingReviewQuery = useMissions('pending_review', inMissionsMode);
 
   // Fila de revisão de pares (só carrega quando o modo "Revisão" está ativo).
-  const toReviewQuery = useMissionsToReview(isReview);
+  // C4/nav: mantido vivo também no modo Missões (não só na Revisão) para o badge de
+  // "há missões para revisar" no acesso secundário. O SSE (new_review_available)
+  // invalida esta chave, então a contagem fica atualizada.
+  const toReviewQuery = useMissionsToReview(!isProgress);
   const approveM = useApproveMission();
 
   const startM = useStartMission();
@@ -426,25 +429,47 @@ export default function MissionsScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8B1A2B" />
         }>
-        {/* ── Troca de abas: Missões | Progresso | Revisão ────────────────── */}
-        <View className="flex-row bg-[#efeaea] rounded-[12px] p-1">
-          <ModeTab
-            label={t('missions.tabMyMissions')}
-            active={viewMode === 'missions'}
-            onPress={() => setViewMode('missions')}
-          />
-          <ModeTab
-            label={t('missions.tabProgress')}
-            active={isProgress}
-            onPress={() => setViewMode('progress')}
-          />
-          <ModeTab
-            label={t('missions.tabReview')}
-            active={isReview}
-            badge={toReviewQuery.data?.length}
-            onPress={() => setViewMode('review')}
-          />
-        </View>
+        {/* ── C4 (ação-first): a tela abre direto nas Missões. Progresso e Revisão
+            deixam de ser abas de igual peso e viram ACESSO SECUNDÁRIO no topo; nos
+            modos secundários, um "voltar" retorna às Missões. ─────────────────── */}
+        {inMissionsMode ? (
+          <View className="flex-row items-center justify-between gap-2">
+            <Text
+              className="text-[16px] font-extrabold text-charcoal"
+              style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
+              {t('missions.tabMyMissions')}
+            </Text>
+            <View className="flex-row items-center gap-2">
+              <SecondaryNav
+                icon={ArrowUpIcon}
+                label={t('missions.tabProgress')}
+                onPress={() => setViewMode('progress')}
+              />
+              <SecondaryNav
+                icon={BellIcon}
+                label={t('missions.tabReview')}
+                badge={toReviewQuery.data?.length}
+                onPress={() => setViewMode('review')}
+              />
+            </View>
+          </View>
+        ) : (
+          <View className="flex-row items-center gap-2">
+            <TouchableOpacity
+              onPress={() => setViewMode('missions')}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={t('missions.tabMyMissions')}
+              className="w-8 h-8 rounded-full bg-[#efeaea] items-center justify-center">
+              <Text className="text-[18px] font-bold text-primary-500">‹</Text>
+            </TouchableOpacity>
+            <Text
+              className="text-[16px] font-extrabold text-charcoal"
+              style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
+              {isReview ? t('missions.tabReview') : t('missions.tabProgress')}
+            </Text>
+          </View>
+        )}
 
         {isReview ? (
           <ReviewSection
@@ -1060,31 +1085,34 @@ function ErrorBox({ text }: { text: string }) {
   );
 }
 
-function ModeTab({
+// Acesso SECUNDÁRIO (C4 ação-first): pílula compacta com ícone + rótulo (e badge
+// opcional) para Progresso/Revisão, sem competir com a ação principal (Missões).
+function SecondaryNav({
+  icon: Icon,
   label,
-  active,
   badge,
   onPress,
 }: {
+  icon: React.ComponentType<{ size?: number; color?: string }>;
   label: string;
-  active: boolean;
   badge?: number;
   onPress: () => void;
 }) {
+  const hasBadge = badge != null && badge > 0;
   return (
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={onPress}
-      accessibilityRole="tab"
-      accessibilityState={{ selected: active }}
-      className={`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-[9px] ${active ? 'bg-white' : ''}`}
-      style={active ? { shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 } : undefined}>
-      <Text className={`text-[13px] font-bold ${active ? 'text-primary-500' : 'text-[#888]'}`}>
-        {label}
-      </Text>
-      {badge != null && badge > 0 && (
-        <View className="bg-primary-500 rounded-full px-1.5 py-0.5 min-w-[18px] items-center">
-          <Text className="text-[10px] font-bold text-white">{badge}</Text>
+      accessibilityRole="button"
+      accessibilityLabel={hasBadge ? `${label}, ${badge}` : label}
+      className="flex-row items-center gap-1.5 pl-3 pr-3.5 py-2 rounded-full bg-white border border-[#ece6e6]">
+      <Icon size={15} color="#6B1221" />
+      <Text className="text-[12px] font-bold text-[#6B1221]">{label}</Text>
+      {hasBadge && (
+        <View className="bg-primary-500 rounded-full min-w-[18px] px-1 py-0.5 items-center">
+          <Text className="text-[10px] font-extrabold text-white leading-none">
+            {badge > 99 ? '99+' : badge}
+          </Text>
         </View>
       )}
     </TouchableOpacity>
