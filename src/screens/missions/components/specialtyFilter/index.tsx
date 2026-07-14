@@ -26,6 +26,9 @@ function Chip({
     <TouchableOpacity
       activeOpacity={0.8}
       onPress={onPress}
+      accessibilityRole="button"
+      accessibilityState={{ selected: active }}
+      accessibilityLabel={label}
       style={active ? { backgroundColor: color, borderColor: color } : { borderColor: `${color}55` }}
       className={`flex-row items-center gap-1.5 px-3.5 py-2 rounded-full border ${active ? '' : 'bg-white'}`}>
       {!active && <View className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />}

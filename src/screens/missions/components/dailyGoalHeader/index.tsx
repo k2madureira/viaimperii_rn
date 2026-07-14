@@ -55,6 +55,11 @@ export default function DailyGoalHeader({ allowance, streak }: Props) {
             ? t('missions.dailyGoal.reached')
             : t('missions.dailyGoal.missing', { count: missing })}
         </Text>
+        {/* M7: relaciona a META (anel X/{{goal}}) com a COTA diária (slots do dia),
+            evitando dois números "diários" soltos sem conexão. */}
+        <Text className="text-[11px] text-[#b0a8a8] mt-1">
+          {t('missions.dailyGoal.slots', { done: completedToday, limit: DAILY_MISSION_LIMIT })}
+        </Text>
       </View>
 
       {streakDays > 0 && (

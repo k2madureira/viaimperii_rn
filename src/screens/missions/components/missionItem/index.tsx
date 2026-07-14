@@ -399,6 +399,8 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
             <TouchableOpacity
               disabled={busy}
               activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel={t('missionItem.abandonMission')}
               onPress={confirmAbandon}
               className="rounded-[10px] py-2 items-center border border-[#e0e0e0]">
               {abandonPending ? (
@@ -426,6 +428,8 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
           <TouchableOpacity
             disabled={busy}
             activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel={t('missionItem.completeMission')}
             onPress={() => onComplete(mission)}
             className="flex-1 rounded-[10px] py-2.5 items-center bg-laurel">
             {pending ? (
@@ -439,6 +443,8 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
           <TouchableOpacity
             disabled={busy}
             activeOpacity={0.85}
+            accessibilityRole="button"
+            accessibilityLabel={t('missionItem.abandonMission')}
             onPress={confirmAbandon}
             className="rounded-[10px] py-2.5 px-4 items-center border-[1.5px] border-primary-500/50">
             {abandonPending ? (

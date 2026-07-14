@@ -59,17 +59,12 @@ export function useCompleteMission() {
         };
       });
 
-      if (result.status === 'completed') {
-        Toast.show({
-          type: 'success',
-          text1: result.promoted
-            ? i18n.t('toasts.completePromoted', { rank: result.current_rank })
-            : i18n.t('toasts.completeTitle'),
-          text2: result.medal_earned
-            ? i18n.t('toasts.completeXpWithMedal', { xp: result.xp_earned, medal: result.medal_earned })
-            : i18n.t('toasts.completeXp', { xp: result.xp_earned }),
-        });
-      } else {
+      // M6 — feedback ÚNICO de "XP creditado": no caso `completed` a tela exibe a
+      // celebração (confete) — ou o modal de promoção, quando sobe de patente —, então
+      // aqui NÃO disparamos um toast concorrente (evita toast + confete no mesmo evento
+      // e alinha com a finalização assíncrona por tempo/aprovação, que já usa só a
+      // celebração). O toast fica reservado ao `pending_review`, onde ainda não há XP.
+      if (result.status !== 'completed') {
         // pending_review — entra na janela de revisão antes de conceder XP.
         Toast.show({
           type: 'success',

@@ -230,6 +230,7 @@ export default {
       reached: 'Goal reached! Keep earning XP.',
       missing_one: '{{count}} mission to reach the goal',
       missing_other: '{{count}} missions to reach the goal',
+      slots: '{{done}} of {{limit}} daily missions done today',
       streak_one: '{{count}} day',
       streak_other: '{{count}} days',
     },
