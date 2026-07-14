@@ -513,6 +513,65 @@ export default function MissionsScreen() {
         {/* Meta diária + ofensiva (F2) */}
         <DailyGoalHeader allowance={allowance} streak={user?.streak} />
 
+        {/* ── Opção 1: card HERO de missões de profissão (destaque no topo) ────
+            Com profissão ativa: hero vinho + dourado com brilho, abre a tela dedicada.
+            Bloqueado: teaser claro de upsell com CTA dourado → Mercado. */}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          accessibilityRole="button"
+          accessibilityLabel={t('missions.professionAccessTitle')}
+          onPress={() =>
+            hasActiveProfessions
+              ? navigation.navigate('ProfessionMissions', { profession: activeProfessions[0] })
+              : navigation.navigate('Market')
+          }
+          className="rounded-[18px] p-4 flex-row items-center gap-3.5 overflow-hidden"
+          style={
+            hasActiveProfessions
+              ? { backgroundColor: '#6B1221', borderWidth: 1.5, borderColor: '#D4AF37' }
+              : { backgroundColor: '#fff', borderWidth: 1, borderColor: '#ece6e6' }
+          }>
+          {hasActiveProfessions && <SparkleOverlay radius={18} />}
+          <View
+            className="w-12 h-12 rounded-[14px] items-center justify-center"
+            style={{ backgroundColor: hasActiveProfessions ? 'rgba(212,175,55,0.18)' : '#f7efdc' }}>
+            {hasActiveProfessions ? (
+              <LogoIcon size={26} color="#D4AF37" />
+            ) : (
+              <LockIcon size={22} color="#c8a24a" />
+            )}
+          </View>
+          <View className="flex-1">
+            <Text
+              className="text-[15px] font-extrabold"
+              style={{
+                color: hasActiveProfessions ? '#fff' : '#3a2b2b',
+                fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+              }}>
+              {t('missions.professionAccessTitle')}
+            </Text>
+            <Text
+              className="text-[12px] mt-0.5 leading-[16px]"
+              style={{ color: hasActiveProfessions ? 'rgba(255,255,255,0.72)' : '#9a8f8f' }}>
+              {hasActiveProfessions
+                ? t('missions.professionAccessSubtitle')
+                : t('missions.professionAccessLocked')}
+            </Text>
+          </View>
+          {hasActiveProfessions ? (
+            <Text className="text-[22px] font-bold" style={{ color: '#D4AF37' }}>›</Text>
+          ) : (
+            <View
+              className="rounded-full px-3 py-2 flex-row items-center gap-1"
+              style={{ backgroundColor: '#D4AF37' }}>
+              <ShopIcon size={16} color="#6B1221" />
+              <Text className="text-[11px] font-extrabold" style={{ color: '#6B1221' }}>
+                {t('market.professions.buy')}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
+
         {/* ── Seletor de tipo (C4: leve, sem a caixa vinho pesada) ──────────── */}
         {!isBelowRecruitIV && (
           <View className="gap-2">
@@ -700,65 +759,8 @@ export default function MissionsScreen() {
           </View>
         </View>
 
-        {/* M3: atalhos de profissão + loja no FIM do fluxo (fora do caminho da ação
-            principal). Dois cards lado a lado. */}
-        <View className="flex-row items-stretch gap-3">
-          {/* Card que abre as missões de profissão do usuário. Habilitado (tem
-              profissão): destaque vinho + logo dourado. Desabilitado: cinza + cadeado. */}
-          <TouchableOpacity
-            disabled={!hasActiveProfessions}
-            activeOpacity={0.9}
-            onPress={() =>
-              navigation.navigate('ProfessionMissions', { profession: activeProfessions[0] })
-            }
-            accessibilityRole="button"
-            className="flex-1 rounded-[16px] p-3.5 flex-row items-center gap-3 overflow-hidden"
-            style={
-              hasActiveProfessions
-                ? { backgroundColor: '#6B1221', borderWidth: 1, borderColor: '#D4AF37' }
-                : { backgroundColor: '#f2eeee', borderWidth: 1, borderColor: '#e7e0e0' }
-            }>
-            {/* Estrelas cintilantes — só no estado de destaque (tem profissão) */}
-            {hasActiveProfessions && <SparkleOverlay />}
-            <View
-              className="w-11 h-11 rounded-[12px] items-center justify-center"
-              style={{ backgroundColor: hasActiveProfessions ? 'rgba(212,175,55,0.18)' : '#e6dede' }}>
-              {hasActiveProfessions ? (
-                <LogoIcon size={24} color="#D4AF37" />
-              ) : (
-                <LockIcon size={20} color="#a89a9a" />
-              )}
-            </View>
-            <View className="flex-1">
-              <Text
-                className="text-[14px] font-extrabold"
-                style={{ color: hasActiveProfessions ? '#fff' : '#9a8f8f' }}>
-                {t('missions.professionAccessTitle')}
-              </Text>
-              <Text
-                className="text-[12px] mt-0.5 leading-[16px]"
-                style={{ color: hasActiveProfessions ? 'rgba(255,255,255,0.7)' : '#b3a9a9' }}>
-                {hasActiveProfessions
-                  ? t('missions.professionAccessSubtitle')
-                  : t('missions.professionAccessLocked')}
-              </Text>
-            </View>
-          </TouchableOpacity>
-
-          {/* Card separado à direita — compra de missões de profissão no mercado */}
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => navigation.navigate('Market')}
-            accessibilityRole="button"
-            accessibilityLabel={t('missions.marketShortcutTitle')}
-            className="rounded-[16px] px-4 items-center justify-center gap-1"
-            style={{ backgroundColor: '#D4AF37' }}>
-            <ShopIcon size={22} color="#6B1221" />
-            <Text className="text-[11px] font-extrabold" style={{ color: '#6B1221' }}>
-              {t('market.professions.buy')}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {/* Opção 4 (verificação): os cards de profissão/loja do FIM foram removidos —
+            o acesso agora é a pílula dourada "Profissões" no header. */}
         </>
         )}
       </ScrollView>
