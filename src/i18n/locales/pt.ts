@@ -185,6 +185,7 @@ export default {
   },
   professionMissions: {
     eyebrow: 'Missões de profissão',
+    buyMore: 'Comprar mais',
     open: 'Ver missões',
     selected: 'Selecionada',
     switchTitle: 'Trocar profissão',

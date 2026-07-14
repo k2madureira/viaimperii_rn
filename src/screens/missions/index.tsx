@@ -8,7 +8,7 @@ import { useUserProfessions } from '../market/model/queries/useProfessions';
 import { useRewardedVideo } from './model/mutations/useRewardedVideo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionSelectModal, Navbar } from '../../components';
-import { LockIcon, ShopIcon } from '../../components/icons';
+import { ArrowUpIcon, BellIcon, LockIcon, ShopIcon } from '../../components/icons';
 import LogoIcon from '../../components/logoIcon';
 import { Mission, MissionDifficulty, MissionEvidence, RecommendedMission, ToReviewItem } from '../../api/missions/missionsApi';
 import { StatsPeriod } from '../../api/users/userApi';
@@ -174,7 +174,10 @@ export default function MissionsScreen() {
   const pendingReviewQuery = useMissions('pending_review', inMissionsMode);
 
   // Fila de revisão de pares (só carrega quando o modo "Revisão" está ativo).
-  const toReviewQuery = useMissionsToReview(isReview);
+  // C4/nav: mantido vivo também no modo Missões (não só na Revisão) para o badge de
+  // "há missões para revisar" no acesso secundário. O SSE (new_review_available)
+  // invalida esta chave, então a contagem fica atualizada.
+  const toReviewQuery = useMissionsToReview(!isProgress);
   const approveM = useApproveMission();
 
   const startM = useStartMission();
@@ -426,25 +429,47 @@ export default function MissionsScreen() {
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#8B1A2B" />
         }>
-        {/* ── Troca de abas: Missões | Progresso | Revisão ────────────────── */}
-        <View className="flex-row bg-[#efeaea] rounded-[12px] p-1">
-          <ModeTab
-            label={t('missions.tabMyMissions')}
-            active={viewMode === 'missions'}
-            onPress={() => setViewMode('missions')}
-          />
-          <ModeTab
-            label={t('missions.tabProgress')}
-            active={isProgress}
-            onPress={() => setViewMode('progress')}
-          />
-          <ModeTab
-            label={t('missions.tabReview')}
-            active={isReview}
-            badge={toReviewQuery.data?.length}
-            onPress={() => setViewMode('review')}
-          />
-        </View>
+        {/* ── C4 (ação-first): a tela abre direto nas Missões. Progresso e Revisão
+            deixam de ser abas de igual peso e viram ACESSO SECUNDÁRIO no topo; nos
+            modos secundários, um "voltar" retorna às Missões. ─────────────────── */}
+        {inMissionsMode ? (
+          <View className="flex-row items-center justify-between gap-2">
+            <Text
+              className="text-[16px] font-extrabold text-charcoal"
+              style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
+              {t('missions.tabMyMissions')}
+            </Text>
+            <View className="flex-row items-center gap-2">
+              <SecondaryNav
+                icon={ArrowUpIcon}
+                label={t('missions.tabProgress')}
+                onPress={() => setViewMode('progress')}
+              />
+              <SecondaryNav
+                icon={BellIcon}
+                label={t('missions.tabReview')}
+                badge={toReviewQuery.data?.length}
+                onPress={() => setViewMode('review')}
+              />
+            </View>
+          </View>
+        ) : (
+          <View className="flex-row items-center gap-2">
+            <TouchableOpacity
+              onPress={() => setViewMode('missions')}
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={t('missions.tabMyMissions')}
+              className="w-8 h-8 rounded-full bg-[#efeaea] items-center justify-center">
+              <Text className="text-[18px] font-bold text-primary-500">‹</Text>
+            </TouchableOpacity>
+            <Text
+              className="text-[16px] font-extrabold text-charcoal"
+              style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
+              {isReview ? t('missions.tabReview') : t('missions.tabProgress')}
+            </Text>
+          </View>
+        )}
 
         {isReview ? (
           <ReviewSection
@@ -487,6 +512,65 @@ export default function MissionsScreen() {
         <>
         {/* Meta diária + ofensiva (F2) */}
         <DailyGoalHeader allowance={allowance} streak={user?.streak} />
+
+        {/* ── Opção 1: card HERO de missões de profissão (destaque no topo) ────
+            Com profissão ativa: hero vinho + dourado com brilho, abre a tela dedicada.
+            Bloqueado: teaser claro de upsell com CTA dourado → Mercado. */}
+        <TouchableOpacity
+          activeOpacity={0.9}
+          accessibilityRole="button"
+          accessibilityLabel={t('missions.professionAccessTitle')}
+          onPress={() =>
+            hasActiveProfessions
+              ? navigation.navigate('ProfessionMissions', { profession: activeProfessions[0] })
+              : navigation.navigate('Market')
+          }
+          className="rounded-[18px] p-4 flex-row items-center gap-3.5 overflow-hidden"
+          style={
+            hasActiveProfessions
+              ? { backgroundColor: '#6B1221', borderWidth: 1.5, borderColor: '#D4AF37' }
+              : { backgroundColor: '#fff', borderWidth: 1, borderColor: '#ece6e6' }
+          }>
+          {hasActiveProfessions && <SparkleOverlay radius={18} />}
+          <View
+            className="w-12 h-12 rounded-[14px] items-center justify-center"
+            style={{ backgroundColor: hasActiveProfessions ? 'rgba(212,175,55,0.18)' : '#f7efdc' }}>
+            {hasActiveProfessions ? (
+              <LogoIcon size={26} color="#D4AF37" />
+            ) : (
+              <LockIcon size={22} color="#c8a24a" />
+            )}
+          </View>
+          <View className="flex-1">
+            <Text
+              className="text-[15px] font-extrabold"
+              style={{
+                color: hasActiveProfessions ? '#fff' : '#3a2b2b',
+                fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+              }}>
+              {t('missions.professionAccessTitle')}
+            </Text>
+            <Text
+              className="text-[12px] mt-0.5 leading-[16px]"
+              style={{ color: hasActiveProfessions ? 'rgba(255,255,255,0.72)' : '#9a8f8f' }}>
+              {hasActiveProfessions
+                ? t('missions.professionAccessSubtitle')
+                : t('missions.professionAccessLocked')}
+            </Text>
+          </View>
+          {hasActiveProfessions ? (
+            <Text className="text-[22px] font-bold" style={{ color: '#D4AF37' }}>›</Text>
+          ) : (
+            <View
+              className="rounded-full px-3 py-2 flex-row items-center gap-1"
+              style={{ backgroundColor: '#D4AF37' }}>
+              <ShopIcon size={16} color="#6B1221" />
+              <Text className="text-[11px] font-extrabold" style={{ color: '#6B1221' }}>
+                {t('market.professions.buy')}
+              </Text>
+            </View>
+          )}
+        </TouchableOpacity>
 
         {/* ── Seletor de tipo (C4: leve, sem a caixa vinho pesada) ──────────── */}
         {!isBelowRecruitIV && (
@@ -675,65 +759,8 @@ export default function MissionsScreen() {
           </View>
         </View>
 
-        {/* M3: atalhos de profissão + loja no FIM do fluxo (fora do caminho da ação
-            principal). Dois cards lado a lado. */}
-        <View className="flex-row items-stretch gap-3">
-          {/* Card que abre as missões de profissão do usuário. Habilitado (tem
-              profissão): destaque vinho + logo dourado. Desabilitado: cinza + cadeado. */}
-          <TouchableOpacity
-            disabled={!hasActiveProfessions}
-            activeOpacity={0.9}
-            onPress={() =>
-              navigation.navigate('ProfessionMissions', { profession: activeProfessions[0] })
-            }
-            accessibilityRole="button"
-            className="flex-1 rounded-[16px] p-3.5 flex-row items-center gap-3 overflow-hidden"
-            style={
-              hasActiveProfessions
-                ? { backgroundColor: '#6B1221', borderWidth: 1, borderColor: '#D4AF37' }
-                : { backgroundColor: '#f2eeee', borderWidth: 1, borderColor: '#e7e0e0' }
-            }>
-            {/* Estrelas cintilantes — só no estado de destaque (tem profissão) */}
-            {hasActiveProfessions && <SparkleOverlay />}
-            <View
-              className="w-11 h-11 rounded-[12px] items-center justify-center"
-              style={{ backgroundColor: hasActiveProfessions ? 'rgba(212,175,55,0.18)' : '#e6dede' }}>
-              {hasActiveProfessions ? (
-                <LogoIcon size={24} color="#D4AF37" />
-              ) : (
-                <LockIcon size={20} color="#a89a9a" />
-              )}
-            </View>
-            <View className="flex-1">
-              <Text
-                className="text-[14px] font-extrabold"
-                style={{ color: hasActiveProfessions ? '#fff' : '#9a8f8f' }}>
-                {t('missions.professionAccessTitle')}
-              </Text>
-              <Text
-                className="text-[12px] mt-0.5 leading-[16px]"
-                style={{ color: hasActiveProfessions ? 'rgba(255,255,255,0.7)' : '#b3a9a9' }}>
-                {hasActiveProfessions
-                  ? t('missions.professionAccessSubtitle')
-                  : t('missions.professionAccessLocked')}
-              </Text>
-            </View>
-          </TouchableOpacity>
-
-          {/* Card separado à direita — compra de missões de profissão no mercado */}
-          <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => navigation.navigate('Market')}
-            accessibilityRole="button"
-            accessibilityLabel={t('missions.marketShortcutTitle')}
-            className="rounded-[16px] px-4 items-center justify-center gap-1"
-            style={{ backgroundColor: '#D4AF37' }}>
-            <ShopIcon size={22} color="#6B1221" />
-            <Text className="text-[11px] font-extrabold" style={{ color: '#6B1221' }}>
-              {t('market.professions.buy')}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        {/* Opção 4 (verificação): os cards de profissão/loja do FIM foram removidos —
+            o acesso agora é a pílula dourada "Profissões" no header. */}
         </>
         )}
       </ScrollView>
@@ -1060,31 +1087,34 @@ function ErrorBox({ text }: { text: string }) {
   );
 }
 
-function ModeTab({
+// Acesso SECUNDÁRIO (C4 ação-first): pílula compacta com ícone + rótulo (e badge
+// opcional) para Progresso/Revisão, sem competir com a ação principal (Missões).
+function SecondaryNav({
+  icon: Icon,
   label,
-  active,
   badge,
   onPress,
 }: {
+  icon: React.ComponentType<{ size?: number; color?: string }>;
   label: string;
-  active: boolean;
   badge?: number;
   onPress: () => void;
 }) {
+  const hasBadge = badge != null && badge > 0;
   return (
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={onPress}
-      accessibilityRole="tab"
-      accessibilityState={{ selected: active }}
-      className={`flex-1 flex-row items-center justify-center gap-1.5 py-2.5 rounded-[9px] ${active ? 'bg-white' : ''}`}
-      style={active ? { shadowColor: '#000', shadowOpacity: 0.06, shadowRadius: 4, elevation: 2 } : undefined}>
-      <Text className={`text-[13px] font-bold ${active ? 'text-primary-500' : 'text-[#888]'}`}>
-        {label}
-      </Text>
-      {badge != null && badge > 0 && (
-        <View className="bg-primary-500 rounded-full px-1.5 py-0.5 min-w-[18px] items-center">
-          <Text className="text-[10px] font-bold text-white">{badge}</Text>
+      accessibilityRole="button"
+      accessibilityLabel={hasBadge ? `${label}, ${badge}` : label}
+      className="flex-row items-center gap-1.5 pl-3 pr-3.5 py-2 rounded-full bg-white border border-[#ece6e6]">
+      <Icon size={15} color="#6B1221" />
+      <Text className="text-[12px] font-bold text-[#6B1221]">{label}</Text>
+      {hasBadge && (
+        <View className="bg-primary-500 rounded-full min-w-[18px] px-1 py-0.5 items-center">
+          <Text className="text-[10px] font-extrabold text-white leading-none">
+            {badge > 99 ? '99+' : badge}
+          </Text>
         </View>
       )}
     </TouchableOpacity>
