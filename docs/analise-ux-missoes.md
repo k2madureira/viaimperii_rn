@@ -148,35 +148,34 @@ Pilha de controles **antes** do primeiro card de missão:
 
 ---
 
-## 🟡 Baixos
+## 🟡 Baixos — ✅ todos endereçados na branch `feature/missions-ux-b-polish`
 
-### B1 — Sem skeletons; só spinners
-- Todos os estados de carregamento são `ActivityIndicator` (`index.tsx:690`, etc.).
-  Skeletons dariam percepção de velocidade e menos "salto" de layout.
+### B1 — Sem skeletons; só spinners — ✅ implementado
+- Novo `MissionSkeleton` (cards fantasma com shimmer) substitui os spinners nas
+  listas de disponíveis, ativas e histórico.
 
-### B2 — Onboarding só uma vez, sem reabrir
-- Flag em SecureStore (`index.tsx:134`); não há "rever tutorial". Baixo, mas útil.
+### B2 — Onboarding só uma vez, sem reabrir — ✅ implementado
+- Botão "?" ao lado do título "Missões" reabre o mini-tour (`setOnboardingSeen(false)`).
 
-### B3 — Peso visual do vinho repetido
-- Caixa de tipo, `PeriodStats` e card de profissão usam `#6B1221`/`#6B1221`
-  (`index.tsx:497`, `periodStats.tsx:23`, `:573`). Muita área escura reduz hierarquia.
+### B3 — Peso visual do vinho repetido — ✅ resolvido pelo C4
+- A caixa de tipo pesada virou um toggle claro (C4). Hoje o único bloco vinho da view
+  principal é o card hero de profissão (destaque intencional) — sem repetição.
 
-### B4 — "Buscar mais" é client-side
-- `renderList` fatia `visible` de uma lista já carregada (perPage 50 —
-  `useAvailableMissions.ts:13`). OK dado o teto de 10 diárias, mas o botão sugere
-  "buscar" (rede) quando só revela itens locais. Ajustar o copy p/ "Ver mais".
+### B4 — "Buscar mais" é client-side — ✅ implementado
+- Copy ajustado para **"Ver mais"** (pt) / "Show more" (en); não sugere mais rede.
 
-### B5 — Bônus de streak exibido pode divergir do creditado
-- Card mostra `+X%` de streak (`missionItem.tsx:339`), mas o valor final é recalculado no
-  backend na finalização. Se o streak mudar entre ver e concluir, diverge. Baixo.
+### B5 — Bônus de streak exibido pode divergir do creditado — ✅ endereçado
+- O `+X%` exibido é o bônus vigente (mesmo `bonus_pct` que o backend aplica no
+  finalize); dentro da sessão o streak não muda. Adicionado rótulo de acessibilidade
+  ("Bônus de ofensiva de +X% XP") para clareza.
 
-### B6 — `"Finalizando..."` hardcoded (fora do i18n)
-- `formatRemaining` retorna string literal `'Finalizando...'` (`missionItem.tsx:46`),
-  enquanto o resto usa `t()`. Inconsistência de i18n.
+### B6 — `"Finalizando..."` hardcoded (fora do i18n) — ✅ implementado
+- `formatRemaining` passou a receber o rótulo traduzido (`t('missionItem.finalizing')`).
 
-### B7 — Emoji como ícone em UI definitiva
-- Vários emojis (`⚔️ 🛡️ 📎 ✨ ⏳ 📣`) em elementos permanentes
-  (`missionItem.tsx:254,273,281`), enquanto CLAUDE.md §0.1 pede **SVG** em UI definitiva.
+### B7 — Emoji como ícone em UI definitiva — ✅ parcial
+- Criados `ShieldIcon` (selo de trilha) e `PaperclipIcon` (selo de prova) em SVG,
+  substituindo `🛡️`/`📎` nos chips do card. Emojis **decorativos** (empty states,
+  onboarding, brilho ✨) mantidos como ilustração amistosa.
 
 ---
 

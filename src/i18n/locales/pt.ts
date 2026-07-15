@@ -214,6 +214,7 @@ export default {
       denarius: 'den',
     },
     onboarding: {
+      reopen: 'Rever tutorial',
       title: 'Como funcionam as missões',
       subtitle: 'Complete missões para ganhar XP, moedas e subir de patente.',
       startTitle: 'Inicie uma missão',
@@ -237,6 +238,7 @@ export default {
     },
     missionType: 'Tipo de missão',
     activeMissions: 'Missões ativas',
+    autoCompleteText: 'Concluí a missão "{{name}}".',
     dailyMissions: 'Missões Diárias',
     weeklyMissions: 'Missões Semanais',
     exhausted: 'Esgotado',
@@ -274,7 +276,7 @@ export default {
     adLoading: 'Carregando anúncio...',
     adWatching: 'Assistindo...',
     adWatch: '▶  Assistir anúncio (+2 missões)',
-    loadMore: 'Buscar mais missões ({{count}})',
+    loadMore: 'Ver mais missões ({{count}})',
   },
   missionsTabs: {
     available: 'Disponíveis',
@@ -334,6 +336,7 @@ export default {
     rewardReviewed: 'Validação de pares',
     rewardInstantHint: 'Ao concluir, seus pontos caem na hora.',
     rewardReviewedHint: 'Ao concluir, passa por validação de pares antes de creditar os pontos.',
+    streakBonus: 'Bônus de ofensiva de +{{pct}}% de XP',
     abandonConfirmTitle: 'Desistir da missão?',
     abandonConfirmBody: 'Você perde o progresso desta missão e ela volta a ficar disponível. Nenhum XP é afetado.',
     abandonConfirmAction: 'Desistir',

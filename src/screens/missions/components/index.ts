@@ -1,6 +1,7 @@
 export { default as StatsFilter } from './statsFilter';
 export { default as PeriodStats } from './periodStats';
 export { default as MissionItem } from './missionItem';
+export { default as MissionSkeleton } from './missionSkeleton';
 export { default as LoadMoreButton } from './loadMoreButton';
 export { default as SpecialtyFilter } from './specialtyFilter';
 export { default as DifficultyFilter } from './difficultyFilter';

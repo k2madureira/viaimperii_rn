@@ -1,6 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Easing, Modal, Platform, RefreshControl, ScrollView, Text, TouchableOpacity, Vibration, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
+import Reanimated, {
+  Easing as ReEasing,
+  cancelAnimation,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
@@ -8,7 +16,7 @@ import { useUserProfessions } from '../market/model/queries/useProfessions';
 import { useRewardedVideo } from './model/mutations/useRewardedVideo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionSelectModal, Navbar } from '../../components';
-import { ArrowUpIcon, BellIcon, LockIcon, ShopIcon } from '../../components/icons';
+import { ArrowUpIcon, BellIcon, LockIcon, ShieldIcon, ShopIcon } from '../../components/icons';
 import LogoIcon from '../../components/logoIcon';
 import { Mission, MissionDifficulty, MissionEvidence, RecommendedMission, ToReviewItem } from '../../api/missions/missionsApi';
 import { StatsPeriod } from '../../api/users/userApi';
@@ -19,6 +27,7 @@ import { useWallet } from '../dashboard/model/queries/useWallet';
 import WalletButton from '../dashboard/components/walletButton';
 import { CreatePostModal } from '../dashboard/components/feed';
 import { parseBackendDate } from '../../utils/date';
+import { buildAutoCompletionText } from '../../utils/missionEvidence';
 
 // Ordenação por dificuldade: fácil → médio → difícil (nulos por último).
 const DIFFICULTY_ORDER: Record<string, number> = { easy: 0, medium: 1, hard: 2 };
@@ -32,6 +41,7 @@ import {
   DifficultyFilter,
   LoadMoreButton,
   MissionItem,
+  MissionSkeleton,
   MissionCelebration,
   EvidenceModal,
   MissionsOnboarding,
@@ -298,11 +308,20 @@ export default function MissionsScreen() {
   };
 
   // Concluir: missões com evidência abrem o modal; as demais concluem direto.
+  // Exceção — CONCLUSÃO IMEDIATA (fácil) com prova em texto/`any`: preenche a evidência
+  // automaticamente a partir das informações da missão (>= 20 chars), atendendo o
+  // prerequisito sem abrir o modal. Provas de imagem/link ainda exigem o modal.
   const handleComplete = (mission: Mission) => {
-    if (mission.proof_type && mission.proof_type !== 'none') {
-      setEvidenceMission(mission);
-    } else {
+    const proof = mission.proof_type;
+    const isImmediate = mission.difficulty === 'easy';
+    if (!proof || proof === 'none') {
       submitComplete(mission);
+    } else if (isImmediate && (proof === 'text' || proof === 'any')) {
+      submitComplete(mission, {
+        text: buildAutoCompletionText(mission, t('missions.autoCompleteText', { name: mission.name })),
+      });
+    } else {
+      setEvidenceMission(mission);
     }
   };
 
@@ -434,11 +453,22 @@ export default function MissionsScreen() {
             modos secundários, um "voltar" retorna às Missões. ─────────────────── */}
         {inMissionsMode ? (
           <View className="flex-row items-center justify-between gap-2">
-            <Text
-              className="text-[16px] font-extrabold text-charcoal"
-              style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-              {t('missions.tabMyMissions')}
-            </Text>
+            <View className="flex-row items-center gap-1.5">
+              <Text
+                className="text-[16px] font-extrabold text-charcoal"
+                style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
+                {t('missions.tabMyMissions')}
+              </Text>
+              {/* B2: reabrir o mini-tour (some após a 1ª visita, mas fica acessível). */}
+              <TouchableOpacity
+                onPress={() => setOnboardingSeen(false)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={t('missions.onboarding.reopen')}
+                className="w-5 h-5 rounded-full bg-[#efeaea] items-center justify-center">
+                <Text className="text-[11px] font-bold text-[#9a8f8f]">?</Text>
+              </TouchableOpacity>
+            </View>
             <View className="flex-row items-center gap-2">
               <SecondaryNav
                 icon={ArrowUpIcon}
@@ -496,9 +526,7 @@ export default function MissionsScreen() {
                 {t('missions.historyTitle')}
               </Text>
               {historyLoading ? (
-                <View className="py-10 items-center">
-                  <ActivityIndicator color="#8B1A2B" />
-                </View>
+                <MissionSkeleton />
               ) : historyError ? (
                 <ErrorBox text={t('missions.errorHistory')} />
               ) : historyMissions.length === 0 ? (
@@ -629,7 +657,9 @@ export default function MissionsScreen() {
         {/* ── C4: "Ativas" vira card colapsável com badge (só quando há ativas),
             acima da lista de Disponíveis, que passa a ser o foco da tela. ──────── */}
         {inProgressMissions.length > 0 && (
-          <View className="bg-white border border-[#f0eded] rounded-[20px] overflow-hidden">
+          <View
+            className="rounded-[20px] overflow-hidden bg-white"
+            style={{ borderWidth: 1, borderColor: '#ecdcac' }}>
             <TouchableOpacity
               activeOpacity={0.85}
               accessibilityRole="button"
@@ -638,7 +668,7 @@ export default function MissionsScreen() {
               onPress={() => setActiveOpen((o) => !o)}
               className="flex-row items-center justify-between px-4 py-3.5">
               <View className="flex-row items-center gap-2">
-                <Text className="text-[14px]">🛡️</Text>
+                <ShieldIcon size={16} color="#9a7b1f" />
                 <Text className="text-[14px] font-extrabold text-charcoal">
                   {t('missions.activeMissions')}
                 </Text>
@@ -654,9 +684,7 @@ export default function MissionsScreen() {
             {activeOpen && (
               <View className="px-3 pb-3 gap-3">
                 {inProgressLoading ? (
-                  <View className="py-8 items-center">
-                    <ActivityIndicator color="#8B1A2B" />
-                  </View>
+                  <MissionSkeleton count={2} />
                 ) : inProgressError ? (
                   <ErrorBox text={t('missions.errorInProgress')} />
                 ) : (
@@ -664,6 +692,10 @@ export default function MissionsScreen() {
                 )}
               </View>
             )}
+
+            {/* Glow dourado pulsante — só com o card FECHADO, para chamar atenção
+                sem manter animação/medição rodando durante a interação (evita travar). */}
+            {!activeOpen && <ActiveGoldGlow radius={20} />}
           </View>
         )}
 
@@ -735,9 +767,7 @@ export default function MissionsScreen() {
 
             {isRecommended ? (
               recommendedQuery.isLoading ? (
-                <View className="py-12 items-center">
-                  <ActivityIndicator color="#8B1A2B" />
-                </View>
+                <MissionSkeleton />
               ) : recommendedQuery.isError ? (
                 <ErrorBox text={t('missions.errorRecommended')} />
               ) : recommendedMissions.length === 0 ? (
@@ -746,9 +776,7 @@ export default function MissionsScreen() {
                 renderList(recommendedMissions)
               )
             ) : availableQuery.isLoading ? (
-              <View className="py-12 items-center">
-                <ActivityIndicator color="#8B1A2B" />
-              </View>
+              <MissionSkeleton />
             ) : availableQuery.isError ? (
               <ErrorBox text={t('missions.errorAvailable')} />
             ) : availableMissions.length === 0 ? (
@@ -983,6 +1011,44 @@ function SparkleOverlay({ radius = 16 }: { radius?: number }) {
         <Sparkle key={i} {...s} />
       ))}
     </View>
+  );
+}
+
+// Glow dourado PULSANTE ao redor do card de missões ativas — destaque que chama
+// atenção sem travar: roda no UI thread (reanimated), animando só a opacidade de um
+// overlay leve (sem SVG e sem medir layout). Assim abrir a aba fica fluido.
+// Decorativo (pointerEvents none) e só monta com o card fechado.
+function ActiveGoldGlow({ radius = 20 }: { radius?: number }) {
+  const pulse = useSharedValue(0);
+
+  useEffect(() => {
+    pulse.value = withRepeat(
+      withTiming(1, { duration: 1500, easing: ReEasing.inOut(ReEasing.ease) }),
+      -1, // infinito
+      true, // vai-e-volta (respira)
+    );
+    return () => cancelAnimation(pulse);
+  }, [pulse]);
+
+  const style = useAnimatedStyle(() => ({ opacity: 0.3 + pulse.value * 0.7 }));
+
+  return (
+    <Reanimated.View
+      pointerEvents="none"
+      style={[
+        {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          borderWidth: 2,
+          borderColor: '#D4AF37',
+          borderRadius: radius,
+        },
+        style,
+      ]}
+    />
   );
 }
 

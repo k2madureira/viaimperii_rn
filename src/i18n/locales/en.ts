@@ -214,6 +214,7 @@ export default {
       denarius: 'den',
     },
     onboarding: {
+      reopen: 'Replay tutorial',
       title: 'How missions work',
       subtitle: 'Complete missions to earn XP, coins and rank up.',
       startTitle: 'Start a mission',
@@ -237,6 +238,7 @@ export default {
     },
     missionType: 'Mission type',
     activeMissions: 'Active missions',
+    autoCompleteText: 'Completed the mission "{{name}}".',
     dailyMissions: 'Daily Missions',
     weeklyMissions: 'Weekly Missions',
     exhausted: 'Exhausted',
@@ -274,7 +276,7 @@ export default {
     adLoading: 'Loading ad...',
     adWatching: 'Watching...',
     adWatch: '▶  Watch ad (+2 missions)',
-    loadMore: 'Load more missions ({{count}})',
+    loadMore: 'Show more missions ({{count}})',
   },
   missionsTabs: {
     available: 'Available',
@@ -334,6 +336,7 @@ export default {
     rewardReviewed: 'Peer validation',
     rewardInstantHint: 'On completion, your points are credited instantly.',
     rewardReviewedHint: 'On completion, it goes through peer validation before points are credited.',
+    streakBonus: 'Streak bonus of +{{pct}}% XP',
     abandonConfirmTitle: 'Give up this mission?',
     abandonConfirmBody: 'You lose the progress on this mission and it becomes available again. No XP is affected.',
     abandonConfirmAction: 'Give up',
