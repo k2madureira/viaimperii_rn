@@ -238,6 +238,7 @@ export default {
     },
     missionType: 'Mission type',
     activeMissions: 'Active missions',
+    autoCompleteText: 'Completed the mission "{{name}}".',
     dailyMissions: 'Daily Missions',
     weeklyMissions: 'Weekly Missions',
     exhausted: 'Exhausted',

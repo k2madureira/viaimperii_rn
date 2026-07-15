@@ -21,6 +21,7 @@ import { Profession } from '../../../api/professions/professionsApi';
 import { useAuth } from '../../../contexts/AuthContext';
 import { XP_PER_RANK } from '../../../constants/game';
 import { professionTheme, withAlpha } from '../../../utils/color';
+import { buildAutoCompletionText } from '../../../utils/missionEvidence';
 import { MissionsStackParamList } from '../../../navigation/MissionsStack';
 import { useUserProfile } from '../../dashboard/model/queries/useUserProfile';
 import { useWallet } from '../../dashboard/model/queries/useWallet';
@@ -216,11 +217,20 @@ export default function ProfessionMissionsScreen() {
     );
   };
 
+  // Conclusão imediata (fácil) com prova em texto/`any`: preenche a evidência
+  // automaticamente a partir das informações da missão (>= 20 chars). Imagem/link
+  // ainda abrem o modal.
   const handleComplete = (mission: Mission) => {
-    if (mission.proof_type && mission.proof_type !== 'none') {
-      setEvidenceMission(mission);
-    } else {
+    const proof = mission.proof_type;
+    const isImmediate = mission.difficulty === 'easy';
+    if (!proof || proof === 'none') {
       submitComplete(mission);
+    } else if (isImmediate && (proof === 'text' || proof === 'any')) {
+      submitComplete(mission, {
+        text: buildAutoCompletionText(mission, t('missions.autoCompleteText', { name: mission.name })),
+      });
+    } else {
+      setEvidenceMission(mission);
     }
   };
 

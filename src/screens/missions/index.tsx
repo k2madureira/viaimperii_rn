@@ -19,6 +19,7 @@ import { useWallet } from '../dashboard/model/queries/useWallet';
 import WalletButton from '../dashboard/components/walletButton';
 import { CreatePostModal } from '../dashboard/components/feed';
 import { parseBackendDate } from '../../utils/date';
+import { buildAutoCompletionText } from '../../utils/missionEvidence';
 
 // Ordenação por dificuldade: fácil → médio → difícil (nulos por último).
 const DIFFICULTY_ORDER: Record<string, number> = { easy: 0, medium: 1, hard: 2 };
@@ -299,11 +300,20 @@ export default function MissionsScreen() {
   };
 
   // Concluir: missões com evidência abrem o modal; as demais concluem direto.
+  // Exceção — CONCLUSÃO IMEDIATA (fácil) com prova em texto/`any`: preenche a evidência
+  // automaticamente a partir das informações da missão (>= 20 chars), atendendo o
+  // prerequisito sem abrir o modal. Provas de imagem/link ainda exigem o modal.
   const handleComplete = (mission: Mission) => {
-    if (mission.proof_type && mission.proof_type !== 'none') {
-      setEvidenceMission(mission);
-    } else {
+    const proof = mission.proof_type;
+    const isImmediate = mission.difficulty === 'easy';
+    if (!proof || proof === 'none') {
       submitComplete(mission);
+    } else if (isImmediate && (proof === 'text' || proof === 'any')) {
+      submitComplete(mission, {
+        text: buildAutoCompletionText(mission, t('missions.autoCompleteText', { name: mission.name })),
+      });
+    } else {
+      setEvidenceMission(mission);
     }
   };
 
