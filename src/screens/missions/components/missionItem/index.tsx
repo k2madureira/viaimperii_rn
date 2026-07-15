@@ -7,7 +7,7 @@ import { Mission } from '../../../../api/missions/missionsApi';
 import { formatBackendDateTime } from '../../../../utils/date';
 import { useMissionStatus } from '../../model/queries/useMissionStatus';
 import { useAuth } from '../../../../contexts/AuthContext';
-import { ArrowUpIcon, CoinAmount, MASTERY_ICONS } from '../../../../components/icons';
+import { ArrowUpIcon, CoinAmount, MASTERY_ICONS, PaperclipIcon, ShieldIcon } from '../../../../components/icons';
 
 interface Props {
   mission: Mission;
@@ -42,8 +42,9 @@ function resolveSpecialtyIcon(name?: string | null) {
 }
 
 // Formata segundos restantes em "Xh Ymin", "Ymin Zs" ou "Zs".
-function formatRemaining(totalSeconds: number): string {
-  if (totalSeconds <= 0) return 'Finalizando...';
+// B6: o rótulo de "finalizando" vem traduzido (i18n) do chamador — nada hardcoded.
+function formatRemaining(totalSeconds: number, finalizingLabel: string): string {
+  if (totalSeconds <= 0) return finalizingLabel;
   const h = Math.floor(totalSeconds / 3600);
   const m = Math.floor((totalSeconds % 3600) / 60);
   const s = totalSeconds % 60;
@@ -144,7 +145,7 @@ function ReviewPanel({ mission, onCompleted }: { mission: Mission; onCompleted?:
           ⏳ {needsApproval ? t('missionItem.reviewLabel') : t('missionItem.pointsPendingLabel')}
         </Text>
         <Text className="text-[13px] font-extrabold text-[#7a5b00]">
-          {formatRemaining(remaining)}
+          {formatRemaining(remaining, t('missionItem.finalizing'))}
         </Text>
       </View>
 
@@ -161,7 +162,7 @@ function ReviewPanel({ mission, onCompleted }: { mission: Mission; onCompleted?:
       <Text className="text-[11px] text-[#9a7b1f] leading-[15px]">
         {needsApproval
           ? t('missionItem.autoCompleteWithApproval')
-          : t('missionItem.pointsCreditIn', { time: formatRemaining(remaining) })}
+          : t('missionItem.pointsCreditIn', { time: formatRemaining(remaining, t('missionItem.finalizing')) })}
       </Text>
 
       {needsApproval && (
@@ -279,7 +280,7 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
             )}
             {(mission.priority ?? 0) > 0 && (
               <View className="px-2 py-0.5 rounded-full bg-[#eaeef7] flex-row items-center gap-1">
-                <Text className="text-[9px]">🛡️</Text>
+                <ShieldIcon size={10} color="#4a5a8a" />
                 <Text className="text-[10px] font-bold text-[#4a5a8a]">
                   {trackLabel ?? t('missionItem.trackBadge')}
                 </Text>
@@ -287,7 +288,7 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
             )}
             {mission.proof_type && mission.proof_type !== 'none' && (
               <View className="px-2 py-0.5 rounded-full bg-[#eef2f7] flex-row items-center gap-1">
-                <Text className="text-[9px]">📎</Text>
+                <PaperclipIcon size={10} color="#5b6b7f" />
                 <Text className="text-[10px] font-bold text-[#5b6b7f]">
                   {t('missionItem.requiresProof', {
                     type: t(`missionItem.proof.${mission.proof_type}`, {
@@ -345,7 +346,10 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
             </View>
           )}
           {streakBonusPct > 0 && !isCompleted && (
-            <View className="flex-row items-center gap-0.5 mt-1">
+            <View
+              className="flex-row items-center gap-0.5 mt-1"
+              accessible
+              accessibilityLabel={t('missionItem.streakBonus', { pct: streakBonusPct })}>
               <ArrowUpIcon size={10} color="#2F7A52" />
               <Text className="text-[11px] font-extrabold text-laurel">+{streakBonusPct}%</Text>
             </View>

@@ -1,6 +1,10 @@
 // Ícone de cadeado
 export { default as LockIcon } from './lock';
 
+// Escudo (selo de trilha) e clipe (selo de evidência) das missões
+export { default as ShieldIcon } from './shield';
+export { default as PaperclipIcon } from './paperclip';
+
 // Ícone de imagem
 export { default as ImageIcon } from './image';
 

@@ -32,6 +32,7 @@ import {
   DifficultyFilter,
   LoadMoreButton,
   MissionItem,
+  MissionSkeleton,
   MissionCelebration,
   EvidenceModal,
   MissionsOnboarding,
@@ -434,11 +435,22 @@ export default function MissionsScreen() {
             modos secundários, um "voltar" retorna às Missões. ─────────────────── */}
         {inMissionsMode ? (
           <View className="flex-row items-center justify-between gap-2">
-            <Text
-              className="text-[16px] font-extrabold text-charcoal"
-              style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-              {t('missions.tabMyMissions')}
-            </Text>
+            <View className="flex-row items-center gap-1.5">
+              <Text
+                className="text-[16px] font-extrabold text-charcoal"
+                style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
+                {t('missions.tabMyMissions')}
+              </Text>
+              {/* B2: reabrir o mini-tour (some após a 1ª visita, mas fica acessível). */}
+              <TouchableOpacity
+                onPress={() => setOnboardingSeen(false)}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel={t('missions.onboarding.reopen')}
+                className="w-5 h-5 rounded-full bg-[#efeaea] items-center justify-center">
+                <Text className="text-[11px] font-bold text-[#9a8f8f]">?</Text>
+              </TouchableOpacity>
+            </View>
             <View className="flex-row items-center gap-2">
               <SecondaryNav
                 icon={ArrowUpIcon}
@@ -496,9 +508,7 @@ export default function MissionsScreen() {
                 {t('missions.historyTitle')}
               </Text>
               {historyLoading ? (
-                <View className="py-10 items-center">
-                  <ActivityIndicator color="#8B1A2B" />
-                </View>
+                <MissionSkeleton />
               ) : historyError ? (
                 <ErrorBox text={t('missions.errorHistory')} />
               ) : historyMissions.length === 0 ? (
@@ -654,9 +664,7 @@ export default function MissionsScreen() {
             {activeOpen && (
               <View className="px-3 pb-3 gap-3">
                 {inProgressLoading ? (
-                  <View className="py-8 items-center">
-                    <ActivityIndicator color="#8B1A2B" />
-                  </View>
+                  <MissionSkeleton count={2} />
                 ) : inProgressError ? (
                   <ErrorBox text={t('missions.errorInProgress')} />
                 ) : (
@@ -735,9 +743,7 @@ export default function MissionsScreen() {
 
             {isRecommended ? (
               recommendedQuery.isLoading ? (
-                <View className="py-12 items-center">
-                  <ActivityIndicator color="#8B1A2B" />
-                </View>
+                <MissionSkeleton />
               ) : recommendedQuery.isError ? (
                 <ErrorBox text={t('missions.errorRecommended')} />
               ) : recommendedMissions.length === 0 ? (
@@ -746,9 +752,7 @@ export default function MissionsScreen() {
                 renderList(recommendedMissions)
               )
             ) : availableQuery.isLoading ? (
-              <View className="py-12 items-center">
-                <ActivityIndicator color="#8B1A2B" />
-              </View>
+              <MissionSkeleton />
             ) : availableQuery.isError ? (
               <ErrorBox text={t('missions.errorAvailable')} />
             ) : availableMissions.length === 0 ? (
