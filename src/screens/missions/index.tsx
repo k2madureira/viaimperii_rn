@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Easing, Modal, Platform, RefreshControl, ScrollView, Text, TouchableOpacity, Vibration, View } from 'react-native';
-import Svg, { Path, Rect } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 import Reanimated, {
   Easing as ReEasing,
   cancelAnimation,
-  useAnimatedProps,
+  useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withTiming,
@@ -693,9 +693,9 @@ export default function MissionsScreen() {
               </View>
             )}
 
-            {/* Borda dourada circulando (bem lenta) — só com o card FECHADO, para
-                chamar atenção sem manter a animação rodando durante a interação. */}
-            {!activeOpen && <ActiveGoldBorder radius={20} />}
+            {/* Glow dourado pulsante — só com o card FECHADO, para chamar atenção
+                sem manter animação/medição rodando durante a interação (evita travar). */}
+            {!activeOpen && <ActiveGoldGlow radius={20} />}
           </View>
         )}
 
@@ -1014,66 +1014,41 @@ function SparkleOverlay({ radius = 16 }: { radius?: number }) {
   );
 }
 
-const AnimatedRect = Reanimated.createAnimatedComponent(Rect);
+// Glow dourado PULSANTE ao redor do card de missões ativas — destaque que chama
+// atenção sem travar: roda no UI thread (reanimated), animando só a opacidade de um
+// overlay leve (sem SVG e sem medir layout). Assim abrir a aba fica fluido.
+// Decorativo (pointerEvents none) e só monta com o card fechado.
+function ActiveGoldGlow({ radius = 20 }: { radius?: number }) {
+  const pulse = useSharedValue(0);
 
-// Borda dourada "circulando": um segmento dourado percorre o perímetro do card,
-// bem devagar. Roda no UI THREAD (reanimated) — não satura a thread JS, então abrir
-// a aba não trava. Decorativa (pointerEvents none) e só monta quando há ativas.
-function ActiveGoldBorder({ radius = 20 }: { radius?: number }) {
-  const [size, setSize] = useState({ w: 0, h: 0 });
-  const { w, h } = size;
-
-  const inset = 1.5;
-  const iw = Math.max(0, w - inset * 2);
-  const ih = Math.max(0, h - inset * 2);
-  const r = Math.max(0, Math.min(radius, iw / 2, ih / 2));
-  // Perímetro do retângulo arredondado (lados retos + 4 quartos de círculo).
-  const per = 2 * (iw - 2 * r) + 2 * (ih - 2 * r) + 2 * Math.PI * r;
-  const segment = per * 0.32; // tamanho do "cometa" dourado
-
-  const progress = useSharedValue(0);
   useEffect(() => {
-    if (!per) return;
-    progress.value = 0;
-    progress.value = withRepeat(
-      withTiming(1, { duration: 9000, easing: ReEasing.linear }),
-      -1, // repete infinitamente
-      false,
+    pulse.value = withRepeat(
+      withTiming(1, { duration: 1500, easing: ReEasing.inOut(ReEasing.ease) }),
+      -1, // infinito
+      true, // vai-e-volta (respira)
     );
-    return () => cancelAnimation(progress);
-  }, [per, progress]);
+    return () => cancelAnimation(pulse);
+  }, [pulse]);
 
-  const animatedProps = useAnimatedProps(() => ({
-    strokeDashoffset: -per * progress.value,
-  }));
+  const style = useAnimatedStyle(() => ({ opacity: 0.3 + pulse.value * 0.7 }));
 
   return (
-    <View
+    <Reanimated.View
       pointerEvents="none"
-      style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-      onLayout={(e) => {
-        const { width, height } = e.nativeEvent.layout;
-        setSize((s) => (s.w === width && s.h === height ? s : { w: width, h: height }));
-      }}>
-      {w > 0 && h > 0 && per > 0 && (
-        <Svg width={w} height={h}>
-          <AnimatedRect
-            x={inset}
-            y={inset}
-            width={iw}
-            height={ih}
-            rx={r}
-            ry={r}
-            fill="none"
-            stroke="#D4AF37"
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeDasharray={`${segment}, ${per - segment}`}
-            animatedProps={animatedProps}
-          />
-        </Svg>
-      )}
-    </View>
+      style={[
+        {
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          borderWidth: 2,
+          borderColor: '#D4AF37',
+          borderRadius: radius,
+        },
+        style,
+      ]}
+    />
   );
 }
 
