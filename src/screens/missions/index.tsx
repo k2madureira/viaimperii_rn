@@ -1,6 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Easing, Modal, Platform, RefreshControl, ScrollView, Text, TouchableOpacity, Vibration, View } from 'react-native';
 import Svg, { Path, Rect } from 'react-native-svg';
+import Reanimated, {
+  Easing as ReEasing,
+  cancelAnimation,
+  useAnimatedProps,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
@@ -1006,30 +1014,14 @@ function SparkleOverlay({ radius = 16 }: { radius?: number }) {
   );
 }
 
-const AnimatedRect = Animated.createAnimatedComponent(Rect);
+const AnimatedRect = Reanimated.createAnimatedComponent(Rect);
 
 // Borda dourada "circulando": um segmento dourado percorre o perímetro do card,
-// bem devagar. Usada para destacar o card de missões ativas (antes muito apagado).
-// Decorativa (pointerEvents none) e só monta quando há missões ativas.
+// bem devagar. Roda no UI THREAD (reanimated) — não satura a thread JS, então abrir
+// a aba não trava. Decorativa (pointerEvents none) e só monta quando há ativas.
 function ActiveGoldBorder({ radius = 20 }: { radius?: number }) {
   const [size, setSize] = useState({ w: 0, h: 0 });
-  const progress = useRef(new Animated.Value(0)).current;
   const { w, h } = size;
-
-  useEffect(() => {
-    if (!w || !h) return;
-    progress.setValue(0);
-    const anim = Animated.loop(
-      Animated.timing(progress, {
-        toValue: 1,
-        duration: 9000, // bem lenta
-        easing: Easing.linear,
-        useNativeDriver: false, // strokeDashoffset não é animável pelo native driver
-      }),
-    );
-    anim.start();
-    return () => anim.stop();
-  }, [w, h, progress]);
 
   const inset = 1.5;
   const iw = Math.max(0, w - inset * 2);
@@ -1038,7 +1030,22 @@ function ActiveGoldBorder({ radius = 20 }: { radius?: number }) {
   // Perímetro do retângulo arredondado (lados retos + 4 quartos de círculo).
   const per = 2 * (iw - 2 * r) + 2 * (ih - 2 * r) + 2 * Math.PI * r;
   const segment = per * 0.32; // tamanho do "cometa" dourado
-  const dashoffset = progress.interpolate({ inputRange: [0, 1], outputRange: [0, -per] });
+
+  const progress = useSharedValue(0);
+  useEffect(() => {
+    if (!per) return;
+    progress.value = 0;
+    progress.value = withRepeat(
+      withTiming(1, { duration: 9000, easing: ReEasing.linear }),
+      -1, // repete infinitamente
+      false,
+    );
+    return () => cancelAnimation(progress);
+  }, [per, progress]);
+
+  const animatedProps = useAnimatedProps(() => ({
+    strokeDashoffset: -per * progress.value,
+  }));
 
   return (
     <View
@@ -1062,7 +1069,7 @@ function ActiveGoldBorder({ radius = 20 }: { radius?: number }) {
             strokeWidth={2.5}
             strokeLinecap="round"
             strokeDasharray={`${segment}, ${per - segment}`}
-            strokeDashoffset={dashoffset}
+            animatedProps={animatedProps}
           />
         </Svg>
       )}
