@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Animated, Easing, Modal, Platform, RefreshControl, ScrollView, Text, TouchableOpacity, Vibration, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Path, Rect } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import * as SecureStore from 'expo-secure-store';
@@ -8,7 +8,7 @@ import { useUserProfessions } from '../market/model/queries/useProfessions';
 import { useRewardedVideo } from './model/mutations/useRewardedVideo';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionSelectModal, Navbar } from '../../components';
-import { ArrowUpIcon, BellIcon, LockIcon, ShopIcon } from '../../components/icons';
+import { ArrowUpIcon, BellIcon, LockIcon, ShieldIcon, ShopIcon } from '../../components/icons';
 import LogoIcon from '../../components/logoIcon';
 import { Mission, MissionDifficulty, MissionEvidence, RecommendedMission, ToReviewItem } from '../../api/missions/missionsApi';
 import { StatsPeriod } from '../../api/users/userApi';
@@ -649,7 +649,9 @@ export default function MissionsScreen() {
         {/* ── C4: "Ativas" vira card colapsável com badge (só quando há ativas),
             acima da lista de Disponíveis, que passa a ser o foco da tela. ──────── */}
         {inProgressMissions.length > 0 && (
-          <View className="bg-white border border-[#f0eded] rounded-[20px] overflow-hidden">
+          <View
+            className="rounded-[20px] overflow-hidden bg-white"
+            style={{ borderWidth: 1, borderColor: '#ecdcac' }}>
             <TouchableOpacity
               activeOpacity={0.85}
               accessibilityRole="button"
@@ -658,7 +660,7 @@ export default function MissionsScreen() {
               onPress={() => setActiveOpen((o) => !o)}
               className="flex-row items-center justify-between px-4 py-3.5">
               <View className="flex-row items-center gap-2">
-                <Text className="text-[14px]">🛡️</Text>
+                <ShieldIcon size={16} color="#9a7b1f" />
                 <Text className="text-[14px] font-extrabold text-charcoal">
                   {t('missions.activeMissions')}
                 </Text>
@@ -682,6 +684,9 @@ export default function MissionsScreen() {
                 )}
               </View>
             )}
+
+            {/* Borda dourada circulando (bem lenta) — chama atenção p/ as ativas. */}
+            <ActiveGoldBorder radius={20} />
           </View>
         )}
 
@@ -996,6 +1001,70 @@ function SparkleOverlay({ radius = 16 }: { radius?: number }) {
       {SPARKLES.map((s, i) => (
         <Sparkle key={i} {...s} />
       ))}
+    </View>
+  );
+}
+
+const AnimatedRect = Animated.createAnimatedComponent(Rect);
+
+// Borda dourada "circulando": um segmento dourado percorre o perímetro do card,
+// bem devagar. Usada para destacar o card de missões ativas (antes muito apagado).
+// Decorativa (pointerEvents none) e só monta quando há missões ativas.
+function ActiveGoldBorder({ radius = 20 }: { radius?: number }) {
+  const [size, setSize] = useState({ w: 0, h: 0 });
+  const progress = useRef(new Animated.Value(0)).current;
+  const { w, h } = size;
+
+  useEffect(() => {
+    if (!w || !h) return;
+    progress.setValue(0);
+    const anim = Animated.loop(
+      Animated.timing(progress, {
+        toValue: 1,
+        duration: 9000, // bem lenta
+        easing: Easing.linear,
+        useNativeDriver: false, // strokeDashoffset não é animável pelo native driver
+      }),
+    );
+    anim.start();
+    return () => anim.stop();
+  }, [w, h, progress]);
+
+  const inset = 1.5;
+  const iw = Math.max(0, w - inset * 2);
+  const ih = Math.max(0, h - inset * 2);
+  const r = Math.max(0, Math.min(radius, iw / 2, ih / 2));
+  // Perímetro do retângulo arredondado (lados retos + 4 quartos de círculo).
+  const per = 2 * (iw - 2 * r) + 2 * (ih - 2 * r) + 2 * Math.PI * r;
+  const segment = per * 0.32; // tamanho do "cometa" dourado
+  const dashoffset = progress.interpolate({ inputRange: [0, 1], outputRange: [0, -per] });
+
+  return (
+    <View
+      pointerEvents="none"
+      style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      onLayout={(e) => {
+        const { width, height } = e.nativeEvent.layout;
+        setSize((s) => (s.w === width && s.h === height ? s : { w: width, h: height }));
+      }}>
+      {w > 0 && h > 0 && per > 0 && (
+        <Svg width={w} height={h}>
+          <AnimatedRect
+            x={inset}
+            y={inset}
+            width={iw}
+            height={ih}
+            rx={r}
+            ry={r}
+            fill="none"
+            stroke="#D4AF37"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeDasharray={`${segment}, ${per - segment}`}
+            strokeDashoffset={dashoffset}
+          />
+        </Svg>
+      )}
     </View>
   );
 }
