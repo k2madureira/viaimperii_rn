@@ -685,8 +685,9 @@ export default function MissionsScreen() {
               </View>
             )}
 
-            {/* Borda dourada circulando (bem lenta) — chama atenção p/ as ativas. */}
-            <ActiveGoldBorder radius={20} />
+            {/* Borda dourada circulando (bem lenta) — só com o card FECHADO, para
+                chamar atenção sem manter a animação rodando durante a interação. */}
+            {!activeOpen && <ActiveGoldBorder radius={20} />}
           </View>
         )}
 
