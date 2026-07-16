@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, LayoutChangeEvent, Text, View } from 'react-native';
+import { ActivityIndicator, LayoutChangeEvent, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { Rank } from '../../../../../api/ranks/ranksApi';
 import { UserTrack } from '../../../../../api/users/userApi';

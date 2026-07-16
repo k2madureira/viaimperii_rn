@@ -1,6 +1,7 @@
 import { useRoute, RouteProp } from '@react-navigation/native';
 import React, { useState } from 'react';
-import { Platform, Text, View, Animated } from 'react-native';
+import { Platform, View, Animated } from 'react-native';
+import Text from '../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { LogoIcon } from '../../../components';
 import AuthContainer from '../components/AuthContainer';

@@ -6,11 +6,11 @@ import {
   KeyboardAvoidingView,
   Modal,
   Platform,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import Text from '../../../../../components/text';
+import TextInput from '../../../../../components/textInput';
 import EyeIcon from '../../../../auth/components/icons/EyeIcon';
 import EyeOffIcon from '../../../../auth/components/icons/EyeOffIcon';
 import { changePasswordSchema } from '../../../model/contracts/changePasswordSchema';

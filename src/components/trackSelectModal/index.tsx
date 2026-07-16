@@ -5,10 +5,10 @@ import {
   Modal,
   Platform,
   ScrollView,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import Text from '../text';
 import { useTranslation } from 'react-i18next';
 import { Track } from '../../api/ranks/ranksApi';
 

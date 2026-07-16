@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { ActivityIndicator, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
+import TextInput, { TextInputRef } from '../../../../../components/textInput';
 import { useTranslation } from 'react-i18next';
 import { useCreateComment } from '../../../../dashboard/model/mutations/useCreateComment';
 
 interface Props {
   postId: number;
-  inputRef: React.RefObject<TextInput | null>;
+  inputRef: React.RefObject<TextInputRef | null>;
   bottomInset: number;
   onCommentCreated: () => void;
 }

@@ -39,6 +39,18 @@ Mantenha-o atualizado ao alterar comportamento.
   formata um valor **atômico** em moedas (ver `src/utils/coins.ts`).
 - **Toda tela nova** usa a `Navbar` padrão (`src/components/navbar/`) — sem headers
   customizados.
+- **Raiz da tela** = `ScreenContainer` (`src/components/screenContainer/`), nunca uma
+  `View` solta. Ele aplica o safe area do topo (obrigatório com o edge-to-edge do SDK 54
+  no Android) e limita a coluna a `CONTENT_MAX_WIDTH` (`src/constants/layout.ts`),
+  centralizando-a em telas grandes (iPad, dobrável, split-screen). Em celular não tem efeito.
+- **Texto**: importar `Text`/`TextInput` de `src/components/text` e `src/components/textInput`
+  — **nunca** de `'react-native'`. Os wrappers aplicam `maxFontSizeMultiplier = MAX_FONT_SCALE`
+  (1.3): a tipografia é densa e assenta em cards de altura fixa, então acima de ~130% da escala
+  de fonte do sistema o texto corta. Para um texto que possa escalar sem teto (corpo de leitura
+  sem altura fixa), passe `maxFontSizeMultiplier={0}`.
+  - Importar **direto da pasta** (`components/text`), não pelo barrel `src/components` —
+    o barrel puxaria a árvore inteira de componentes e criaria ciclo de import.
+  - Refs de campo usam o tipo `TextInputRef` (o wrapper é função, não serve como tipo).
 
 ---
 

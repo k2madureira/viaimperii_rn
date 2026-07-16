@@ -4,11 +4,11 @@ import {
   Modal,
   Platform,
   ScrollView,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import Text from '../text';
+import TextInput from '../textInput';
 import * as Location from 'expo-location';
 import { useTranslation } from 'react-i18next';
 import { getProvinces, Province } from '../../api/provinces/provincesApi';

@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { FireIcon } from '../../../../../components/icons';
 import { LoginStreak } from '../../../../../api/auth/authApi';

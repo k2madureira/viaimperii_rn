@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 
 // Acesso SECUNDÁRIO (C4 ação-first): pílula compacta com ícone + rótulo (e badge
 // opcional) para Progresso/Revisão, sem competir com a ação principal (Missões).

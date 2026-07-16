@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, TouchableOpacity } from 'react-native';
+import { TouchableOpacity } from 'react-native';
+import Text from '../../../../../components/text';
 import { MarketSection, MarketSectionIcon, SECTION_COLOR } from '../../icons';
 
 interface Props {

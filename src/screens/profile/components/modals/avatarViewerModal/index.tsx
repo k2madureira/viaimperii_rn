@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, Modal, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Modal, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 
 interface Props {
   visible: boolean;

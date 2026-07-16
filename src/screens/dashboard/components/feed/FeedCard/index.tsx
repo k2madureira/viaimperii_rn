@@ -1,6 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useRef, useState } from 'react';
-import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { HomeNavigationProp } from '../../../../../navigation/HomeStack';
 import { FeedItem, ReactionType } from '../../../../../api/feed/feedApi';

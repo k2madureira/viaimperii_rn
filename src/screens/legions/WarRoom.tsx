@@ -5,10 +5,11 @@ import {
   Platform,
   RefreshControl,
   ScrollView,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import Text from '../../components/text';
+import ScreenContainer from '../../components/screenContainer';
 import { SvgUri } from 'react-native-svg';
 import { useTranslation } from 'react-i18next';
 import { useRoute, RouteProp } from '@react-navigation/native';
@@ -35,7 +36,7 @@ export default function WarRoomScreen() {
   const color = legionColorById(legionsQuery.data, legionId) ?? '#8B1A2B';
 
   return (
-    <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+    <ScreenContainer>
       <Navbar />
 
       {detailQuery.isLoading ? (
@@ -124,7 +125,7 @@ export default function WarRoomScreen() {
           </View>
         </ScrollView>
       ) : null}
-    </View>
+    </ScreenContainer>
   );
 }
 

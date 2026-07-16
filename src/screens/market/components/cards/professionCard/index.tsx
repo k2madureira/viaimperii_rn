@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, Image, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import Svg, { Path, Rect } from 'react-native-svg';
 import { CoinAmount, LockIcon } from '../../../../../components/icons';

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import ScreenContainer from '../../../components/screenContainer';
 import { ActivityIndicator, RefreshControl, ScrollView, Vibration, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useRoute, RouteProp } from '@react-navigation/native';
@@ -214,17 +215,17 @@ export default function ProfessionMissionsScreen() {
   // Sem profissão resolvida ainda (query carregando) — evita render com dados nulos.
   if (!profession) {
     return (
-      <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+      <ScreenContainer>
         <Navbar />
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator color="#8B1A2B" />
         </View>
-      </View>
+      </ScreenContainer>
     );
   }
 
   return (
-    <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+    <ScreenContainer>
       <Navbar
         rightExtra={walletQuery.data ? <WalletButton balance={walletQuery.data.balance} /> : null}
       />
@@ -299,6 +300,6 @@ export default function ProfessionMissionsScreen() {
           onClose: () => setRankUp(null),
         }}
       />
-    </View>
+    </ScreenContainer>
   );
 }

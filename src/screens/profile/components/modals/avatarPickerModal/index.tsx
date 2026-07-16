@@ -7,11 +7,11 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Text,
   TouchableOpacity,
   useWindowDimensions,
   View,
 } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { AssetRarity } from '../../../../../api/assets/assetsApi';
 import { AureusCoin, CoinAmount, ShopIcon, UnlockedIcon } from '../../../../../components/icons';

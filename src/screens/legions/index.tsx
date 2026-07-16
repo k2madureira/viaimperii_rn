@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import ScreenContainer from '../../components/screenContainer';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Navbar } from '../../components';
@@ -34,7 +35,7 @@ export default function LegionsScreen() {
   const showSkeleton = legionsQuery.isLoading || (!allImagesLoaded && legions.length > 0);
 
   return (
-    <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+    <ScreenContainer>
       <Navbar />
 
       <ScrollView
@@ -77,6 +78,6 @@ export default function LegionsScreen() {
           />
         )}
       </ScrollView>
-    </View>
+    </ScreenContainer>
   );
 }

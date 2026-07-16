@@ -1,5 +1,6 @@
 import React from 'react';
-import { Modal, Platform, Text, TouchableOpacity, View } from 'react-native';
+import { Modal, Platform, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { LegionSelectModal } from '../../../../../components';
 import { Mission, MissionEvidence } from '../../../../../api/missions/missionsApi';

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import ScreenContainer from '../../components/screenContainer';
 import { RefreshControl, ScrollView, Vibration, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import * as SecureStore from 'expo-secure-store';
@@ -385,7 +386,7 @@ export default function MissionsScreen() {
   };
 
   return (
-    <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+    <ScreenContainer>
       <Navbar
         rightExtra={walletQuery.data ? <WalletButton balance={walletQuery.data.balance} /> : null}
       />
@@ -530,6 +531,6 @@ export default function MissionsScreen() {
           },
         }}
       />
-    </View>
+    </ScreenContainer>
   );
 }

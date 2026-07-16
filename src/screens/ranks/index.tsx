@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import ScreenContainer from '../../components/screenContainer';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../contexts/AuthContext';
@@ -51,7 +52,7 @@ export default function RanksScreen() {
   }, [ranksQuery.isLoading, sortedRanks.length, currentLevel]);
 
   return (
-    <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+    <ScreenContainer>
       <RanksHeader />
 
       <ScrollView
@@ -92,6 +93,6 @@ export default function RanksScreen() {
           }}
         />
       </ScrollView>
-    </View>
+    </ScreenContainer>
   );
 }

@@ -6,11 +6,11 @@ import {
   Linking,
   Modal,
   Platform,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import Text from '../../../../../components/text';
+import TextInput from '../../../../../components/textInput';
 import { useTranslation } from 'react-i18next';
 import { ToReviewItem } from '../../../../../api/missions/missionsApi';
 import { parseBackendDate } from '../../../../../utils/date';

@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { ToReviewItem } from '../../../../../api/missions/missionsApi';
 import { useApproveMission } from '../../../model/mutations/useApproveMission';

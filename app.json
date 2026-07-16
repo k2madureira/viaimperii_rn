@@ -51,7 +51,14 @@
         }
       ],
       "expo-video",
-      "./plugins/withAdsKotlinMetadataFix"
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "android": { "minSdkVersion": 24 },
+          "ios": { "deploymentTarget": "15.1" }
+        }
+      ]
     ],
     "extra": {
       "eas": {

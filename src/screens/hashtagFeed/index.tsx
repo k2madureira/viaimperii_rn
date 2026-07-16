@@ -1,12 +1,7 @@
 import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  Platform,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import ScreenContainer from '../../components/screenContainer';
+import { ActivityIndicator, FlatList, Platform, TouchableOpacity, View } from 'react-native';
+import Text from '../../components/text';
 import { useTranslation } from 'react-i18next';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -36,7 +31,7 @@ export default function HashtagFeedScreen() {
   const items = (feedQuery.data?.pages ?? []).flatMap((p) => p.items);
 
   return (
-    <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+    <ScreenContainer>
       <Navbar />
 
       {/* Cabeçalho: voltar + #hashtag */}
@@ -107,6 +102,6 @@ export default function HashtagFeedScreen() {
       />
 
       <CommentsModal item={commentsItem} onClose={() => setCommentsItem(null)} />
-    </View>
+    </ScreenContainer>
   );
 }

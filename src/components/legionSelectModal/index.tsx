@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  Image,
-  Modal,
-  Platform,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Image, Modal, Platform, TouchableOpacity, View } from 'react-native';
+import Text from '../text';
 import { useTranslation } from 'react-i18next';
 import { Legion } from '../../api/legions/legionsApi';
 import LegionAttributes from '../legionAttributes';

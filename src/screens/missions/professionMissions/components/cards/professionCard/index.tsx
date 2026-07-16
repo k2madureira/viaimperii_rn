@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { Image, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { Profession } from '../../../../../../api/professions/professionsApi';
 import { normalizeHex, withAlpha } from '../../../../../../utils/color';

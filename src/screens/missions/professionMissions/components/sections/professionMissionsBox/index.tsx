@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import Text from '../../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { Mission, MissionDifficulty } from '../../../../../../api/missions/missionsApi';
 import { ProfessionTheme } from '../../../../../../utils/color';

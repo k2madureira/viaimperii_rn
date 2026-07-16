@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ScreenContainer from '../../components/screenContainer';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Navbar } from '../../components';
@@ -77,7 +78,7 @@ export default function MarketScreen() {
   };
 
   return (
-    <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+    <ScreenContainer>
       <Navbar
         rightExtra={walletQuery.data ? <WalletButton balance={walletQuery.data.balance} /> : null}
       />
@@ -132,6 +133,6 @@ export default function MarketScreen() {
         }
         onClose={() => setConfirmProf(null)}
       />
-    </View>
+    </ScreenContainer>
   );
 }

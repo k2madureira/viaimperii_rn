@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Platform, Text, View } from 'react-native';
+import { Platform, View } from 'react-native';
+import Text from '../text';
 import { useTranslation } from 'react-i18next';
 import { ChangePasswordModal } from '../../screens/dashboard/components';
 import LogoIcon from '../logoIcon';

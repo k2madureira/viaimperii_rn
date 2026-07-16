@@ -1,5 +1,6 @@
 import React from 'react';
-import { Linking, Text, TextStyle, View } from 'react-native';
+import { Linking, TextStyle, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { parseDocument } from 'htmlparser2';
 
 /**

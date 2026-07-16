@@ -1,5 +1,6 @@
 import React from 'react';
-import { Platform, Text, View } from 'react-native';
+import { Platform, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import ProgressRing from '../../../../../components/progressRing';
 import { FireIcon } from '../../../../../components/icons';

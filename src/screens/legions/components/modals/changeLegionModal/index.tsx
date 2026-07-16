@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, Modal, Platform, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Modal, Platform, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { Legion } from '../../../../../api/legions/legionsApi';
 import { TRACK_CHANGE_PENALTY_PCT } from '../../../../../constants/legions';

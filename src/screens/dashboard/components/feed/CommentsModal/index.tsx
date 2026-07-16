@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Animated,
-  Dimensions,
   Easing,
   FlatList,
   Image,
@@ -11,11 +10,12 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
+  useWindowDimensions,
 } from 'react-native';
+import Text from '../../../../../components/text';
+import TextInput from '../../../../../components/textInput';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FeedComment, FeedItem } from '../../../../../api/feed/feedApi';
@@ -28,7 +28,6 @@ interface Props {
   onClose: () => void;
 }
 
-const SCREEN_H = Dimensions.get('window').height;
 
 function initials(name: string) {
   return name
@@ -68,6 +67,9 @@ function CommentRow({ comment }: { comment: FeedComment }) {
 export default function CommentsModal({ item, onClose }: Props) {
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  // Medido por render (não no escopo do módulo) para acompanhar split-screen,
+  // dobráveis e Stage Manager, onde a janela muda de tamanho em runtime.
+  const { height: screenH } = useWindowDimensions();
   const eventId = item?.id ?? null;
 
   const commentsQuery = useFeedComments(eventId, item != null);
@@ -77,10 +79,10 @@ export default function CommentsModal({ item, onClose }: Props) {
   // Apenas a folha (sheet) desliza de baixo; o escurecimento (backdrop) já cobre
   // a tela inteira assim que o modal abre (animationType="fade" anima a opacidade
   // de uma camada full-screen, sem "subir" junto com o conteúdo).
-  const sheetY = useRef(new Animated.Value(SCREEN_H)).current;
+  const sheetY = useRef(new Animated.Value(screenH)).current;
   useEffect(() => {
     if (item != null) {
-      sheetY.setValue(SCREEN_H);
+      sheetY.setValue(screenH);
       Animated.timing(sheetY, {
         toValue: 0,
         duration: 260,
@@ -88,7 +90,7 @@ export default function CommentsModal({ item, onClose }: Props) {
         useNativeDriver: true,
       }).start();
     }
-  }, [item, sheetY]);
+  }, [item, sheetY, screenH]);
 
   // Controle manual da altura do teclado: dentro de um Modal do Android o
   // KeyboardAvoidingView não recebe corretamente os eventos de resize da

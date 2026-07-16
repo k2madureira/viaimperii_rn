@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { useFeedComments } from '../../../../dashboard/model/queries/useFeedComments';
 import CommentRow from '../../cards/commentRow';

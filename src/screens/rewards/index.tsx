@@ -1,4 +1,5 @@
 import React from 'react';
+import ScreenContainer from '../../components/screenContainer';
 import { ActivityIndicator, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Navbar } from '../../components';
@@ -19,7 +20,7 @@ export default function RewardsScreen() {
   const rewards = rewardsQuery.data ?? [];
 
   return (
-    <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+    <ScreenContainer>
       <Navbar
         rightExtra={walletQuery.data ? <WalletButton balance={walletQuery.data.balance} /> : null}
       />
@@ -38,6 +39,6 @@ export default function RewardsScreen() {
           bottomInset={insets.bottom}
         />
       )}
-    </View>
+    </ScreenContainer>
   );
 }

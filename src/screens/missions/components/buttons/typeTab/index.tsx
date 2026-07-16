@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 
 // Segmented control CLARO de tipo (Diárias/Semanais): ativo = pílula branca com o
 // texto na cor do tipo; inativo = texto cinza sobre o trilho claro.

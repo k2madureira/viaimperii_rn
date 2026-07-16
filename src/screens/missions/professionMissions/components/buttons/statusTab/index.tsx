@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../../components/text';
 
 // Aba de status (Disponíveis/Em andamento) dentro do box de missões, tingida
 // com a cor da profissão quando ativa.
