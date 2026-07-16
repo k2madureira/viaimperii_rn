@@ -2,8 +2,8 @@ import React from 'react';
 import { ActivityIndicator, Image, Modal, Platform, Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Svg, { Path, Rect } from 'react-native-svg';
-import { CoinAmount } from '../../../../components/icons';
-import { Profession } from '../../../../api/professions/professionsApi';
+import { CoinAmount } from '../../../../../components/icons';
+import { Profession } from '../../../../../api/professions/professionsApi';
 
 const OUTLINE = '#d6c9c9';
 

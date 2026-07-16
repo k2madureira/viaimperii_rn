@@ -1,10 +1,10 @@
 import React from 'react';
 import { ActivityIndicator, Image, Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { CoinAmount } from '../../../../components/icons';
-import { PhysicalProduct } from '../../../../api/physical/physicalApi';
+import { CoinAmount } from '../../../../../components/icons';
+import { PhysicalProduct } from '../../../../../api/physical/physicalApi';
 import ProductPlaceholder from '../productPlaceholder';
-import { TYPE_COLOR } from '../icons';
+import { TYPE_COLOR } from '../../icons';
 
 interface Props {
   product: PhysicalProduct;

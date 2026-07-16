@@ -2,8 +2,8 @@ import React from 'react';
 import { ActivityIndicator, Image, Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Svg, { Path, Rect } from 'react-native-svg';
-import { CoinAmount, LockIcon } from '../../../../components/icons';
-import { Profession } from '../../../../api/professions/professionsApi';
+import { CoinAmount, LockIcon } from '../../../../../components/icons';
+import { Profession } from '../../../../../api/professions/professionsApi';
 
 interface Props {
   profession: Profession;

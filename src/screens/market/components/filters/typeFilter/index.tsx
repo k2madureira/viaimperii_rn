@@ -1,10 +1,10 @@
 import React from 'react';
 import { ScrollView, Text, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { PRODUCT_TYPES, ProductType } from '../../../../api/physical/physicalApi';
-import { ShopIcon } from '../../../../components/icons';
-import ProductPlaceholder from '../productPlaceholder';
-import { TYPE_COLOR } from '../icons';
+import { PRODUCT_TYPES, ProductType } from '../../../../../api/physical/physicalApi';
+import { ShopIcon } from '../../../../../components/icons';
+import ProductPlaceholder from '../../cards/productPlaceholder';
+import { TYPE_COLOR } from '../../icons';
 
 interface Props {
   value: ProductType | null;
