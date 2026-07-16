@@ -1,4 +1,4 @@
-import { NotificationItem } from '../../../../api/notifications/notificationsApi';
+import { NotificationItem } from '../../../../../api/notifications/notificationsApi';
 
 type T = (key: string, options?: Record<string, any>) => string;
 

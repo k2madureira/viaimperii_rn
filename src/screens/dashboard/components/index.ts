@@ -1,8 +1,16 @@
-export { default as RankCard } from './rankCard';
-export { default as LegionCard } from './legionCard';
-export { default as ChangePasswordModal } from './changePasswordModal';
-export { default as StreakButton } from './streakButton';
-export { default as WalletButton } from './walletButton';
-export { default as NotificationsButton } from './notificationsButton';
-export { default as DailyMissionsHero } from './dailyMissionsHero';
-export { default as RewardsButton } from './rewardsButton';
+// Componentes da Home, organizados por contexto de UI.
+// `feed/` é um contexto próprio (submódulo da timeline) e tem seu barrel.
+
+// buttons
+export { default as NotificationsButton } from './buttons/notificationsButton';
+export { default as RewardsButton } from './buttons/rewardsButton';
+export { default as StreakButton } from './buttons/streakButton';
+export { default as WalletButton } from './buttons/walletButton';
+
+// cards
+export { default as DailyMissionsHero } from './cards/dailyMissionsHero';
+export { default as LegionCard } from './cards/legionCard';
+export { default as RankCard } from './cards/rankCard';
+
+// modals
+export { default as ChangePasswordModal } from './modals/changePasswordModal';

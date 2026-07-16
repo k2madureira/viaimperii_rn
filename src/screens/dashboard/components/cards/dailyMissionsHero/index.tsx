@@ -2,14 +2,14 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Platform, Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
-import ProgressRing from '../../../../components/progressRing';
-import { MissionAllowance } from '../../../../api/missions/missionsApi';
+import ProgressRing from '../../../../../components/progressRing';
+import { MissionAllowance } from '../../../../../api/missions/missionsApi';
 import {
   DAILY_GOAL_REWARD_DENARIUS,
   DAILY_MISSION_GOAL,
   DAILY_MISSION_LIMIT,
-} from '../../../../constants/game';
-import { useClaimDailyGoalReward } from '../../model/mutations/useClaimDailyGoalReward';
+} from '../../../../../constants/game';
+import { useClaimDailyGoalReward } from '../../../model/mutations/useClaimDailyGoalReward';
 
 interface Props {
   allowance?: MissionAllowance;

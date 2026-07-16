@@ -1,9 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { FireIcon } from '../../../../components/icons';
-import { LoginStreak } from '../../../../api/auth/authApi';
-import AnchoredPopover, { Anchor } from '../feed/AnchoredPopover';
+import { FireIcon } from '../../../../../components/icons';
+import { LoginStreak } from '../../../../../api/auth/authApi';
+import AnchoredPopover, { Anchor } from '../../feed/AnchoredPopover';
 
 interface Props {
   streak: LoginStreak;

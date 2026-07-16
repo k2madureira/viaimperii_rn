@@ -7,7 +7,7 @@ import { ProductType } from '../../api/physical/physicalApi';
 import { Profession } from '../../api/professions/professionsApi';
 import { useUserProfile } from '../dashboard/model/queries/useUserProfile';
 import { useWallet } from '../dashboard/model/queries/useWallet';
-import WalletButton from '../dashboard/components/walletButton';
+import { WalletButton } from '../dashboard/components';
 import { useProducts } from './model/queries/useProducts';
 import { useProfessions, useUserProfessions } from './model/queries/useProfessions';
 import { useBuyProfession } from './model/mutations/useBuyProfession';

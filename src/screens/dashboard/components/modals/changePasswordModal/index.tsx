@@ -11,10 +11,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import EyeIcon from '../../../auth/components/icons/EyeIcon';
-import EyeOffIcon from '../../../auth/components/icons/EyeOffIcon';
-import { changePasswordSchema } from '../../model/contracts/changePasswordSchema';
-import { useUpdatePasswordMutation } from '../../model/mutations/useUpdatePasswordMutation';
+import EyeIcon from '../../../../auth/components/icons/EyeIcon';
+import EyeOffIcon from '../../../../auth/components/icons/EyeOffIcon';
+import { changePasswordSchema } from '../../../model/contracts/changePasswordSchema';
+import { useUpdatePasswordMutation } from '../../../model/mutations/useUpdatePasswordMutation';
 
 interface Props {
   visible: boolean;

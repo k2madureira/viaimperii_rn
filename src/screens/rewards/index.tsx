@@ -5,7 +5,7 @@ import { Navbar } from '../../components';
 import { useAuth } from '../../contexts/AuthContext';
 import { useDailyRewards } from './model/queries/useDailyRewards';
 import { useWallet } from '../dashboard/model/queries/useWallet';
-import WalletButton from '../dashboard/components/walletButton';
+import { WalletButton } from '../dashboard/components';
 import { ErrorState } from './components';
 import { RewardsBody } from './components/sections';
 

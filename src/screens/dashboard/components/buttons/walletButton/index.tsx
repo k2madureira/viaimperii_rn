@@ -1,9 +1,9 @@
 import React, { useRef, useState } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { AsCoin, CoinAmount, DiamondIcon, WalletIcon } from '../../../../components/icons';
-import AnchoredPopover, { Anchor } from '../feed/AnchoredPopover';
-import { splitCoins } from '../../../../utils/coins';
+import { AsCoin, CoinAmount, DiamondIcon, WalletIcon } from '../../../../../components/icons';
+import AnchoredPopover, { Anchor } from '../../feed/AnchoredPopover';
+import { splitCoins } from '../../../../../utils/coins';
 
 interface Props {
   balance: number; // valor atômico

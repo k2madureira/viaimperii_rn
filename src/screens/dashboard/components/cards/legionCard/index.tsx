@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image, Platform, Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { UserLegion } from '../../../../api/users/userApi';
+import { UserLegion } from '../../../../../api/users/userApi';
 
 interface Props {
   legion: UserLegion | null;

@@ -11,7 +11,7 @@ import { XP_PER_RANK } from '../../constants/game';
 import { FIRST_TRACK_RANK, PAGE_SIZE, sortByDifficulty } from '../../constants/missions';
 import { useUserProfile } from '../dashboard/model/queries/useUserProfile';
 import { useWallet } from '../dashboard/model/queries/useWallet';
-import WalletButton from '../dashboard/components/walletButton';
+import { WalletButton } from '../dashboard/components';
 import { buildAutoCompletionText } from '../../utils/missionEvidence';
 import { DailyGoalHeader, LoadMoreButton, MissionItem } from './components';
 import {

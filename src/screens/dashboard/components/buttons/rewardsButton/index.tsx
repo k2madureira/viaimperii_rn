@@ -2,10 +2,10 @@ import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
-import { GiftIcon } from '../../../../components/icons';
-import { HomeNavigationProp } from '../../../../navigation/HomeStack';
-import { useAuth } from '../../../../contexts/AuthContext';
-import { useDailyRewards } from '../../../rewards/model/queries/useDailyRewards';
+import { GiftIcon } from '../../../../../components/icons';
+import { HomeNavigationProp } from '../../../../../navigation/HomeStack';
+import { useAuth } from '../../../../../contexts/AuthContext';
+import { useDailyRewards } from '../../../../rewards/model/queries/useDailyRewards';
 
 /**
  * Botão de presente (colorido) no topo da Home — abre a tela de Prêmios.

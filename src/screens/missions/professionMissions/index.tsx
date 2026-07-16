@@ -13,7 +13,7 @@ import { buildAutoCompletionText } from '../../../utils/missionEvidence';
 import { MissionsStackParamList } from '../../../navigation/MissionsStack';
 import { useUserProfile } from '../../dashboard/model/queries/useUserProfile';
 import { useWallet } from '../../dashboard/model/queries/useWallet';
-import WalletButton from '../../dashboard/components/walletButton';
+import { WalletButton } from '../../dashboard/components';
 import { useTracks } from '../../ranks/model/queries/useTracks';
 import { useUserProfessions } from '../../market/model/queries/useProfessions';
 import { MissionItem } from '../components';
