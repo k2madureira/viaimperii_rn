@@ -1,4 +1,5 @@
 import { useNavigation } from '@react-navigation/native';
+import ScreenContainer from '../../components/screenContainer';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -132,7 +133,7 @@ export default function DashboardScreen() {
   );
 
   return (
-    <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+    <ScreenContainer>
       <Navbar
         rightExtra={walletQuery.data ? <WalletButton balance={walletQuery.data.balance} /> : null}
       />
@@ -185,6 +186,6 @@ export default function DashboardScreen() {
         comments={{ item: commentsItem, onClose: () => setCommentsItem(null) }}
         search={{ visible: searchVisible, onClose: () => setSearchVisible(false) }}
       />
-    </View>
+    </ScreenContainer>
   );
 }

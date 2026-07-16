@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ScreenContainer from '../../components/screenContainer';
 import { ActivityIndicator, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Navbar } from '../../components';
@@ -27,7 +28,7 @@ export default function AchievementsScreen() {
   const visibleLocked = visibleAchievements.filter((a) => !a.achieved_at);
 
   return (
-    <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+    <ScreenContainer>
       <Navbar />
 
       <AchievementsHeader unlocked={unlocked.length} total={achievements.length} />
@@ -49,6 +50,6 @@ export default function AchievementsScreen() {
           bottomInset={insets.bottom}
         />
       )}
-    </View>
+    </ScreenContainer>
   );
 }

@@ -1,6 +1,8 @@
 import { RouteProp, useRoute } from '@react-navigation/native';
+import ScreenContainer from '../../components/screenContainer';
 import React, { useRef } from 'react';
-import { KeyboardAvoidingView, Platform, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, View } from 'react-native';
+import type { TextInputRef } from '../../components/textInput';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
 import { Navbar } from '../../components';
@@ -21,7 +23,7 @@ export default function PostDetailScreen() {
   const postQuery = useFeedEvent(route.params.post.id, route.params.post);
   const post = postQuery.data ?? route.params.post;
 
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<TextInputRef>(null);
 
   // Atualiza otimistamente o cache deste post (o cache do feed pode não conter
   // este item, já que veio da busca).
@@ -29,7 +31,7 @@ export default function PostDetailScreen() {
     queryClient.setQueryData<FeedItem>(['feed-event', post.id], (p) => (p ? patch(p) : p));
 
   return (
-    <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+    <ScreenContainer>
       <Navbar />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
@@ -54,6 +56,6 @@ export default function PostDetailScreen() {
           onCommentCreated={() => patchPost((p) => ({ ...p, comments_count: p.comments_count + 1 }))}
         />
       </KeyboardAvoidingView>
-    </View>
+    </ScreenContainer>
   );
 }

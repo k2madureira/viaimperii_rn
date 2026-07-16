@@ -1,4 +1,5 @@
 import { RouteProp, useRoute } from '@react-navigation/native';
+import ScreenContainer from '../../components/screenContainer';
 import React, { useState } from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
@@ -62,7 +63,7 @@ export default function ProfileScreen() {
   }, [data?.user.created_at, i18n.language]);
 
   return (
-    <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+    <ScreenContainer>
       <ProfileTopBar isOwnProfile={isOwnProfile} balance={walletQuery.data?.balance} />
 
       {profileQuery.isLoading ? (
@@ -127,6 +128,6 @@ export default function ProfileScreen() {
         name={name}
         onClose={() => setShowAvatar(false)}
       />
-    </View>
+    </ScreenContainer>
   );
 }

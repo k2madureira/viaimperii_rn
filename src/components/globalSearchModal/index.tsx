@@ -1,14 +1,8 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  Image,
-  Modal,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Image, Modal, ScrollView, TouchableOpacity, View } from 'react-native';
+import Text from '../text';
+import ScreenContainer from '../screenContainer';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeNavigationProp } from '../../navigation/HomeStack';
@@ -71,7 +65,7 @@ export default function GlobalSearchModal({ visible, onClose }: Props) {
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+      <ScreenContainer>
         {/* Barra de busca + cancelar */}
         <View className="flex-row items-center px-4 py-3" style={{ gap: 10 }}>
           <View className="flex-1">
@@ -135,7 +129,7 @@ export default function GlobalSearchModal({ visible, onClose }: Props) {
             </View>
           )}
         </ScrollView>
-      </View>
+      </ScreenContainer>
     </Modal>
   );
 }
