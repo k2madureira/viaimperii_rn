@@ -13,12 +13,12 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { AssetRarity } from '../../../../api/assets/assetsApi';
-import { AureusCoin, CoinAmount, ShopIcon, UnlockedIcon } from '../../../../components/icons';
-import { useWallet } from '../../../dashboard/model/queries/useWallet';
-import { useAvatarCatalog } from '../../model/queries/useAssetCatalog';
-import { useBuyAsset } from '../../model/mutations/useBuyAsset';
-import { useEquipAsset } from '../../model/mutations/useEquipAsset';
+import { AssetRarity } from '../../../../../api/assets/assetsApi';
+import { AureusCoin, CoinAmount, ShopIcon, UnlockedIcon } from '../../../../../components/icons';
+import { useWallet } from '../../../../dashboard/model/queries/useWallet';
+import { useAvatarCatalog } from '../../../model/queries/useAssetCatalog';
+import { useBuyAsset } from '../../../model/mutations/useBuyAsset';
+import { useEquipAsset } from '../../../model/mutations/useEquipAsset';
 
 const serif = Platform.OS === 'ios' ? 'Georgia' : 'serif';
 
