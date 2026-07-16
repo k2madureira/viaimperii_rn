@@ -162,6 +162,7 @@ export default {
       minutes: '{{count}}min',
       hours: '{{count}}h',
       days: '{{count}}d',
+      yesterday: 'ontem {{time}}',
     },
     events: {
       mission_completed: 'concluiu a missão {{name}}',

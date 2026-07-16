@@ -1,43 +1,27 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ActivityIndicator,
-  FlatList,
-  Platform,
-  RefreshControl,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import {
-  GlobalSearchModal,
-  LegionSelectModal,
-  Navbar,
-  ProvinceSetupModal,
-  SearchBar,
-  TrackSelectModal,
-} from '../../components';
-import { PrimusPilusEmblem } from '../../components/icons';
+import { Navbar, SearchBar } from '../../components';
 import { useAuth } from '../../contexts/AuthContext';
-import { ChangePasswordModal, DailyMissionsHero, NotificationsButton, RewardsButton, StreakButton, WalletButton } from './components';
-import { CommentsModal, FeedCard } from './components/feed';
+import { DailyMissionsHero, WalletButton } from './components';
 import { FeedItem } from '../../api/feed/feedApi';
 import { useLegions } from '../missions/model/queries/useLegions';
 import { useDailyBriefing } from '../missions/model/queries/useDailyBriefing';
-import { useJoinLegion } from '../missions/model/mutations/useJoinLegion';
 import { useUserProfile } from './model/queries/useUserProfile';
 import { useWallet } from './model/queries/useWallet';
 import { useCampaigns } from './model/queries/useCampaigns';
-import { useUpdateProvince } from './model/mutations/useUpdateProvince';
-import { useChooseTrack } from './model/mutations/useChooseTrack';
-import { useTracks } from '../ranks/model/queries/useTracks';
 import { useFeed } from './model/queries/useFeed';
-import { useReactFeed } from './model/mutations/useReactFeed';
 import { useFeedEvents } from './model/hooks/useFeedEvents';
 import { useNotificationEvents } from './model/hooks/useNotificationEvents';
 import { usePersistedFlag } from '../../hooks/usePersistedFlag';
+import {
+  CurrentCampaign,
+  DashboardHeader,
+  DashboardModals,
+  HomeFeed,
+} from './components/sections';
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
@@ -57,7 +41,6 @@ export default function DashboardScreen() {
 
   // Feed social (timeline da home) + tempo real via SSE.
   const feedQuery = useFeed('home', !!user);
-  const reactM = useReactFeed();
   useFeedEvents(!!user);
   useNotificationEvents(!!user);
 
@@ -77,11 +60,6 @@ export default function DashboardScreen() {
   };
 
   // ── Modais automáticos (senha → província → trilha → legião) ──────────────
-  const updateProvinceM = useUpdateProvince(user?.user_id);
-  const joinLegionM = useJoinLegion(user?.user_id);
-  const chooseTrackM = useChooseTrack(user?.user_id);
-  const tracksQuery = useTracks();
-
   const [provinceModalVisible, setProvinceModalVisible] = useState(false);
   const [provinceDismissed, markProvinceDismissed] = usePersistedFlag('modal_dismissed_province');
   const [trackModalVisible, setTrackModalVisible] = useState(false);
@@ -115,46 +93,23 @@ export default function DashboardScreen() {
   }, [isTemporary, legionDismissed, needsProvince, needsTrack, hasLegion, completedCount]);
 
   // ── Dados derivados ────────────────────────────────────────────────────────
-  const streak = user?.streak ?? null;
   const firstName = user?.name?.split(' ')[0] ?? t('dashboard.defaultName');
   const rankName = profile?.rank ?? user?.rank ?? '—';
 
   const completedIds = new Set(profile?.completed_missions?.map((c) => c.mission_id) ?? []);
   const completedCampaigns = new Set(profile?.completed_campaigns ?? []);
-  const activeCampaign = (campaignsQuery.data ?? [])
-    .map((c) => {
-      const done = c.required_missions.filter((m) => completedIds.has(m)).length;
-      return { campaign: c, done, total: c.required_missions.length };
-    })
-    .find(({ campaign, done, total }) => !completedCampaigns.has(campaign.id) && done < total);
 
   const feedItems = (feedQuery.data?.pages ?? []).flatMap((p) => p.items);
 
   const ListHeader = (
     <View style={{ gap: 18 }}>
-      {/* 1 — HEADER */}
-      <View className="flex-row items-center justify-between">
-        <TouchableOpacity
-          className="flex-1"
-          activeOpacity={0.7}
-          accessibilityRole="button"
-          onPress={() => navigation.navigate('Profile')}>
-          <Text
-            className="text-[26px] font-extrabold text-charcoal"
-            style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-            {t('dashboard.greeting', { name: firstName })}
-          </Text>
-          <Text className="text-[13px] text-[#777] mt-0.5" numberOfLines={1}>
-            {rankName}
-            {legion ? ` • ${legion.name}` : ''}
-          </Text>
-        </TouchableOpacity>
-        <View className="flex-row items-center gap-3">
-          <RewardsButton />
-          {streak && streak.current_streak > 0 && <StreakButton streak={streak} />}
-          <NotificationsButton />
-        </View>
-      </View>
+      <DashboardHeader
+        firstName={firstName}
+        rankName={rankName}
+        legionName={legion?.name ?? null}
+        streak={user?.streak ?? null}
+        onOpenProfile={() => navigation.navigate('Profile')}
+      />
 
       {/* 2 — HERO: MISSÕES DO DIA (progresso da meta, acima do feed) */}
       <DailyMissionsHero
@@ -162,35 +117,12 @@ export default function DashboardScreen() {
         onSeeAll={() => navigation.navigate('Missions')}
       />
 
-      {/* 3 — CAMPANHA ATUAL */}
-      {activeCampaign && (
-        <View className="bg-white border border-[#f0eded] rounded-[18px] p-5">
-          <Text className="text-[15px] font-extrabold text-charcoal mb-1">📖 {t('dashboard.currentCampaignTitle')}</Text>
-          <Text className="text-[14px] font-bold text-primary-500">
-            {formatCampaignName(activeCampaign.campaign.name)}
-          </Text>
-          <Text className="text-[12px] text-[#888] mt-1">
-            {t('dashboard.missionsProgress', {
-              done: activeCampaign.done,
-              total: activeCampaign.total,
-            })}
-          </Text>
-          <View className="h-[6px] bg-[#f0eded] rounded-full overflow-hidden mt-2">
-            <View
-              className="h-full bg-laurel rounded-full"
-              style={{
-                width: `${activeCampaign.total > 0 ? (activeCampaign.done / activeCampaign.total) * 100 : 0}%`,
-              }}
-            />
-          </View>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Missions')}
-            activeOpacity={0.9}
-            className="border border-[#e6dada] rounded-[12px] py-2.5 items-center mt-4">
-            <Text className="text-[13px] font-bold text-primary-500">{t('dashboard.continueCampaign')}</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      <CurrentCampaign
+        campaigns={campaignsQuery.data ?? []}
+        completedMissionIds={completedIds}
+        completedCampaignIds={completedCampaigns}
+        onContinue={() => navigation.navigate('Missions')}
+      />
 
       {/* 5 — BARRA DE BUSCA GLOBAL */}
       <View style={{ paddingTop: 6, paddingBottom: 6 }}>
@@ -202,129 +134,57 @@ export default function DashboardScreen() {
   return (
     <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
       <Navbar
-        rightExtra={
-          walletQuery.data ? <WalletButton balance={walletQuery.data.balance} /> : null
-        }
-      />
-      <FlatList
-        data={feedItems}
-        keyExtractor={(item) => String(item.id)}
-        ListHeaderComponent={ListHeader}
-        ListHeaderComponentStyle={{ marginBottom: 20 }}
-        renderItem={({ item }) => (
-          <FeedCard
-            item={item}
-            currentUserId={user?.user_id}
-            legions={legionsQuery.data}
-            onReact={(eventId, type, currentMine) =>
-              reactM.mutate({ eventId, type, currentMine })
-            }
-            onOpenComments={setCommentsItem}
-          />
-        )}
-        ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
-        contentContainerStyle={{
-          paddingHorizontal: 3,
-          paddingTop: 20,
-          paddingBottom: insets.bottom + 24,
-        }}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#9E1B32" />
-        }
-        // Dispara o carregamento incremental (+5) quando o usuário se aproxima
-        // do fim — ~1 tela antes do último post.
-        onEndReachedThreshold={0.6}
-        onEndReached={() => {
-          if (feedQuery.hasNextPage && !feedQuery.isFetchingNextPage) {
-            feedQuery.fetchNextPage();
-          }
-        }}
-        ListEmptyComponent={
-          feedQuery.isLoading ? (
-            <View className="py-12 items-center">
-              <ActivityIndicator color="#8B1A2B" />
-            </View>
-          ) : (
-            <View className="bg-white border border-[#f0eded] rounded-[18px] py-10 items-center px-6 mt-2">
-              <PrimusPilusEmblem size={56} />
-              <Text className="text-[14px] font-bold text-charcoal mt-3 text-center">
-                {t('feed.emptyTitle')}
-              </Text>
-              <Text className="text-[12px] text-[#999] mt-1 text-center">
-                {t('feed.emptyBody')}
-              </Text>
-            </View>
-          )
-        }
-        ListFooterComponent={
-          feedQuery.isFetchingNextPage ? (
-            <View className="py-4 items-center">
-              <ActivityIndicator color="#8B1A2B" size="small" />
-            </View>
-          ) : null
-        }
+        rightExtra={walletQuery.data ? <WalletButton balance={walletQuery.data.balance} /> : null}
       />
 
-      {/* Modal automático para senha temporária */}
-      <ChangePasswordModal visible={isTemporary} isTemporary={isTemporary} onClose={() => {}} />
-
-      <ProvinceSetupModal
-        visible={provinceModalVisible}
-        pending={updateProvinceM.isPending}
-        onClose={() => {
-          setProvinceModalVisible(false);
-          markProvinceDismissed();
-        }}
-        onConfirm={(provinceId) =>
-          updateProvinceM.mutate(provinceId, {
-            onSuccess: () => setProvinceModalVisible(false),
-          })
-        }
+      <HomeFeed
+        items={feedItems}
+        currentUserId={user?.user_id}
+        legions={legionsQuery.data}
+        header={ListHeader}
+        isLoading={feedQuery.isLoading}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        hasNextPage={!!feedQuery.hasNextPage}
+        isFetchingNextPage={feedQuery.isFetchingNextPage}
+        onEndReached={() => feedQuery.fetchNextPage()}
+        bottomInset={insets.bottom}
+        onOpenComments={setCommentsItem}
       />
 
-      <TrackSelectModal
-        visible={trackModalVisible}
-        tracks={tracksQuery.data ?? []}
-        currentTrackSlug={data?.track?.slug ?? null}
-        isLoading={chooseTrackM.isPending}
-        onChoose={(slug) =>
-          chooseTrackM.mutate(slug, {
-            onSuccess: () => {
-              setTrackModalVisible(false);
-            },
-          })
-        }
-        onClose={() => {
-          setTrackModalVisible(false);
-          markTrackDismissed();
-        }}
-      />
-
-      <LegionSelectModal
-        visible={legionModalVisible}
+      <DashboardModals
+        userId={user?.user_id}
+        isTemporary={isTemporary}
         legions={legionsQuery.data ?? []}
-        recommendedIds={recommendedIds}
-        pending={joinLegionM.isPending}
-        onClose={() => {
-          setLegionModalVisible(false);
-          markLegionDismissed();
+        province={{
+          visible: provinceModalVisible,
+          onDismiss: () => {
+            setProvinceModalVisible(false);
+            markProvinceDismissed();
+          },
+          onSuccess: () => setProvinceModalVisible(false),
         }}
-        onConfirm={(legionId) =>
-          joinLegionM.mutate(legionId, {
-            onSuccess: () => setLegionModalVisible(false),
-          })
-        }
+        track={{
+          visible: trackModalVisible,
+          currentTrackSlug: data?.track?.slug ?? null,
+          onDismiss: () => {
+            setTrackModalVisible(false);
+            markTrackDismissed();
+          },
+          onSuccess: () => setTrackModalVisible(false),
+        }}
+        legion={{
+          visible: legionModalVisible,
+          recommendedIds,
+          onDismiss: () => {
+            setLegionModalVisible(false);
+            markLegionDismissed();
+          },
+          onSuccess: () => setLegionModalVisible(false),
+        }}
+        comments={{ item: commentsItem, onClose: () => setCommentsItem(null) }}
+        search={{ visible: searchVisible, onClose: () => setSearchVisible(false) }}
       />
-
-      <CommentsModal item={commentsItem} onClose={() => setCommentsItem(null)} />
-
-      <GlobalSearchModal visible={searchVisible} onClose={() => setSearchVisible(false)} />
     </View>
   );
-}
-
-function formatCampaignName(name: string) {
-  return name.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 }

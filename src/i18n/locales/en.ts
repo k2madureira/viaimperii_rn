@@ -162,6 +162,7 @@ export default {
       minutes: '{{count}}m',
       hours: '{{count}}h',
       days: '{{count}}d',
+      yesterday: 'yesterday {{time}}',
     },
     events: {
       mission_completed: 'completed the mission {{name}}',
