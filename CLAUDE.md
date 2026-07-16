@@ -42,6 +42,57 @@ Mantenha-o atualizado ao alterar comportamento.
 
 ---
 
+## 0.2 Organização de Telas (Frontend — obrigatório)
+
+Toda tela deve ser **enxuta e composta**: o `index.tsx` da screen é apenas o
+**orquestrador** (estado + hooks + handlers), montando componentes. Nada de arquivos
+de 1000+ linhas com JSX e subcomponentes inline. Referência: `src/screens/missions/`
+e `src/screens/missions/professionMissions/` (index reduzido a orquestração).
+
+### Estrutura de pastas por screen
+
+```
+src/screens/{screen}/
+  index.tsx                      # só orquestração (estado, hooks, handlers, render das sections)
+  components/
+    index.ts                     # barrel dos átomos
+    {contexto}/{Componente}/     # átomos agrupados por CONTEXTO de UI
+    sections/
+      index.ts                   # barrel das sections
+      {Section}/index.tsx        # blocos grandes do render (header/body/footer, cards, boxes…)
+  model/                         # queries/mutations/hooks (React Query) da screen
+  professionMissions/…           # sub-tela → tem seu PRÓPRIO components/ no mesmo padrão
+```
+
+### Regras
+
+- **Quebrar o `index` em sections**: os grandes blocos do `return` viram componentes em
+  `components/sections/` (ex.: `MissionsHeader`, `MissionsBody`/boxes, `MissionsModals` =
+  header/body/footer). O `index` só compõe as sections e passa props.
+- **Átomos agrupados por contexto de UI** dentro de `components/` — pastas como
+  `buttons/`, `cards/`, `modals/`, `filters/`, `skeletons/`, `feedback/` (estados vazio/erro),
+  `effects/` (overlays decorativos), etc. **Nunca** deixar componentes soltos na raiz de
+  `components/`. Crie o contexto conforme necessário.
+- **Componente que pertence a UMA screen** fica em `components/` **dessa** screen. Sub-telas
+  (ex.: `professionMissions`) têm seu próprio `components/` (com as mesmas pastas de contexto).
+  Componentes genéricos/compartilhados podem ser reusados do `components/` da screen-pai
+  (ou de `src/components/` se forem globais) — **não duplicar**.
+- **Queries/mutations exclusivas de uma section vivem DENTRO da section** que as usa
+  (o hook é chamado no componente, não no `index`). Só permanecem no `index` as
+  **compartilhadas** — usadas no pull-to-refresh, em badges ou por mais de uma section
+  (ex.: `useMissions`, `useAvailableMissions`). Ex.: `useRewardedVideo` → `MissionTypeSelector`;
+  `useLegions`/`useJoinLegion` → `MissionsModals`; `useApproveMission`/`useRejectMission` →
+  `ReviewSection`.
+- **Constantes** (dados fixos como `SPARKLES`, mapas de ordenação, `PAGE_SIZE`) ficam em
+  `src/constants/{contexto}.ts` — **reusar** o arquivo existente do contexto, não redefinir
+  local (ex.: `sortByDifficulty`/`DIFFICULTY_ORDER` em `src/constants/missions.ts`).
+- **Cada componente** = pasta `{nome}/index.tsx`, **default export**, `interface Props`,
+  `useTranslation` interno; exportado no **barrel** (`index.ts`) do seu nível.
+- **Refactor de organização é refactor puro**: mesma UI e comportamento; validar com
+  `npx tsc --noEmit` (exit 0) antes de concluir.
+
+---
+
 ## 1. Arquitetura e Convenções
 
 - **Clean Architecture** em 4 camadas: `domain → application → infrastructure → presentation`.
