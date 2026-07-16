@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { useResendTestCodeMutation } from '../../model/mutations/useResendTestCodeMutation';
 

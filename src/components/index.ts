@@ -9,3 +9,10 @@ export { default as ProvinceSetupModal } from './provinceSetupModal';
 export { default as SearchBar } from './searchBar';
 export { default as TrackSelectModal } from './trackSelectModal';
 export { default as UserMenu } from './userMenu';
+
+// Text/TextInput aplicam o teto de escala de fonte (ver MAX_FONT_SCALE).
+// Consumidores devem importar direto da pasta (`components/text`), NÃO por este
+// barrel: como quase todo componente usa Text, importá-lo daqui puxaria a árvore
+// inteira de componentes e criaria ciclos de import.
+export { default as Text, MAX_FONT_SCALE } from './text';
+export { default as TextInput, type TextInputRef } from './textInput';

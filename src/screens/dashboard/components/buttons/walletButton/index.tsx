@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { AsCoin, CoinAmount, DiamondIcon, WalletIcon } from '../../../../../components/icons';
 import AnchoredPopover, { Anchor } from '../../feed/AnchoredPopover';

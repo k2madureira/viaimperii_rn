@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Platform, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
 import ProgressRing from '../../../../../components/progressRing';

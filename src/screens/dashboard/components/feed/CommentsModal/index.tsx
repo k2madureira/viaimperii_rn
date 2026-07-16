@@ -10,12 +10,12 @@ import {
   Platform,
   Pressable,
   StyleSheet,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
   useWindowDimensions,
 } from 'react-native';
+import Text from '../../../../../components/text';
+import TextInput from '../../../../../components/textInput';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FeedComment, FeedItem } from '../../../../../api/feed/feedApi';

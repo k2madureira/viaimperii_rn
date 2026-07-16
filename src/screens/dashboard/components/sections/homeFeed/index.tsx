@@ -1,5 +1,6 @@
 import React from 'react';
-import { ActivityIndicator, FlatList, RefreshControl, Text, View } from 'react-native';
+import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { FeedItem } from '../../../../../api/feed/feedApi';
 import { Legion } from '../../../../../api/legions/legionsApi';

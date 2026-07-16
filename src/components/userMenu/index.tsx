@@ -1,12 +1,6 @@
 import React, { useRef, useState } from 'react';
-import {
-  Image,
-  Modal,
-  Text,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import { Image, Modal, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import Text from '../text';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';

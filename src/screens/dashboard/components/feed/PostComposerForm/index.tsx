@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Image, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 import * as ImagePicker from 'expo-image-picker';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { useTranslation } from 'react-i18next';

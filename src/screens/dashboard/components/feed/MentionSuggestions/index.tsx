@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Image, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { FeedAuthor, searchUsers } from '../../../../../api/feed/feedApi';
 
 interface Props {

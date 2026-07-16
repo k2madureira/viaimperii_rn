@@ -6,11 +6,11 @@ import {
   Modal,
   Platform,
   ScrollView,
-  Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import Text from '../../../../../components/text';
+import TextInput from '../../../../../components/textInput';
 import * as ImagePicker from 'expo-image-picker';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { useTranslation } from 'react-i18next';

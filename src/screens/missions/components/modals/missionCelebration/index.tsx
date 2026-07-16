@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { Animated, Easing, Text, View } from 'react-native';
+import { Animated, Easing, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { CoinAmount } from '../../../../../components/icons';
 

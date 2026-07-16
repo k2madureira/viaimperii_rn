@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, Text, View } from 'react-native';
+import { Image, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { FeedComment } from '../../../../../api/feed/feedApi';
 import { parseBackendDate } from '../../../../../utils/date';
 import { initials } from '../../../../../utils/name';

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Image, Modal, Platform, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Modal, Platform, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 
 interface Props {

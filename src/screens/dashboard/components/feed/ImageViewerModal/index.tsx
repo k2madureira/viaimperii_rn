@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions } from 'react-native';
+import { Modal, Pressable, StyleSheet, TouchableOpacity, useWindowDimensions } from 'react-native';
+import Text from '../../../../../components/text';
 import {
   Gesture,
   GestureDetector,

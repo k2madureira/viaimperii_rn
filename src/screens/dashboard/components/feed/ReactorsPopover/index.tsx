@@ -1,6 +1,7 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { Reactor, ReactionType } from '../../../../../api/feed/feedApi';
 import { HomeNavigationProp } from '../../../../../navigation/HomeStack';

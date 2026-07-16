@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { Mission, MissionDifficulty } from '../../../../../api/missions/missionsApi';
 import { Specialty } from '../../../../../api/specialties/specialtiesApi';

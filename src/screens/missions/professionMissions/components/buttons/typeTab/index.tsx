@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../../components/text';
 
 // Segmented control de tipo (Diárias/Semanais) sobre o cabeçalho colorido da
 // profissão: ativo = pílula branca; inativo = texto claro translúcido.

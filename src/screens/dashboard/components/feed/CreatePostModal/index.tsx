@@ -4,10 +4,10 @@ import {
   Modal,
   Platform,
   Pressable,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import PostComposerForm from '../PostComposerForm';
 
