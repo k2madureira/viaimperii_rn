@@ -15,18 +15,18 @@ import * as ImagePicker from 'expo-image-picker';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
-import { ImageIcon } from '../../../../components/icons';
+import { ImageIcon } from '../../../../../components/icons';
 import {
   Mission,
   MissionEvidence,
   uploadEvidenceImage,
-} from '../../../../api/missions/missionsApi';
-import { EVIDENCE_COMPRESS, MAX_EVIDENCE_WIDTH } from '../../../../constants/evidence';
+} from '../../../../../api/missions/missionsApi';
+import { EVIDENCE_COMPRESS, MAX_EVIDENCE_WIDTH } from '../../../../../constants/evidence';
 import {
   MIN_EVIDENCE_TEXT_LENGTH,
   validateLink,
   validateText,
-} from '../../../../utils/evidenceValidation';
+} from '../../../../../utils/evidenceValidation';
 
 /**
  * Redimensiona (sem upscale) e comprime a imagem para JPEG antes do upload,

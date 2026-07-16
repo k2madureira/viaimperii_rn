@@ -12,9 +12,9 @@ import {
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { ToReviewItem } from '../../../../api/missions/missionsApi';
-import { parseBackendDate } from '../../../../utils/date';
-import { REJECTION_REASON_MIN_LENGTH } from '../../../../constants/game';
+import { ToReviewItem } from '../../../../../api/missions/missionsApi';
+import { parseBackendDate } from '../../../../../utils/date';
+import { REJECTION_REASON_MIN_LENGTH } from '../../../../../constants/game';
 
 interface Props {
   item: ToReviewItem;

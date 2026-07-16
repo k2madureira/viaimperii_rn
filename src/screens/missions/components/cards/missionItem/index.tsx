@@ -3,11 +3,11 @@ import { ActivityIndicator, Modal, Platform, Text, TouchableOpacity, View } from
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
-import { Mission } from '../../../../api/missions/missionsApi';
-import { formatBackendDateTime } from '../../../../utils/date';
-import { useMissionStatus } from '../../model/queries/useMissionStatus';
-import { useAuth } from '../../../../contexts/AuthContext';
-import { ArrowUpIcon, CoinAmount, MASTERY_ICONS, PaperclipIcon, ShieldIcon } from '../../../../components/icons';
+import { Mission } from '../../../../../api/missions/missionsApi';
+import { formatBackendDateTime } from '../../../../../utils/date';
+import { useMissionStatus } from '../../../model/queries/useMissionStatus';
+import { useAuth } from '../../../../../contexts/AuthContext';
+import { ArrowUpIcon, CoinAmount, MASTERY_ICONS, PaperclipIcon, ShieldIcon } from '../../../../../components/icons';
 
 interface Props {
   mission: Mission;

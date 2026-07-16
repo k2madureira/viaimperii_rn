@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { Animated, Easing, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { CoinAmount } from '../../../../components/icons';
+import { CoinAmount } from '../../../../../components/icons';
 
 interface Props {
   visible: boolean;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { MissionDifficulty } from '../../../../api/missions/missionsApi';
+import { MissionDifficulty } from '../../../../../api/missions/missionsApi';
 
 interface Props {
   value: MissionDifficulty | null;

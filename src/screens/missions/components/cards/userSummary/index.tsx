@@ -1,8 +1,8 @@
 import React from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { CoinAmount, MASTERY_ICONS } from '../../../../components/icons';
-import { UserActivitySummary } from '../../../../api/users/userApi';
+import { CoinAmount, MASTERY_ICONS } from '../../../../../components/icons';
+import { UserActivitySummary } from '../../../../../api/users/userApi';
 
 interface Props {
   summary?: UserActivitySummary;

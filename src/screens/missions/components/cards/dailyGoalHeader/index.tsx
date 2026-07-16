@@ -1,11 +1,11 @@
 import React from 'react';
 import { Platform, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import ProgressRing from '../../../../components/progressRing';
-import { FireIcon } from '../../../../components/icons';
-import { LoginStreak } from '../../../../api/auth/authApi';
-import { MissionAllowance } from '../../../../api/missions/missionsApi';
-import { DAILY_MISSION_GOAL, DAILY_MISSION_LIMIT } from '../../../../constants/game';
+import ProgressRing from '../../../../../components/progressRing';
+import { FireIcon } from '../../../../../components/icons';
+import { LoginStreak } from '../../../../../api/auth/authApi';
+import { MissionAllowance } from '../../../../../api/missions/missionsApi';
+import { DAILY_MISSION_GOAL, DAILY_MISSION_LIMIT } from '../../../../../constants/game';
 
 interface Props {
   allowance?: MissionAllowance;
