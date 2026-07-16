@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Dimensions, Modal, Pressable, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, useWindowDimensions } from 'react-native';
 import {
   Gesture,
   GestureDetector,
@@ -18,14 +18,16 @@ interface Props {
   onClose: () => void;
 }
 
-const { width: SCREEN_W, height: SCREEN_H } = Dimensions.get('window');
-const IMG_H = SCREEN_H * 0.8;
 const MAX_SCALE = 5;
 
 // Visualizador de imagem em tela cheia, 100% in-app: pinça p/ zoom, arrastar
 // quando ampliada, duplo-toque p/ alternar zoom e toque simples p/ fechar.
 export default function ImageViewerModal({ uri, onClose }: Props) {
   const insets = useSafeAreaInsets();
+  // Medido por render (não no escopo do módulo) para acompanhar split-screen,
+  // dobráveis e Stage Manager, onde a janela muda de tamanho em runtime.
+  const { width: screenW, height: screenH } = useWindowDimensions();
+  const imgH = screenH * 0.8;
 
   const scale = useSharedValue(1);
   const savedScale = useSharedValue(1);
@@ -48,8 +50,8 @@ export default function ImageViewerModal({ uri, onClose }: Props) {
 
   const clampTranslation = (s: number) => {
     'worklet';
-    const maxX = (SCREEN_W * (s - 1)) / 2;
-    const maxY = (IMG_H * (s - 1)) / 2;
+    const maxX = (screenW * (s - 1)) / 2;
+    const maxY = (imgH * (s - 1)) / 2;
     tx.value = Math.min(Math.max(tx.value, -maxX), maxX);
     ty.value = Math.min(Math.max(ty.value, -maxY), maxY);
   };
@@ -134,7 +136,7 @@ export default function ImageViewerModal({ uri, onClose }: Props) {
           <GestureDetector gesture={composed}>
             <Animated.Image
               source={{ uri }}
-              style={[{ width: SCREEN_W, height: IMG_H }, animStyle]}
+              style={[{ width: screenW, height: imgH }, animStyle]}
               resizeMode="contain"
             />
           </GestureDetector>
