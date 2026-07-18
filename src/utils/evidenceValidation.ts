@@ -12,12 +12,26 @@
 // Tamanho mínimo exigido quando a missão pede evidência em texto.
 export const MIN_EVIDENCE_TEXT_LENGTH = 20;
 
-// Aceita apenas URLs http(s) com um host contendo ponto (ex.: exemplo.com).
-const URL_REGEX = /^https?:\/\/[^\s/$.?#][^\s]*\.[^\s]{2,}$/i;
+// Aceita um link com ou sem esquema (http/https opcional), desde que tenha
+// estrutura de domínio: um ou mais rótulos + um TLD de 2+ letras (ex.: exemplo.com,
+// exemplo.com.br, site.net/caminho, https://exemplo.com). O esquema é opcional —
+// se o usuário não digitar http(s)://, o link é normalizado no envio (normalizeLink).
+const URL_REGEX = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}(:\d+)?([/?#][^\s]*)?$/i;
 
-/** True se o valor for uma URL http(s) bem formada. */
+/** True se o valor tiver estrutura de link válida (esquema opcional). */
 export function isValidUrl(value: string): boolean {
   return URL_REGEX.test(value.trim());
+}
+
+/**
+ * Normaliza o link para envio: se não tiver esquema http(s)://, prefixa https://.
+ * Assume que o valor já passou por isValidUrl (tem estrutura de domínio).
+ */
+export function normalizeLink(link: string): string {
+  const v = link.trim();
+  if (v.length === 0) return v;
+  if (/^https?:\/\//i.test(v)) return v;
+  return `https://${v}`;
 }
 
 // Domínios adultos conhecidos e TLDs adultos — espelham o eixo de link do backend.

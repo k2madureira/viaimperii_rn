@@ -24,6 +24,7 @@ import {
 import { EVIDENCE_COMPRESS, MAX_EVIDENCE_WIDTH } from '../../../../../constants/evidence';
 import {
   MIN_EVIDENCE_TEXT_LENGTH,
+  normalizeLink,
   validateLink,
   validateText,
 } from '../../../../../utils/evidenceValidation';
@@ -112,7 +113,7 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
     if (!mission || !canSubmit || submitting || uploading) return;
     try {
       const evidence: MissionEvidence = {};
-      if (hasLink) evidence.link = link.trim();
+      if (hasLink) evidence.link = normalizeLink(link);
       if (hasText) evidence.text = text.trim();
       if (hasImage && imageUri) {
         setUploading(true);
@@ -164,7 +165,7 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
               <TextInput
                 value={link}
                 onChangeText={setLink}
-                placeholder="https://..."
+                placeholder="exemplo.com"
                 placeholderTextColor="#aaa"
                 autoCapitalize="none"
                 keyboardType="url"
