@@ -10,6 +10,10 @@ export interface LoginStreak {
   next_milestone: number;
   max_streak_days: number;
   is_max_bonus: boolean;
+  // Streak Shields (consumível anti-decay). Respostas antigas de login podem não
+  // trazê-los — tratar `undefined` como 0 até a query dedicada resolver (spec §9).
+  streak_shields?: number;
+  max_streak_shields?: number;
 }
 
 export interface LoginResponse {
