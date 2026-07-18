@@ -4,21 +4,61 @@ import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { FireIcon } from '../../../../../components/icons';
 import { LoginStreak } from '../../../../../api/auth/authApi';
+import { useAuth } from '../../../../../contexts/AuthContext';
 import AnchoredPopover, { Anchor } from '../../feed/AnchoredPopover';
+import { useStreak } from '../../../model/queries/useStreak';
+import { useWallet } from '../../../model/queries/useWallet';
+import { useBuyStreakShield } from '../../../model/mutations/useBuyStreakShield';
+import BuyShieldModal from '../../modals/buyShieldModal';
+import PulsingShield from '../../effects/pulsingShield';
+import { shieldFillRatio, shieldGlowColor } from '../../../../../utils/streakShield';
 
 interface Props {
   streak: LoginStreak;
 }
 
 // Botão de streak no topo direito da tela: chama com a porcentagem dentro,
-// toque abre um tooltip com os detalhes (dias, bônus, próxima meta).
+// toque abre um tooltip com os detalhes (dias, bônus, próxima meta, escudos).
 export default function StreakButton({ streak }: Props) {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const userId = user?.user_id;
   const anchorRef = useRef<View>(null);
   const [anchor, setAnchor] = useState<Anchor | null>(null);
+  const [shieldModal, setShieldModal] = useState(false);
+  // Saldo insuficiente detectado numa tentativa (backend responde 422): trava o botão.
+  const [lowBalance, setLowBalance] = useState(false);
+
+  const isOpen = anchor !== null;
+  // Query dedicada só busca quando o tooltip abre (reflete compra sem re-logar).
+  const streakQuery = useStreak(userId, isOpen);
+  const wallet = useWallet(shieldModal);
+  const buyShield = useBuyStreakShield(userId);
+
+  // Escudos: prioriza a query fresca; cai para o snapshot do login (undefined = 0).
+  const shields = streakQuery.data?.streak_shields ?? streak.streak_shields ?? 0;
+  const maxShields = streakQuery.data?.max_streak_shields ?? streak.max_streak_shields ?? 0;
+  const isMaxed = maxShields > 0 && shields >= maxShields;
 
   const open = () =>
     anchorRef.current?.measureInWindow((x, y, w, h) => setAnchor({ x, y, width: w, height: h }));
+
+  const openShieldModal = () => {
+    setLowBalance(false);
+    setShieldModal(true);
+  };
+
+  const confirmBuy = () => {
+    // NÃO fechar o modal no sucesso: o usuário precisa VER o escudo encher na hora
+    // (fill + glow recomputam a partir da query atualizada pela mutation). O modal
+    // fecha manualmente. Em erro não-422 fecha; 422 mantém aberto e trava o botão.
+    buyShield.mutate(undefined, {
+      onError: (error) => {
+        if ((error as { status?: number })?.status === 422) setLowBalance(true);
+        else setShieldModal(false);
+      },
+    });
+  };
 
   return (
     <>
@@ -66,8 +106,48 @@ export default function StreakButton({ streak }: Props) {
                   pct: streak.next_milestone,
                 })}
           </Text>
+
+          {/* Escudos de ofensiva: contagem + compra */}
+          <View className="border-t border-[#f0eaea] pt-3 mt-1">
+            <View className="flex-row items-center">
+              <PulsingShield
+                size={20}
+                fillRatio={shieldFillRatio(shields, maxShields)}
+                glowColor={shieldGlowColor(shields, maxShields)}
+              />
+              <Text className="text-[13px] font-bold text-charcoal ml-1.5 flex-1">
+                {t('dashboard.streakShield.count', { have: shields, max: maxShields })}
+              </Text>
+              {isMaxed ? (
+                <Text className="text-[11px] font-bold text-[#9a7b1f]">
+                  {t('dashboard.streakShield.maxed')}
+                </Text>
+              ) : (
+                <TouchableOpacity
+                  onPress={openShieldModal}
+                  activeOpacity={0.85}
+                  className="bg-primary-500 rounded-full px-3 py-1.5">
+                  <Text className="text-[12px] font-bold text-white">
+                    {t('dashboard.streakShield.buy')}
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
         </View>
       </AnchoredPopover>
+
+      <BuyShieldModal
+        visible={shieldModal}
+        shields={shields}
+        maxShields={maxShields}
+        pending={buyShield.isPending}
+        balanceAtomic={wallet.data?.general_balance}
+        priceDisplay={streakQuery.data?.shield_price_display}
+        disabled={lowBalance}
+        onConfirm={confirmBuy}
+        onClose={() => setShieldModal(false)}
+      />
     </>
   );
 }
