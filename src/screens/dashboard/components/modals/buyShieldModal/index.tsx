@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Modal, Platform, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { ShieldIcon, CoinAmount } from '../../../../../components/icons';
+import PulsingShield from '../../effects/pulsingShield';
+import { shieldFillRatio, shieldGlowColor } from '../../../../../utils/streakShield';
 
 interface Props {
   visible: boolean;
@@ -32,10 +34,20 @@ export default function BuyShieldModal({
 }: Props) {
   const { t } = useTranslation();
   const [confirming, setConfirming] = useState(false);
+  const wasPending = useRef(false);
 
   useEffect(() => {
     if (!visible) setConfirming(false);
   }, [visible]);
+
+  // Ao resolver a compra (pending true→false) com o modal ABERTO, fecha o overlay
+  // de confirmação e volta ao card principal — que já mostra a contagem/fill novos
+  // (derivados da query atualizada pela mutation). Em erro não-422 o pai fecha o
+  // modal; em 422 o overlay some e o card exibe "saldo insuficiente".
+  useEffect(() => {
+    if (wasPending.current && !pending) setConfirming(false);
+    wasPending.current = pending;
+  }, [pending]);
 
   const question = priceDisplay
     ? t('dashboard.streakShield.buyConfirm', { price: priceDisplay })
@@ -61,7 +73,11 @@ export default function BuyShieldModal({
 
           {/* Contagem de escudos */}
           <View className="flex-row items-center gap-1.5 bg-[#f2efef] rounded-full px-3 py-1.5 mt-4">
-            <ShieldIcon size={15} color="#4a5a8a" />
+            <PulsingShield
+              size={17}
+              fillRatio={shieldFillRatio(shields, maxShields)}
+              glowColor={shieldGlowColor(shields, maxShields)}
+            />
             <Text className="text-[13px] font-bold text-charcoal">
               {t('dashboard.streakShield.count', { have: shields, max: maxShields })}
             </Text>

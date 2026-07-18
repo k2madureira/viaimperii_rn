@@ -15,3 +15,6 @@ export { default as RankCard } from './cards/rankCard';
 // modals
 export { default as ChangePasswordModal } from './modals/changePasswordModal';
 export { default as BuyShieldModal } from './modals/buyShieldModal';
+
+// effects
+export { default as PulsingShield } from './effects/pulsingShield';

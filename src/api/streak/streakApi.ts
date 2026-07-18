@@ -23,6 +23,8 @@ export interface StreakResponse {
   is_max_bonus: boolean;
   streak_shields: number;
   max_streak_shields: number;
+  shield_price: number; // atômico (asses)
+  shield_price_display: string;
 }
 
 // POST /users/{id}/streak/shield — resposta da compra de 1 escudo.

@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { FireIcon, ShieldIcon } from '../../../../../components/icons';
+import { FireIcon } from '../../../../../components/icons';
 import { LoginStreak } from '../../../../../api/auth/authApi';
 import { useAuth } from '../../../../../contexts/AuthContext';
 import AnchoredPopover, { Anchor } from '../../feed/AnchoredPopover';
@@ -10,6 +10,8 @@ import { useStreak } from '../../../model/queries/useStreak';
 import { useWallet } from '../../../model/queries/useWallet';
 import { useBuyStreakShield } from '../../../model/mutations/useBuyStreakShield';
 import BuyShieldModal from '../../modals/buyShieldModal';
+import PulsingShield from '../../effects/pulsingShield';
+import { shieldFillRatio, shieldGlowColor } from '../../../../../utils/streakShield';
 
 interface Props {
   streak: LoginStreak;
@@ -47,10 +49,11 @@ export default function StreakButton({ streak }: Props) {
   };
 
   const confirmBuy = () => {
+    // NÃO fechar o modal no sucesso: o usuário precisa VER o escudo encher na hora
+    // (fill + glow recomputam a partir da query atualizada pela mutation). O modal
+    // fecha manualmente. Em erro não-422 fecha; 422 mantém aberto e trava o botão.
     buyShield.mutate(undefined, {
-      onSuccess: () => setShieldModal(false),
       onError: (error) => {
-        // 422 = saldo insuficiente (contrato real): mantém o modal e trava o botão.
         if ((error as { status?: number })?.status === 422) setLowBalance(true);
         else setShieldModal(false);
       },
@@ -107,7 +110,11 @@ export default function StreakButton({ streak }: Props) {
           {/* Escudos de ofensiva: contagem + compra */}
           <View className="border-t border-[#f0eaea] pt-3 mt-1">
             <View className="flex-row items-center">
-              <ShieldIcon size={18} color="#4a5a8a" />
+              <PulsingShield
+                size={20}
+                fillRatio={shieldFillRatio(shields, maxShields)}
+                glowColor={shieldGlowColor(shields, maxShields)}
+              />
               <Text className="text-[13px] font-bold text-charcoal ml-1.5 flex-1">
                 {t('dashboard.streakShield.count', { have: shields, max: maxShields })}
               </Text>
@@ -136,6 +143,7 @@ export default function StreakButton({ streak }: Props) {
         maxShields={maxShields}
         pending={buyShield.isPending}
         balanceAtomic={wallet.data?.general_balance}
+        priceDisplay={streakQuery.data?.shield_price_display}
         disabled={lowBalance}
         onConfirm={confirmBuy}
         onClose={() => setShieldModal(false)}

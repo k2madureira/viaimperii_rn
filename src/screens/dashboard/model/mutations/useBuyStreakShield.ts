@@ -1,7 +1,11 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import { buyStreakShield, StreakApiError } from '../../../../api/streak/streakApi';
+import {
+  buyStreakShield,
+  StreakApiError,
+  StreakResponse,
+} from '../../../../api/streak/streakApi';
 
 /**
  * Compra 1 Streak Shield via POST /users/{id}/streak/shield.
@@ -16,8 +20,20 @@ export function useBuyStreakShield(userId: string | undefined) {
 
   return useMutation({
     mutationFn: () => buyStreakShield(userId as string),
-    onSuccess: () => {
+    onSuccess: (data) => {
       Toast.show({ type: 'success', text1: i18n.t('dashboard.streakShield.success') });
+      // Atualiza a contagem exibida NA HORA (o tooltip/modal renderizam a partir
+      // desta query): sem o seed síncrono, o número só mudava após o refetch do
+      // invalidate resolver — daí "só atualiza reabrindo". `data` traz o novo total.
+      queryClient.setQueryData<StreakResponse>(['streak', userId], (old) =>
+        old
+          ? {
+              ...old,
+              streak_shields: data.streak_shields,
+              max_streak_shields: data.max_streak_shields,
+            }
+          : old,
+      );
       queryClient.invalidateQueries({ queryKey: ['streak', userId] });
       queryClient.invalidateQueries({ queryKey: ['wallet'] });
     },
