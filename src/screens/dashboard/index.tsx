@@ -6,7 +6,7 @@ import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Navbar, SearchBar } from '../../components';
 import { useAuth } from '../../contexts/AuthContext';
-import { DailyMissionsHero, WalletButton } from './components';
+import { DailyMissionsHero, LeaderboardEntry, WalletButton } from './components';
 import { FeedItem } from '../../api/feed/feedApi';
 import { useLegions } from '../missions/model/queries/useLegions';
 import { useDailyBriefing } from '../missions/model/queries/useDailyBriefing';
@@ -124,6 +124,9 @@ export default function DashboardScreen() {
         completedCampaignIds={completedCampaigns}
         onContinue={() => navigation.navigate('Missions')}
       />
+
+      {/* Placar semanal escopado (coexiste com o ranking all-time) */}
+      <LeaderboardEntry onPress={() => navigation.navigate('Leaderboards')} />
 
       {/* 5 — BARRA DE BUSCA GLOBAL */}
       <View style={{ paddingTop: 6, paddingBottom: 6 }}>

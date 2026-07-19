@@ -88,6 +88,19 @@ export default function NotificationsButton() {
   const handlePress = async (item: NotificationItem) => {
     if (!item.read) markReadM.mutate(item.id);
 
+    // Prêmio de placar → abre a screen `leaderboards` no escopo/semana do payload.
+    if (item.type === 'leaderboard_prize') {
+      const p = item.payload ?? {};
+      setAnchor(null);
+      navigation.navigate('Leaderboards', {
+        scope: p.scope,
+        scopeId: p.scope_key ?? undefined,
+        isoYear: p.iso_year ?? undefined,
+        isoWeek: p.iso_week ?? undefined,
+      });
+      return;
+    }
+
     const feedEventId = item.payload?.feed_event_id;
     if (!POST_NOTIFICATION_TYPES.has(item.type) || feedEventId == null) return;
 

@@ -29,6 +29,9 @@ export { default as FireIcon } from './fire';
 // Presente colorido — gatilho da tela de Prêmios
 export { default as GiftIcon } from './gift';
 
+// Medalha de pódio (1º/2º/3º) — placar semanal
+export { default as MedalIcon } from './medal';
+
 // Sino de notificações
 export { default as BellIcon } from './bell';
 
