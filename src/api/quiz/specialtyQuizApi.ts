@@ -67,17 +67,3 @@ export async function submitQuizAnswers(
 
   return readContent<QuizResult>(response);
 }
-
-export async function updateUserSpecialty(
-  userId: string,
-  specialtyId: number,
-): Promise<void> {
-  const response = await apiFetch(`/users/${userId}/specialty`, {
-    method: 'PATCH',
-    body: JSON.stringify({ specialty_id: specialtyId }),
-  });
-
-  if (!response.ok) {
-    throw new Error(await readError(response, 'Erro ao atualizar especialidade'));
-  }
-}

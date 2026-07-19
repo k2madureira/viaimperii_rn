@@ -1,6 +1,10 @@
 // Ícone de cadeado
 export { default as LockIcon } from './lock';
 
+// Escudo (selo de trilha) e clipe (selo de evidência) das missões
+export { default as ShieldIcon } from './shield';
+export { default as PaperclipIcon } from './paperclip';
+
 // Ícone de imagem
 export { default as ImageIcon } from './image';
 
@@ -21,6 +25,9 @@ export { AureusCoin, DenariusCoin, AsCoin, CoinIcon, CoinAmount } from './coins'
 
 // Chama do streak de login
 export { default as FireIcon } from './fire';
+
+// Presente colorido — gatilho da tela de Prêmios
+export { default as GiftIcon } from './gift';
 
 // Sino de notificações
 export { default as BellIcon } from './bell';

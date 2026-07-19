@@ -1,14 +1,8 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
-import {
-  ActivityIndicator,
-  Image,
-  Modal,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Image, Modal, ScrollView, TouchableOpacity, View } from 'react-native';
+import Text from '../text';
+import ScreenContainer from '../screenContainer';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HomeNavigationProp } from '../../navigation/HomeStack';
@@ -64,9 +58,14 @@ export default function GlobalSearchModal({ visible, onClose }: Props) {
     navigation.navigate('PostDetail', { post });
   };
 
+  const openHashtag = (tag: string) => {
+    onClose();
+    navigation.navigate('HashtagFeed', { tag });
+  };
+
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
-      <View className="flex-1 bg-[#fafafa]" style={{ paddingTop: insets.top }}>
+      <ScreenContainer>
         {/* Barra de busca + cancelar */}
         <View className="flex-row items-center px-4 py-3" style={{ gap: 10 }}>
           <View className="flex-1">
@@ -110,7 +109,12 @@ export default function GlobalSearchModal({ visible, onClose }: Props) {
               {data!.hashtags.length > 0 && (
                 <Section title={t('search.hashtags')}>
                   {data!.hashtags.map((h) => (
-                    <HashtagRow key={h.tag} item={h} label={t('search.postsCount', { count: h.posts_count })} />
+                    <HashtagRow
+                      key={h.tag}
+                      item={h}
+                      label={t('search.postsCount', { count: h.posts_count })}
+                      onPress={() => openHashtag(h.tag)}
+                    />
                   ))}
                 </Section>
               )}
@@ -125,7 +129,7 @@ export default function GlobalSearchModal({ visible, onClose }: Props) {
             </View>
           )}
         </ScrollView>
-      </View>
+      </ScreenContainer>
     </Modal>
   );
 }
@@ -173,9 +177,20 @@ function UserRow({ user, onPress }: { user: FeedAuthor; onPress: () => void }) {
   );
 }
 
-function HashtagRow({ item, label }: { item: HashtagResult; label: string }) {
+function HashtagRow({
+  item,
+  label,
+  onPress,
+}: {
+  item: HashtagResult;
+  label: string;
+  onPress: () => void;
+}) {
   return (
-    <View className="flex-row items-center px-4 py-3 border-b border-[#f4f0f0]">
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      className="flex-row items-center px-4 py-3 border-b border-[#f4f0f0]">
       <View className="w-11 h-11 rounded-full bg-[#fcecef] items-center justify-center mr-3">
         <Text className="text-[18px] font-extrabold text-primary-500">#</Text>
       </View>
@@ -185,7 +200,7 @@ function HashtagRow({ item, label }: { item: HashtagResult; label: string }) {
         </Text>
         <Text className="text-[12px] text-[#888]">{label}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 

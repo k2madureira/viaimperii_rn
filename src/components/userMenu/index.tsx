@@ -1,13 +1,8 @@
 import React, { useRef, useState } from 'react';
-import {
-  Image,
-  Modal,
-  Text,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import { Image, Modal, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
+import Text from '../text';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../contexts/AuthContext';
 import { KeyIcon, LogoutIcon, UserIcon } from '../../navigation/icons/MenuIcons';
 import { useUserProfile } from '../../screens/dashboard/model/queries/useUserProfile';
@@ -18,6 +13,7 @@ interface Props {
 
 export default function UserMenu({ onChangePassword }: Props) {
   const { t } = useTranslation();
+  const navigation = useNavigation<any>();
   const { user, signOut } = useAuth();
   const profileQuery = useUserProfile(user?.user_id);
   const aa = profileQuery.data?.active_avatar;
@@ -34,6 +30,13 @@ export default function UserMenu({ onChangePassword }: Props) {
   };
 
   const close = () => setVisible(false);
+
+  // Perfil vive no HomeStack (aba Home). `navigate('Home', { screen: 'Profile' })`
+  // funciona de qualquer aba: a ação sobe até o tab navigator que conhece 'Home'.
+  const goToProfile = () => {
+    close();
+    navigation.navigate('Home', { screen: 'Profile', params: {} });
+  };
 
   return (
     <>
@@ -71,11 +74,24 @@ export default function UserMenu({ onChangePassword }: Props) {
                 elevation: 8,
               }}>
               {user && (
-                <View className="px-4 py-3 border-b border-[#f0f0f0]">
+                <TouchableOpacity
+                  className="px-4 py-3 border-b border-[#f0f0f0]"
+                  activeOpacity={0.7}
+                  onPress={goToProfile}>
                   <Text className="text-[13px] font-bold text-[#111]" numberOfLines={1}>{user.name}</Text>
                   <Text className="text-[11px] text-[#888]" numberOfLines={1}>{user.email}</Text>
-                </View>
+                </TouchableOpacity>
               )}
+
+              <TouchableOpacity
+                className="flex-row items-center gap-3 px-4 py-3"
+                activeOpacity={0.7}
+                onPress={goToProfile}>
+                <UserIcon size={18} color="#111" />
+                <Text className="text-[14px] font-medium text-[#111]">{t('userMenu.profile')}</Text>
+              </TouchableOpacity>
+
+              <View className="h-px bg-[#f0f0f0]" />
 
               <TouchableOpacity
                 className="flex-row items-center gap-3 px-4 py-3"

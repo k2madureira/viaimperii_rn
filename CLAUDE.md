@@ -39,6 +39,123 @@ Mantenha-o atualizado ao alterar comportamento.
   formata um valor **atômico** em moedas (ver `src/utils/coins.ts`).
 - **Toda tela nova** usa a `Navbar` padrão (`src/components/navbar/`) — sem headers
   customizados.
+- **Raiz da tela** = `ScreenContainer` (`src/components/screenContainer/`), nunca uma
+  `View` solta. Ele aplica o safe area do topo (obrigatório com o edge-to-edge do SDK 54
+  no Android) e limita a coluna a `CONTENT_MAX_WIDTH` (`src/constants/layout.ts`),
+  centralizando-a em telas grandes (iPad, dobrável, split-screen). Em celular não tem efeito.
+- **Texto**: importar `Text`/`TextInput` de `src/components/text` e `src/components/textInput`
+  — **nunca** de `'react-native'`. Os wrappers aplicam `maxFontSizeMultiplier = MAX_FONT_SCALE`
+  (1.3): a tipografia é densa e assenta em cards de altura fixa, então acima de ~130% da escala
+  de fonte do sistema o texto corta. Para um texto que possa escalar sem teto (corpo de leitura
+  sem altura fixa), passe `maxFontSizeMultiplier={0}`.
+  - Importar **direto da pasta** (`components/text`), não pelo barrel `src/components` —
+    o barrel puxaria a árvore inteira de componentes e criaria ciclo de import.
+  - Refs de campo usam o tipo `TextInputRef` (o wrapper é função, não serve como tipo).
+
+---
+
+## 0.2 Organização de Telas (Frontend — obrigatório)
+
+Toda tela deve ser **enxuta e composta**: o `index.tsx` da screen é apenas o
+**orquestrador** (estado + hooks + handlers), montando componentes. Nada de arquivos
+de 1000+ linhas com JSX e subcomponentes inline.
+
+**Toda tela nova nasce nesse padrão** — ele não é só para refactor. Todas as telas já
+seguem o modelo: `missions` (+ sub-tela `professionMissions`), `dashboard`, `profile`,
+`legions`, `market`, `ranks`, `postDetail`, `rewards`, `achievements`.
+
+### Estrutura de pastas por screen
+
+```
+src/screens/{screen}/
+  index.tsx                      # só orquestração (estado, hooks, handlers, render das sections)
+  components/
+    index.ts                     # barrel dos átomos (agrupado por contexto, com comentários)
+    {contexto}/{componente}/index.tsx   # átomos agrupados por CONTEXTO de UI
+    sections/
+      index.ts                   # barrel das sections
+      {section}/index.tsx        # blocos grandes do render (header/body/footer, cards, boxes…)
+  model/
+    queries/                     # React Query — leitura
+    mutations/                   # React Query — escrita
+    hooks/                       # hooks de tela (ex.: SSE)
+  {subTela}/…                    # sub-tela → tem seu PRÓPRIO components/ no mesmo padrão
+```
+
+Exemplo real (`src/screens/legions/`):
+
+```
+legions/
+  index.tsx                      # 82 linhas: hooks + refresh + compõe as sections
+  components/
+    index.ts
+    cards/legionBadge/           cards/legionExpandedCard/
+    modals/changeLegionModal/    # dono do useJoinLegion
+    skeletons/legionSkeleton/
+    feedback/errorState/
+    effects/imagePreloader/
+    sections/
+      index.ts
+      legionBadges/              # fileira de brasões + card expandido
+```
+
+### Taxonomia de contextos (usar estes nomes; criar novos só se nenhum servir)
+
+| Pasta | O que vai nela | Exemplos no projeto |
+|---|---|---|
+| `buttons/` | botões, abas, chips clicáveis, pílulas de navegação | `typeTab`, `statusTab`, `sectionTab`, `trackTab`, `filterChip`, `loadMoreButton`, `secondaryNav`, `claimAllButton`, `walletButton` |
+| `cards/` | cards, itens de lista, linhas de dado, barras de info | `missionItem`, `reviewItem`, `rewardCard`, `rankRow`, `legionBadge`, `statCard`, `masteryRow`, `infoRow`, `allowanceBar`, `dailyGoalHeader` |
+| `modals/` | modais e overlays de diálogo | `evidenceModal`, `rankUpModal`, `changeLegionModal`, `buyConfirmModal`, `avatarPickerModal`, `avatarViewerModal` |
+| `filters/` | controles de filtro (chips, selects, barras) | `difficultyFilter`, `specialtyFilter`, `statsFilter`, `typeFilter`, `specialtyFilterBar` |
+| `skeletons/` | placeholders de carregamento | `missionSkeleton`, `legionSkeleton` |
+| `feedback/` | estados vazio / erro / loading / wrappers de estado | `emptyBox`, `errorBox`, `errorState`, `loading`, `sectionBody` |
+| `effects/` | overlays decorativos e não interativos | `sparkleOverlay`, `activeGoldGlow`, `imagePreloader` |
+| `icons/` | ícones específicos da tela | `market/components/icons`, `profile/components/icons/countryIcon` |
+| `labels/` | tipografia/rótulos reutilizados | `profile/components/labels/sectionLabel` |
+| `sections/` | **blocos do render** do `index` (não é átomo) | `MissionsHeader`, `AvailableMissionsBox`, `HomeFeed`, `DashboardModals`, `ProfileStats` |
+
+> **Submódulo coeso**: um conjunto grande e autocontido, consumido por várias telas,
+> pode ser seu próprio contexto com barrel próprio, sem ser quebrado nos contextos acima.
+> Único caso hoje: `dashboard/components/feed/` (importado por 4 telas).
+
+### Regras
+
+- **Quebrar o `index` em sections**: os grandes blocos do `return` viram componentes em
+  `components/sections/` (ex.: `MissionsHeader`, `MissionsBody`/boxes, `MissionsModals` =
+  header/body/footer). O `index` só compõe as sections e passa props.
+- **Átomos agrupados por contexto de UI** dentro de `components/` — pastas como
+  `buttons/`, `cards/`, `modals/`, `filters/`, `skeletons/`, `feedback/` (estados vazio/erro),
+  `effects/` (overlays decorativos), etc. **Nunca** deixar componentes soltos na raiz de
+  `components/`. Crie o contexto conforme necessário.
+- **Componente que pertence a UMA screen** fica em `components/` **dessa** screen. Sub-telas
+  (ex.: `professionMissions`) têm seu próprio `components/` (com as mesmas pastas de contexto).
+  Componentes genéricos/compartilhados podem ser reusados do `components/` da screen-pai
+  (ou de `src/components/` se forem globais) — **não duplicar**.
+- **Queries/mutations exclusivas de uma section vivem DENTRO da section** que as usa
+  (o hook é chamado no componente, não no `index`). Só permanecem no `index` as
+  **compartilhadas** — usadas no pull-to-refresh, em badges ou por mais de uma section
+  (ex.: `useMissions`, `useAvailableMissions`). Ex.: `useRewardedVideo` → `MissionTypeSelector`;
+  `useLegions`/`useJoinLegion` → `MissionsModals`; `useApproveMission`/`useRejectMission` →
+  `ReviewSection`.
+- **Constantes** (dados fixos como `SPARKLES`, mapas de ordenação, `PAGE_SIZE`) ficam em
+  `src/constants/{contexto}.ts` — **reusar** o arquivo existente do contexto, não redefinir
+  local (ex.: `sortByDifficulty`/`DIFFICULTY_ORDER` em `src/constants/missions.ts`).
+- **Cada componente** = pasta `{nome}/index.tsx`, **default export**, `interface Props`,
+  `useTranslation` interno; exportado no **barrel** (`index.ts`) do seu nível.
+- **Não refatorar por refatorar**: tela já enxuta (sem subcomponentes inline, sem consts,
+  sem blocos grandes) **fica como está** — sections ali só adicionam indireção.
+  Ex.: `hashtagFeed` (112 linhas) não tem `components/`. O gatilho é: subcomponente inline,
+  const de dados, bloco grande no `return`, ou index difícil de ler.
+- **Importar sempre pelo barrel** entre telas (`from '../dashboard/components'`), nunca pelo
+  caminho interno do átomo (`.../components/buttons/walletButton`) — o caminho muda quando
+  o contexto é reorganizado.
+- **Sub-tela** (ex.: `professionMissions`) tem `components/` próprio com as mesmas pastas de
+  contexto e reusa os genéricos do `components/` da screen-pai — não duplicar.
+- **Refactor de organização é refactor puro**: mesma UI e comportamento; validar com
+  `npx tsc --noEmit` (exit 0) antes de concluir. **Um commit por tela**
+  (`refactor({tela}): split screen into sections and context-based components`).
+- **Ao mover arquivos**: usar `git mv` (preserva histórico) e lembrar que cada nível a mais
+  de profundidade exige **+1 `../`** em todo import relativo do arquivo movido.
 
 ---
 

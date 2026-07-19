@@ -1,5 +1,7 @@
 import React from 'react';
-import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { TouchableOpacity, View } from 'react-native';
+import Text from '../text';
+import TextInput from '../textInput';
 import { useTranslation } from 'react-i18next';
 import { SearchIcon } from '../icons';
 

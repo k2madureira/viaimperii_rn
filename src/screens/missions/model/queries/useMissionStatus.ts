@@ -11,15 +11,20 @@ import { parseBackendDate } from '../../../../utils/date';
  * concluída sai daquela lista, e o status "sumiria".
  *
  * O intervalo é ADAPTATIVO à janela da própria missão (não martela o backend): bem
- * espaçado quando ainda falta muito tempo, e acelera só perto/depois do prazo. Para
- * medium/hard (aprovação de pares pode finalizar antes), o teto garante detectar a
- * mudança em ~1 min.
+ * espaçado quando ainda falta muito tempo, e acelera só perto/depois do prazo.
+ *
+ * M2 — o SSE (`useMissionEvents`) é o canal PRIMÁRIO: aprovação/rejeição/conclusão
+ * de pares invalidam `['mission-status', slug]` na hora, então NÃO dependemos do poll
+ * para detectá-las. Longe do prazo o poll é só rede de segurança para a finalização
+ * por tempo (que o job do backend também cobre), por isso pode ser bem espaçado —
+ * o que reduz bateria/rede quando há várias missões ativas ao mesmo tempo.
  */
 function intervalForRemaining(seconds: number): number {
   if (seconds <= 0) return 4000; // finalizando: confere a cada 4s
   if (seconds <= 30) return 6000; // reta final
   if (seconds <= 120) return 20000; // últimos minutos
-  return 60000; // ainda longe — teto de 60s (pega aprovação/rejeição de pares)
+  if (seconds <= 900) return 60000; // ~15 min antes do prazo: 1 min
+  return 180000; // muito longe — SSE cobre as transições; poll só de segurança (3 min)
 }
 
 export function useMissionStatus(slug: string | null, enabled: boolean) {

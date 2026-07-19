@@ -1,10 +1,11 @@
 import { useNavigation } from '@react-navigation/native';
 import React, { useRef, useState } from 'react';
-import { Alert, Image, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { HomeNavigationProp } from '../../../../../navigation/HomeStack';
 import { FeedItem, ReactionType } from '../../../../../api/feed/feedApi';
-import { parseBackendDate } from '../../../../../utils/date';
+import { formatPostTime } from '../../../../../utils/date';
 import { CommentIcon, EditIcon, EyeIcon, TrashIcon } from '../../../../../components/icons';
 import FeedReactions, { ReactionCluster } from '../FeedReactions';
 import AnchoredPopover, { Anchor } from '../AnchoredPopover';
@@ -100,20 +101,10 @@ export default function FeedCard({
     ]);
   };
 
-  const relativeTime = React.useMemo(() => {
-    const d = parseBackendDate(item.created_at);
-    if (!d) return '';
-    const diff = Date.now() - d.getTime();
-    const min = Math.floor(diff / 60_000);
-    if (min < 1) return t('feed.time.now');
-    if (min < 60) return t('feed.time.minutes', { count: min });
-    const h = Math.floor(min / 60);
-    if (h < 24) return t('feed.time.hours', { count: h });
-    const days = Math.floor(h / 24);
-    if (days < 7) return t('feed.time.days', { count: days });
-    const locale = i18n.language === 'pt' ? 'pt-BR' : 'en-US';
-    return d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
-  }, [item.created_at, t, i18n.language]);
+  const relativeTime = React.useMemo(
+    () => formatPostTime(item.created_at, t, i18n.language === 'pt' ? 'pt-BR' : 'en-US'),
+    [item.created_at, t, i18n.language],
+  );
 
   const isSystem = item.source === 'system';
   // Eventos de atividade (rank_up, mission_completed, …) usam o card de evento.

@@ -152,3 +152,24 @@ export async function getUserStats(
 
   return readContent<UserStats>(response);
 }
+
+// ── Resumo de atividade do usuário logado (GET /users/me/summary) ─────────────
+// Buckets de calendário SP; chaves sempre 0-filled (ver docs/users/activity-summary).
+export interface UserActivitySummary {
+  period: string;
+  completedMissions: { easy: number; medium: number; hard: number };
+  completedSpecialties: Record<string, number>; // chaves em minúsculas
+  coins: { aureus: number; denarius: number; as: number }; // ganho no período (contagens)
+  rewards: { xp: number; denarius: number };
+}
+
+export async function getUserSummary(period: StatsPeriod = 'all'): Promise<UserActivitySummary> {
+  const query = period !== 'all' ? `?period=${period}` : '';
+  const response = await apiFetch(`/users/me/summary${query}`);
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao carregar o resumo'));
+  }
+
+  return readContent<UserActivitySummary>(response);
+}

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
+import Text from '../../text';
 import Svg, { Circle, Defs, G, Path, RadialGradient, Stop } from 'react-native-svg';
 import { CoinDenom, coinParts } from '../../../utils/coins';
 
@@ -154,16 +155,24 @@ export function CoinAmount({
   textColor = '#3d2900',
   compact = false,
   showSigla = false,
+  omitAs = false,
+  wrap = true,
 }: {
   atomic: number;
   size?: number;
   textColor?: string;
   compact?: boolean;
   showSigla?: boolean;
+  omitAs?: boolean; // esconde a denominação `as` (ex.: carteira, que tem linha própria)
+  wrap?: boolean; // false = uma linha só (ex.: pill compacto que não pode quebrar)
 }) {
-  const parts = compact ? coinParts(atomic).slice(0, 1) : coinParts(atomic);
+  let parts = compact ? coinParts(atomic).slice(0, 1) : coinParts(atomic);
+  if (omitAs) parts = parts.filter((p) => p.name !== 'as');
   return (
-    <View className="flex-row items-center" style={{ gap: 7 }}>
+    // flexWrap evita estouro horizontal quando o container tem largura limitada
+    // (ex.: popover da carteira com 3 denominações + sigla). Em pills compactos
+    // (largura livre), `wrap={false}` mantém as moedas numa única linha.
+    <View className="flex-row items-center" style={{ gap: 7, flexWrap: wrap ? 'wrap' : 'nowrap' }}>
       {parts.map((p) => (
         <View key={p.name} className="flex-row items-center" style={{ gap: 3 }}>
           <CoinIcon denom={p.name} size={size} />

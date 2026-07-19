@@ -1,4 +1,5 @@
 import { apiFetch, readContent, readError } from '../config/defaultApi';
+import { LoginStreak } from '../auth/authApi';
 
 export type MissionStatus = 'available' | 'in_progress' | 'pending_review' | 'completed';
 
@@ -19,7 +20,13 @@ export interface Mission {
   coin_reward_display: string;
   specialty_id: number | null;
   specialty_name: string | null;
+  specialty_color: string | null; // cor da especialidade (#RRGGBB) — badge/ícone
   track_id: number | null;
+  // Prioridade no catálogo: 0 = comum, 1 = universal (missão de trilha, hábito
+  // diário genérico). Universais lideram as listagens; as `easy` concluem na hora.
+  priority: number;
+  // true quando a missão pertence a uma das profissões ativas do usuário.
+  matched_profession?: boolean;
   status: MissionStatus;
   proof_type: ProofType;
   acceptance_criteria: string | null;
@@ -94,10 +101,13 @@ export interface MissionSort {
 export async function getMissions(
   status?: MissionStatus,
   sort?: MissionSort,
+  professionId?: number,
 ): Promise<PaginatedMissions> {
   const parts = ['page=1', 'perPage=100'];
   if (status) parts.push(`status=${status}`);
   if (sort) parts.push(`sortField=${sort.sortField}`, `sortOrder=${sort.sortOrder}`);
+  // Missões de profissão (opt-in): só aparecem quando filtradas pela profissão ativa.
+  if (professionId != null) parts.push(`professionId=${professionId}`);
   const response = await apiFetch(`/missions?${parts.join('&')}`);
 
   if (!response.ok) {
@@ -129,10 +139,13 @@ export async function getAvailableMissions(
   difficulty?: MissionDifficulty,
   page = 1,
   perPage = 50,
+  professionId?: number,
 ): Promise<PaginatedMissions> {
   const parts = [`page=${page}`, `perPage=${perPage}`];
   if (specialtyId != null) parts.push(`specialtyId=${specialtyId}`);
   if (difficulty != null) parts.push(`difficulty=${difficulty}`);
+  // Restringe às missões da profissão ativa (422 no backend se não for do usuário).
+  if (professionId != null) parts.push(`professionId=${professionId}`);
 
   const response = await apiFetch(`/missions/available?${parts.join('&')}`);
 
@@ -182,6 +195,33 @@ export async function getRecommendedMissions(
   }
 
   return readContent<RecommendedMissions>(response);
+}
+
+// ── Briefing do dia (B2, GET /missions/daily-briefing) ────────────────────────
+// Uma chamada que compõe sugeridas + meta + streak + bônus ativo p/ o hero da Home.
+
+export interface DailyBriefingActiveBonus {
+  streak_bonus_pct: number;
+  rewarded_video_available: boolean;
+}
+
+export interface DailyBriefing {
+  date: string;
+  personalized: boolean;
+  suggested_missions: RecommendedMission[];
+  goal: MissionAllowance;
+  streak: LoginStreak;
+  active_bonus: DailyBriefingActiveBonus;
+}
+
+export async function getDailyBriefing(suggestions = 3): Promise<DailyBriefing> {
+  const response = await apiFetch(`/missions/daily-briefing?suggestions=${suggestions}`);
+
+  if (!response.ok) {
+    throw new Error(await readError(response, 'Erro ao carregar o briefing do dia'));
+  }
+
+  return readContent<DailyBriefing>(response);
 }
 
 export async function startMission(slug: string): Promise<void> {

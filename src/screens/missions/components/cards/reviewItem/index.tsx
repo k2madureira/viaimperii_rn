@@ -1,0 +1,269 @@
+import React, { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Image,
+  KeyboardAvoidingView,
+  Linking,
+  Modal,
+  Platform,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import Text from '../../../../../components/text';
+import TextInput from '../../../../../components/textInput';
+import { useTranslation } from 'react-i18next';
+import { ToReviewItem } from '../../../../../api/missions/missionsApi';
+import { parseBackendDate } from '../../../../../utils/date';
+import { REJECTION_REASON_MIN_LENGTH } from '../../../../../constants/game';
+
+interface Props {
+  item: ToReviewItem;
+  onApprove: (slug: string, executorId: string) => void;
+  onReject: (slug: string, executorId: string, reason: string) => void;
+  pending: boolean;
+}
+
+const DIFFICULTY_COLOR: Record<string, string> = {
+  easy: '#2F7A52',
+  medium: '#D4AF37',
+  hard: '#9E1B32',
+};
+
+function formatRemaining(totalSeconds: number, closingLabel: string): string {
+  if (totalSeconds <= 0) return closingLabel;
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  if (h > 0) return `${h}h ${m}min`;
+  if (m > 0) return `${m}min ${s.toString().padStart(2, '0')}s`;
+  return `${s}s`;
+}
+
+export default function ReviewItem({ item, onApprove, onReject, pending }: Props) {
+  const { t } = useTranslation();
+  const diffColor = DIFFICULTY_COLOR[item.difficulty ?? ''] ?? '#aaa';
+  const targetMs = parseBackendDate(item.completable_at)?.getTime() ?? null;
+  const avatarUrl =
+    item.executor.active_avatar?.thumb_url ??
+    item.executor.active_avatar?.url ??
+    item.executor.image ??
+    null;
+  const initial = item.executor.name?.trim().charAt(0).toUpperCase() || '?';
+
+  const [remaining, setRemaining] = useState<number>(() =>
+    targetMs != null ? Math.max(0, Math.round((targetMs - Date.now()) / 1000)) : item.remaining_seconds ?? 0,
+  );
+
+  // C3 — rejeitar exige motivo (≥ REJECTION_REASON_MIN_LENGTH após strip). O modal
+  // segue o padrão de overlay do app (nunca Alert nativo) e o autor recebe o motivo.
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [reason, setReason] = useState('');
+  const trimmedReason = reason.trim();
+  const reasonTooShort = trimmedReason.length < REJECTION_REASON_MIN_LENGTH;
+
+  const confirmReject = () => {
+    if (reasonTooShort || pending) return;
+    onReject(item.mission_slug, item.executor.id, trimmedReason);
+    setRejectOpen(false);
+    setReason('');
+  };
+
+  useEffect(() => {
+    if (targetMs == null) return;
+    const id = setInterval(() => {
+      setRemaining(Math.max(0, Math.round((targetMs - Date.now()) / 1000)));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [targetMs]);
+
+  return (
+    <View className="border border-[#f0eded] rounded-[14px] p-4 bg-white">
+      <View className="flex-row items-start justify-between">
+        <View className="flex-1 flex-row pr-3">
+          {/* Avatar do executor */}
+          <View className="w-10 h-10 rounded-full bg-[#f4eaea] items-center justify-center overflow-hidden mr-3">
+            {avatarUrl ? (
+              <Image source={{ uri: avatarUrl }} style={{ width: 40, height: 40 }} resizeMode="cover" />
+            ) : (
+              <Text className="text-[15px] font-extrabold text-primary-500">{initial}</Text>
+            )}
+          </View>
+
+          <View className="flex-1">
+            <Text className="text-[14px] font-bold text-[#222]">{item.mission_name}</Text>
+            <View className="flex-row items-center flex-wrap gap-x-2 mt-1.5">
+              {item.difficulty && (
+                <View
+                  className="px-1.5 py-0.5 rounded-full"
+                  style={{ backgroundColor: `${diffColor}18` }}>
+                  <Text className="text-[10px] font-bold" style={{ color: diffColor }}>
+                    {t(`missionItem.difficulty.${item.difficulty}`, { defaultValue: item.difficulty })}
+                  </Text>
+                </View>
+              )}
+              <Text className="text-[11px] text-[#999]">
+                {item.executor.name}
+                {item.executor.rank ? ` · ${item.executor.rank.name}` : ''}
+              </Text>
+            </View>
+          </View>
+        </View>
+
+        <View className="items-end gap-1">
+          <Text className="text-[13px] font-extrabold text-accent-500">+{item.xp_reward} {t('common.xp')}</Text>
+          <Text className="text-[11px] font-bold text-[#7a5b00]">⏳ {formatRemaining(remaining, t('reviewItem.closing'))}</Text>
+        </View>
+      </View>
+
+      {/* Critério de aceitação */}
+      {item.acceptance_criteria ? (
+        <View className="mt-3 bg-[#f7f7f7] rounded-[10px] px-3 py-2">
+          <Text className="text-[10px] font-bold text-[#999] uppercase tracking-[1px] mb-0.5">
+            {t('reviewItem.criterion')}
+          </Text>
+          <Text className="text-[12px] text-[#555] leading-[16px]">{item.acceptance_criteria}</Text>
+        </View>
+      ) : null}
+
+      {/* Evidência submetida */}
+      {item.submission ? (
+        <View className="mt-3 border border-[#eee] rounded-[10px] p-3 gap-2">
+          <Text className="text-[10px] font-bold text-primary-500 uppercase tracking-[1px]">
+            {t('reviewItem.evidence', { kind: item.submission.kind })}
+          </Text>
+          {item.submission.kind === 'image' && item.submission.image_url ? (
+            <Image
+              source={{ uri: item.submission.image_url }}
+              style={{ width: '100%', height: 180, borderRadius: 8 }}
+              resizeMode="cover"
+            />
+          ) : item.submission.kind === 'link' && item.submission.content ? (
+            <TouchableOpacity onPress={() => Linking.openURL(item.submission!.content!)} activeOpacity={0.7}>
+              <Text className="text-[13px] text-primary-500 underline" numberOfLines={2}>
+                {item.submission.content}
+              </Text>
+            </TouchableOpacity>
+          ) : item.submission.content ? (
+            <Text className="text-[13px] text-[#444] leading-[18px]">{item.submission.content}</Text>
+          ) : (
+            <Text className="text-[12px] text-[#999]">{t('reviewItem.noContent')}</Text>
+          )}
+        </View>
+      ) : null}
+
+      {/* Progresso de aprovações */}
+      <View className="mt-3 gap-1.5">
+        <View className="flex-row items-center justify-between">
+          <Text className="text-[11px] font-semibold text-[#888]">{t('reviewItem.approvals')}</Text>
+          <Text className="text-[12px] font-extrabold text-[#555]">
+            {item.approvals_count}/{item.approvals_required}
+          </Text>
+        </View>
+        <View className="flex-row gap-1.5">
+          {Array.from({ length: item.approvals_required }).map((_, i) => (
+            <View
+              key={i}
+              className={`flex-1 h-1.5 rounded-full ${
+                i < item.approvals_count ? 'bg-laurel' : 'bg-[#ececec]'
+              }`}
+            />
+          ))}
+        </View>
+      </View>
+
+      <View className="mt-3 flex-row gap-2.5">
+        <TouchableOpacity
+          disabled={pending}
+          activeOpacity={0.85}
+          accessibilityRole="button"
+          onPress={() => setRejectOpen(true)}
+          className={`flex-1 rounded-[10px] py-2.5 items-center border ${
+            pending ? 'border-primary-500/30' : 'border-primary-500'
+          }`}>
+          <Text className={`text-[13px] font-bold ${pending ? 'text-primary-500/40' : 'text-primary-500'}`}>
+            {t('reviewItem.reject')}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          disabled={pending}
+          activeOpacity={0.85}
+          onPress={() => onApprove(item.mission_slug, item.executor.id)}
+          className={`flex-1 rounded-[10px] py-2.5 items-center ${pending ? 'bg-laurel/50' : 'bg-laurel'}`}>
+          {pending ? (
+            <ActivityIndicator color="#fff" size="small" />
+          ) : (
+            <Text className="text-[13px] font-bold text-white">{t('reviewItem.approve')}</Text>
+          )}
+        </TouchableOpacity>
+      </View>
+
+      {/* C3 — modal de motivo obrigatório da rejeição (padrão de overlay do app) */}
+      <Modal
+        transparent
+        visible={rejectOpen}
+        animationType="fade"
+        onRequestClose={() => setRejectOpen(false)}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          className="flex-1">
+          <View className="flex-1 bg-black/60 items-center justify-center px-6">
+            <View className="w-full bg-white rounded-[20px] p-6">
+              <Text className="text-[18px] font-extrabold text-charcoal text-center">
+                {t('reviewItem.rejectModalTitle')}
+              </Text>
+              <Text className="text-[13px] text-[#555] leading-[19px] text-center mt-2">
+                {t('reviewItem.rejectModalBody')}
+              </Text>
+
+              <TextInput
+                value={reason}
+                onChangeText={setReason}
+                placeholder={t('reviewItem.rejectReasonPlaceholder')}
+                placeholderTextColor="#aaa"
+                multiline
+                autoFocus
+                className={`border rounded-[10px] px-3 py-2.5 text-[14px] text-charcoal min-h-[90px] mt-4 ${
+                  reason.length > 0 && reasonTooShort ? 'border-primary-500' : 'border-[#e0e0e0]'
+                }`}
+                style={{ textAlignVertical: 'top' }}
+              />
+              <Text
+                className={`text-[11px] mt-1 ${
+                  reason.length > 0 && reasonTooShort ? 'text-primary-500' : 'text-[#888]'
+                }`}>
+                {reason.length > 0 && reasonTooShort
+                  ? t('reviewItem.rejectReasonTooShort', { min: REJECTION_REASON_MIN_LENGTH })
+                  : t('reviewItem.rejectReasonHint', { min: REJECTION_REASON_MIN_LENGTH })}
+              </Text>
+
+              <View className="flex-row gap-3 mt-5">
+                <TouchableOpacity
+                  onPress={() => setRejectOpen(false)}
+                  disabled={pending}
+                  activeOpacity={0.85}
+                  accessibilityRole="button"
+                  className="flex-1 border border-[#e0dada] rounded-[12px] py-3 items-center">
+                  <Text className="text-[14px] font-bold text-[#666]">{t('reviewItem.cancel')}</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={confirmReject}
+                  disabled={reasonTooShort || pending}
+                  activeOpacity={0.85}
+                  accessibilityRole="button"
+                  className={`flex-1 rounded-[12px] py-3 items-center ${
+                    reasonTooShort || pending ? 'bg-primary-500/40' : 'bg-primary-500'
+                  }`}>
+                  {pending ? (
+                    <ActivityIndicator color="#fff" size="small" />
+                  ) : (
+                    <Text className="text-[14px] font-bold text-white">{t('reviewItem.rejectConfirm')}</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+    </View>
+  );
+}

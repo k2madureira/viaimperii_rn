@@ -7,6 +7,7 @@ export interface Specialty {
   description: string | null;
   icon: string | null;
   icon_url: string | null;
+  color: string | null; // cor da especialidade (#RRGGBB) — badges/filtros
 }
 
 interface PaginatedSpecialties {

@@ -50,7 +50,15 @@
           "photosPermission": "Usamos suas fotos para você anexar a evidência de conclusão de uma missão."
         }
       ],
-      "expo-video"
+      "expo-video",
+      "expo-secure-store",
+      [
+        "expo-build-properties",
+        {
+          "android": { "minSdkVersion": 24 },
+          "ios": { "deploymentTarget": "15.1" }
+        }
+      ]
     ],
     "extra": {
       "eas": {

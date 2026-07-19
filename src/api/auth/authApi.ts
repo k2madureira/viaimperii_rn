@@ -10,6 +10,10 @@ export interface LoginStreak {
   next_milestone: number;
   max_streak_days: number;
   is_max_bonus: boolean;
+  // Streak Shields (consumível anti-decay). Respostas antigas de login podem não
+  // trazê-los — tratar `undefined` como 0 até a query dedicada resolver (spec §9).
+  streak_shields?: number;
+  max_streak_shields?: number;
 }
 
 export interface LoginResponse {
@@ -137,6 +141,21 @@ export async function forgotPasswordRequest(email: string): Promise<void> {
 
   if (!response.ok) {
     throw new Error(await readError(response, 'Erro ao solicitar redefinição de senha'));
+  }
+}
+
+export async function resetPasswordRequest(
+  token: string,
+  newPassword: string,
+): Promise<void> {
+  const response = await apiFetch('/auth/reset-password', {
+    method: 'POST',
+    body: JSON.stringify({ token, new_password: newPassword }),
+  });
+
+  if (!response.ok) {
+    // 400 = token inválido/expirado/já usado; 422 = senha fraca (§3).
+    throw new Error(await readError(response, 'Não foi possível redefinir a senha'));
   }
 }
 

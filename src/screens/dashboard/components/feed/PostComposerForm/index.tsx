@@ -1,5 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Image, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
 import * as ImagePicker from 'expo-image-picker';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { useTranslation } from 'react-i18next';
@@ -60,6 +61,8 @@ interface Props {
   large?: boolean;
   // Avatar do autor exibido no cabeçalho, ao lado do seletor de audiência.
   authorAvatarUrl?: string | null;
+  // Texto inicial (ex.: compartilhar uma missão concluída) — editável antes de publicar.
+  initialText?: string;
   // Chamado após publicar com sucesso / ao cancelar — cada host decide o que
   // fazer (recolher inline, fechar modal, etc.).
   onPosted?: () => void;
@@ -75,14 +78,18 @@ export default function PostComposerForm({
   autoFocus = true,
   large = false,
   authorAvatarUrl,
+  initialText,
   onPosted,
   onCancel,
 }: Props) {
   const { t } = useTranslation();
   const createM = useCreatePost();
 
-  const [text, setText] = useState('');
-  const [selection, setSelection] = useState<Selection>({ start: 0, end: 0 });
+  const [text, setText] = useState(initialText ?? '');
+  const [selection, setSelection] = useState<Selection>({
+    start: (initialText ?? '').length,
+    end: (initialText ?? '').length,
+  });
   const [media, setMedia] = useState<PickedMedia[]>([]);
   const [scope, setScope] = useState<FeedScope>('global');
   const [uploading, setUploading] = useState(false);

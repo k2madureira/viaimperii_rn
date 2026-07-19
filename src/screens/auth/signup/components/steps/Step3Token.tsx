@@ -3,14 +3,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { getQuizQuestions } from '../../../../../api/quiz/specialtyQuizApi';
-import {
-  ActivityIndicator,
-  Platform,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Platform, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
+import TextInput, { TextInputRef } from '../../../../../components/textInput';
 import { AuthNavigationProp } from '../../../../../navigation/types';
 import { useVerifyTokenMutation } from '../../model/mutations/useVerifyTokenMutation';
 import { useResendTestCodeMutation } from '../../model/mutations/useResendTestCodeMutation';
@@ -28,7 +23,7 @@ export default function Step3Token({ email: initialEmail, onBack }: Props) {
   const inputPaddingVertical = Platform.OS === 'ios' ? 13 : 10;
   const [email, setEmail] = useState(initialEmail);
   const [token, setToken] = useState('');
-  const tokenInputRef = useRef<TextInput>(null);
+  const tokenInputRef = useRef<TextInputRef>(null);
 
   const canSubmit = email.trim().length > 0 && token.trim().length >= TOKEN_LENGTH;
 

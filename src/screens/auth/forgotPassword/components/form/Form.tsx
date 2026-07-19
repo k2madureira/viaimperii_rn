@@ -2,7 +2,9 @@ import { useForm } from '@tanstack/react-form';
 import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Platform, TouchableOpacity, View } from 'react-native';
+import Text from '../../../../../components/text';
+import TextInput from '../../../../../components/textInput';
 import { AuthNavigationProp } from '../../../../../navigation/types';
 import { forgotPasswordSchema } from '../../model/contracts/forgotPasswordSchema';
 import { useForgotPasswordMutation } from '../../model/mutations/useForgotPasswordMutation';
@@ -18,7 +20,9 @@ export default function ForgotPasswordForm() {
     defaultValues: { email: '' },
     validators: { onSubmit: forgotPasswordSchema },
     onSubmit: async ({ value }) => {
-      sendEmail(value.email);
+      sendEmail(value.email, {
+        onSuccess: () => navigation.navigate('ResetPassword', { email: value.email }),
+      });
     },
   });
 
@@ -74,8 +78,18 @@ export default function ForgotPasswordForm() {
       <View className="h-3.5" />
 
       <View className="flex-row justify-center items-center">
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity onPress={() => navigation.navigate('ResetPassword', {})}>
           <Text className="text-[13px] text-primary-500 font-semibold">
+            {t('auth.forgotPassword.haveToken')}
+          </Text>
+        </TouchableOpacity>
+      </View>
+
+      <View className="h-3" />
+
+      <View className="flex-row justify-center items-center">
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+          <Text className="text-[13px] text-[#888] font-semibold">
             {t('auth.forgotPassword.backToLogin')}
           </Text>
         </TouchableOpacity>

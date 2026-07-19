@@ -1,16 +1,16 @@
 import { BottomTabNavigationProp, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React, { useState } from 'react';
-import { Platform, Text, View } from 'react-native';
+import { Platform, View } from 'react-native';
+import Text from '../components/text';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeIcon from './icons/HomeIcon';
 import AchievementsIcon from './icons/AchievementsIcon';
-import ProfileIcon from './icons/ProfileIcon';
-import { PlusIcon, PrimusPilusEmblem } from '../components/icons';
-import MissionsScreen from '../screens/missions';
+import { PlusIcon, PrimusPilusEmblem, ShopIcon } from '../components/icons';
 import AchievementsScreen from '../screens/achievements';
-import ProfileScreen from '../screens/profile';
+import MarketScreen from '../screens/market';
 import HomeStack from './HomeStack';
+import MissionsStack from './MissionsStack';
 import { useAuth } from '../contexts/AuthContext';
 import { useAvailableMissions } from '../screens/missions/model/queries/useAvailableMissions';
 import { useUserProfile } from '../screens/dashboard/model/queries/useUserProfile';
@@ -21,7 +21,7 @@ export type BottomTabParamList = {
   Missions: undefined;
   CreatePost: undefined;
   Achievements: undefined;
-  Profile: undefined;
+  Market: undefined;
 };
 
 export type BottomTabNavProp = BottomTabNavigationProp<BottomTabParamList>;
@@ -40,7 +40,9 @@ const TAB_ICON: Partial<Record<keyof BottomTabParamList, IconComponent>> = {
   // monocromática para seguir o esquema de cor (cinza inativo / vermelho ativo).
   Missions: ({ size, color }) => <PrimusPilusEmblem size={size} color={color} />,
   Achievements: AchievementsIcon,
-  Profile: ProfileIcon,
+  // Sacola de compras — aba do Mercado (substituiu o Perfil, agora acessível pelo
+  // menu do usuário e pela saudação da Home).
+  Market: ({ size, color }) => <ShopIcon size={size} color={color} />,
 };
 
 // Aba "CreatePost" não navega — só abre o modal. Precisa de um componente de
@@ -69,7 +71,7 @@ export default function BottomTabs() {
     Missions: t('nav.missions'),
     CreatePost: '',
     Achievements: t('nav.achievements'),
-    Profile: t('nav.profile'),
+    Market: t('nav.market'),
   };
   // Eleva a barra acima da área de gestos do sistema (home indicator / nav bar).
   const bottomInset = Math.max(insets.bottom, Platform.OS === 'android' ? 16 : 12);
@@ -131,7 +133,7 @@ export default function BottomTabs() {
           tabBarLabel: TAB_LABEL[route.name],
         })}>
         <Tab.Screen name="Home" component={HomeStack} />
-        <Tab.Screen name="Missions" component={MissionsScreen} />
+        <Tab.Screen name="Missions" component={MissionsStack} />
         <Tab.Screen
           name="CreatePost"
           component={EmptyScreen}
@@ -143,7 +145,7 @@ export default function BottomTabs() {
           })}
         />
         <Tab.Screen name="Achievements" component={AchievementsScreen} />
-        <Tab.Screen name="Profile" component={ProfileScreen} />
+        <Tab.Screen name="Market" component={MarketScreen} />
       </Tab.Navigator>
 
       <CreatePostModal

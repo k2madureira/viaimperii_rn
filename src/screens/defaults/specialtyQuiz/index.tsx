@@ -2,19 +2,13 @@ import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  ActivityIndicator,
-  Platform,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { ActivityIndicator, Platform, TouchableOpacity, View } from 'react-native';
+import Text from '../../../components/text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import {
   getQuizQuestions,
   submitQuizAnswers,
-  updateUserSpecialty,
   QuizAnswer,
   QuizResult,
 } from '../../../api/quiz/specialtyQuizApi';
@@ -29,7 +23,7 @@ export default function SpecialtyQuizScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation<AuthNavigationProp>();
   const { params } = useRoute<QuizRoute>();
-  const { testCode, userId } = params;
+  const { testCode } = params;
   const queryClient = useQueryClient();
 
   const cachedQuiz = queryClient.getQueryData<{ total: number; questions: any[] }>(['specialty-quiz', testCode]);
@@ -56,12 +50,9 @@ export default function SpecialtyQuizScreen() {
 
   const { mutate: submitAnswers } = useMutation({
     mutationFn: (finalAnswers: QuizAnswer[]) => submitQuizAnswers(testCode, finalAnswers),
-    onSuccess: async (quizResult) => {
-      try {
-        await updateUserSpecialty(userId, quizResult.specialty_id);
-      } catch {
-        /* falha silenciosa — resultado já foi salvo no backend via submit */
-      }
+    onSuccess: (quizResult) => {
+      // A especialidade já é persistida pelo próprio submit; a troca posterior usa
+      // PATCH /users/{id} pós-login (require_self_or_admin).
       setResult(quizResult);
       setStep('result');
     },

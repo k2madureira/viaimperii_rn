@@ -24,6 +24,50 @@ export function formatBackendDateTime(value: string | null | undefined): string 
 }
 
 /**
+ * Data de publicação de um post do feed.
+ *
+ * Relativo só na primeira hora ("agora", "5min"); depois disso vira HORA
+ * ABSOLUTA ("23:26", "ontem 23:26", "14/07 23:26").
+ *
+ * Motivo: o relativo trunca a hora (`2h` para qualquer coisa entre 2h00 e
+ * 2h59), então posts publicados com minutos de diferença — o feed recebe posts
+ * gerados de 5 em 5 minutos — ficavam TODOS com o mesmo rótulo e
+ * indistinguíveis entre si. A hora absoluta desambigua sempre.
+ */
+export function formatPostTime(
+  value: string | null | undefined,
+  t: (key: string, options?: Record<string, any>) => string,
+  locale: string,
+): string {
+  const d = parseBackendDate(value);
+  if (!d || isNaN(d.getTime())) return '';
+
+  const diffMin = Math.floor((Date.now() - d.getTime()) / 60_000);
+  // Datas futuras (relógio dessincronizado) caem no relativo "agora".
+  if (diffMin < 1) return t('feed.time.now');
+  if (diffMin < 60) return t('feed.time.minutes', { count: diffMin });
+
+  const time = d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+
+  // "Hoje"/"ontem" pelo calendário local do dispositivo (não por janelas de 24h).
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfYesterday = new Date(startOfToday);
+  startOfYesterday.setDate(startOfToday.getDate() - 1);
+
+  if (d >= startOfToday) return time;
+  if (d >= startOfYesterday) return t('feed.time.yesterday', { time });
+
+  const date = d.toLocaleDateString(locale, {
+    day: '2-digit',
+    month: '2-digit',
+    // Ano só quando não for o corrente, para não poluir o caso comum.
+    ...(d.getFullYear() !== now.getFullYear() ? { year: 'numeric' as const } : {}),
+  });
+  return `${date} ${time}`;
+}
+
+/**
  * Tempo relativo curto ("agora", "5min", "2h", "3d") a partir de uma data do
  * backend — usa as mesmas chaves `feed.time.*` já traduzidas no app.
  */
