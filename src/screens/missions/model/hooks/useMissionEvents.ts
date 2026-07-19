@@ -41,6 +41,9 @@ export function useMissionEvents(enabled = true) {
         queryClient.invalidateQueries({ queryKey: ['user-profile'] });
         queryClient.invalidateQueries({ queryKey: ['user-stats'] });
         queryClient.invalidateQueries({ queryKey: ['ranking'] });
+        // A finalização "de fato" (por tempo ou aprovação de pares) credita moedas
+        // no ledger — refetch da carteira p/ refletir o saldo novo sem reabrir a tela.
+        queryClient.invalidateQueries({ queryKey: ['wallet'] });
         break;
 
       case 'new_review_available':

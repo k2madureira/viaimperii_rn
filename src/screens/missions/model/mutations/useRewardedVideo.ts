@@ -41,6 +41,8 @@ export function useRewardedVideo() {
           // sem invalidar, as vagas extras do vídeo não apareciam.
           queryClient.invalidateQueries({ queryKey: ['missions-recommended'] }),
           queryClient.invalidateQueries({ queryKey: ['daily-briefing'] }),
+          // O vídeo premiado credita moedas no ledger — atualiza a carteira.
+          queryClient.invalidateQueries({ queryKey: ['wallet'] }),
         ]);
         Toast.show({
           type: 'success',

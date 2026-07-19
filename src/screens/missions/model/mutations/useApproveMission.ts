@@ -24,6 +24,8 @@ export function useApproveMission() {
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
       queryClient.invalidateQueries({ queryKey: ['user-stats'] });
       queryClient.invalidateQueries({ queryKey: ['ranking'] });
+      // O revisor ganha moedas por aprovar (reviewer_coins_earned) — refetch da carteira.
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
     },
     onError: (error: Error) => {
       Toast.show({ type: 'error', text1: i18n.t('toasts.approveError'), text2: error.message });

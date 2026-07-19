@@ -84,6 +84,9 @@ export function useCompleteMission() {
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
       queryClient.invalidateQueries({ queryKey: ['ranking'] });
       queryClient.invalidateQueries({ queryKey: ['user-stats'] });
+      // Conclusão imediata (status `completed`) credita moedas no ledger — atualiza a
+      // carteira. No caso `pending_review` ainda não há moeda, mas o refetch é inócuo.
+      queryClient.invalidateQueries({ queryKey: ['wallet'] });
     },
     onError: (error: Error) => {
       Toast.show({ type: 'error', text1: i18n.t('toasts.completeError'), text2: error.message });
