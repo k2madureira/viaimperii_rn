@@ -36,8 +36,9 @@ Loops e sistemas já vivos (regras no `CLAUDE.md` do backend). **Front já cobre
 - **Ranking all-time** (`/ranking`, consumido no dashboard).
 - **AI Chronicler** (posts de crônica no feed).
 
-> Só existe `/ranking` all-time — **não há** leaderboards semanais/escopados ainda
-> (backlog #1 abaixo).
+> Backend já shipou **leaderboards semanais escopados** (§23) e **Legion Weekly Objective**
+> (§24) — front ainda **não consome** (tasks F4/F5 abaixo). O `/ranking` all-time do dashboard
+> continua existindo e coexiste com o placar semanal.
 
 ---
 
@@ -50,10 +51,13 @@ Loops e sistemas já vivos (regras no `CLAUDE.md` do backend). **Front já cobre
 |--:|------|:------:|:---:|---|---|---|
 | F1 | **Legion Treasury + Estandartes (UI)** — section no card da legião do viewer: saldo do cofre + histórico, modal de doação (padrão `LegionSelectModal`), loja de estandartes só p/ líder (carrossel) + countdown do buff ativo. | M | 4.0 | `GET /legions/{id}/treasury`, `POST .../treasury/donate`, `POST .../standard/{slug}` | `tasks/legion-treasury.md` | Ready for build |
 | F3 | **Store Promotions (UI)** — faixa "Promoções da semana" no `market` + badge de desconto nos itens em promoção; countdown até `ends_at`. | M | 3.2 | `GET /promotions?active=true`, `GET /promotions/{id}` | `tasks/store-promotions.md` | Ready for build (bloqueador de backend a confirmar) |
+| F4 | **Weekly Leaderboards (UI)** — nova screen `leaderboards`: placar semanal por escopo (global/legião/província/ofício), pin da linha do viewer, countdown de reset, badges de prêmio + notificação `leaderboard_prize`. | M | 4.5 | `GET /leaderboards`, `/leaderboards/history`, `/leaderboards/scopes` | `tasks/weekly-leaderboards.md` | Ready for build |
+| F5 | **Legion Weekly Objective (UI)** — section no card da legião: barra de progresso da meta semanal + mini-placar de contribuição + recompensa (cofre + bônus) + notificação `legion_objective_completed`. | M | 4.2 | `GET /legions/{id}/objective`, `/objective/history` | `tasks/legion-weekly-objective.md` | Ready for build (após F1) |
 
-**Build order (front):** **F1 → F3**. **F3 tem dependência de backend**: confirmar se os itens
-da loja já retornam preço **com desconto** + preço original (§9 da spec) — se não, abrir task de
-backend; a faixa informativa pode shipar antes.
+**Build order (front):** **F1 → F5 → F4 → F3**. F5 sai logo após **F1 (Legion Treasury)** — dividem
+o card expandido da legião e a recompensa do objetivo aponta pro cofre. **F3 tem dependência de
+backend**: confirmar se os itens da loja já retornam preço **com desconto** + preço original (§9 da
+spec) — se não, abrir task de backend; a faixa informativa pode shipar antes.
 
 ---
 
