@@ -1,6 +1,6 @@
 import React from 'react';
 import { Image, View } from 'react-native';
-import { Legion } from '../../../../../api/legions/legionsApi';
+import { Legion } from '../../../../../api/legion/dto';
 
 interface Props {
   legions: Legion[];

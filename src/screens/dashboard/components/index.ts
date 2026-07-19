@@ -11,7 +11,6 @@ export { default as WalletButton } from './buttons/walletButton';
 export { default as DailyMissionsHero } from './cards/dailyMissionsHero';
 export { default as LegionCard } from './cards/legionCard';
 export { default as RankCard } from './cards/rankCard';
-export { default as LeaderboardEntry } from './cards/leaderboardEntry';
 
 // modals
 export { default as ChangePasswordModal } from './modals/changePasswordModal';

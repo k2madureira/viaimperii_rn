@@ -200,7 +200,7 @@ export async function createPost(input: CreatePostInput): Promise<FeedItem> {
   if (!response.ok) {
     throw new Error(await readError(response, 'Erro ao publicar'));
   }
-
+  
   return readContent<FeedItem>(response);
 }
 
@@ -325,53 +325,3 @@ export async function createComment(
 
   return readContent<FeedComment>(response);
 }
-
-// ── Upload de mídia do post (objeto PÚBLICO) ──────────────────────────────────
-
-export type FeedImageContentType = 'image/jpeg' | 'image/png' | 'image/webp';
-export type FeedVideoContentType = 'video/mp4' | 'video/quicktime';
-export type FeedMediaContentType = FeedImageContentType | FeedVideoContentType;
-
-interface FeedPresignResult {
-  upload_url: string;
-  key: string;
-  public: boolean;
-  expires_in: number;
-}
-
-async function presignFeedUpload(contentType: FeedMediaContentType): Promise<FeedPresignResult> {
-  const response = await apiFetch('/uploads/presign', {
-    method: 'POST',
-    body: JSON.stringify({ content_type: contentType, purpose: 'feed' }),
-  });
-  if (!response.ok) {
-    throw new Error(await readError(response, 'Erro ao preparar o envio da mídia'));
-  }
-  return readContent<FeedPresignResult>(response);
-}
-
-/**
- * Faz upload de uma mídia (imagem ou vídeo) do post direto ao S3 (presigned PUT,
- * objeto público) e retorna a `key`. Diferente da evidência (privada), o feed
- * exige o header `x-amz-acl: public-read` no PUT.
- */
-export async function uploadFeedMedia(
-  localUri: string,
-  contentType: FeedMediaContentType,
-): Promise<string> {
-  const { upload_url, key } = await presignFeedUpload(contentType);
-  const blob = await (await fetch(localUri)).blob();
-  const put = await fetch(upload_url, {
-    method: 'PUT',
-    headers: { 'Content-Type': contentType, 'x-amz-acl': 'public-read' },
-    body: blob,
-  });
-  if (!put.ok) {
-    throw new Error('Falha ao enviar a mídia para o armazenamento.');
-  }
-  return key;
-}
-
-/** @deprecated use `uploadFeedMedia` — mantido por compatibilidade. */
-export const uploadFeedImage = (localUri: string, contentType: FeedImageContentType) =>
-  uploadFeedMedia(localUri, contentType);

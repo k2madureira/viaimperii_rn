@@ -8,6 +8,7 @@ import {
   PaginatedMissions,
   startMission,
 } from '../../../../api/missions/missionsApi';
+import { isDuplicateImageError } from '../../../../utils/missionEvidence';
 
 export function useStartMission() {
   const queryClient = useQueryClient();
@@ -89,6 +90,8 @@ export function useCompleteMission() {
       queryClient.invalidateQueries({ queryKey: ['wallet'] });
     },
     onError: (error: Error) => {
+      // Dedup de imagem: o EvidenceModal já exibe o aviso inline — não duplicar em toast.
+      if (isDuplicateImageError(error.message)) return;
       Toast.show({ type: 'error', text1: i18n.t('toasts.completeError'), text2: error.message });
     },
   });

@@ -20,7 +20,7 @@ interface Props {
   initialText?: string;
   onClose: () => void;
 }
-
+ 
 // Modal de criação de post acessível pelo botão (+) da bottom tab bar — segue
 // o padrão de modal do app (overlay escuro + card branco central, fecha ao
 // tocar fora ou no X). Cresce com o conteúdo (texto, mídia, sugestões de

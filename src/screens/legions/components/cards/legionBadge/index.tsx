@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
-import { Legion } from '../../../../../api/legions/legionsApi';
+import { Legion } from '../../../../../api/legion/dto';
 
 interface Props {
   legion: Legion;

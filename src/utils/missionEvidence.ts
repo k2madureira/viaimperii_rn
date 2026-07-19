@@ -9,6 +9,16 @@ import { MIN_EVIDENCE_TEXT_LENGTH } from './evidenceValidation';
  *
  * @param prefix Frase inicial já traduzida (ex.: `Concluí a missão "X".`).
  */
+/**
+ * Detecta o erro de dedup de evidência (backend retorna 422 quando o mesmo usuário
+ * reenvia um print já usado). A mensagem crua vem do backend em inglês; casamos por
+ * padrão (mesma abordagem tolerante já usada para o erro de "prova exigida").
+ */
+export function isDuplicateImageError(message?: string): boolean {
+  if (!message) return false;
+  return /already submitted|submitted before|new screenshot|já.*(enviad|utilizad|usad)/i.test(message);
+}
+
 export function buildAutoCompletionText(mission: Mission, prefix: string): string {
   const info = mission.acceptance_criteria?.trim() || mission.specialty_name?.trim() || '';
   let text = (info ? `${prefix} ${info}` : prefix).trim();

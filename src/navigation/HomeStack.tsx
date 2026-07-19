@@ -10,6 +10,7 @@ import PostDetailScreen from '../screens/postDetail';
 import RewardsScreen from '../screens/rewards';
 import HashtagFeedScreen from '../screens/hashtagFeed';
 import LeaderboardsScreen from '../screens/leaderboards';
+import AchievementsScreen from '../screens/achievements';
 import { FeedItem } from '../api/feed/feedApi';
 import { LeaderboardScope } from '../api/leaderboards/leaderboardsApi';
 
@@ -25,6 +26,7 @@ export type HomeStackParamList = {
   Leaderboards:
     | { scope?: LeaderboardScope; scopeId?: number; isoYear?: number; isoWeek?: number }
     | undefined;
+  Achievements: undefined;
 };
 
 export type HomeNavigationProp = NativeStackNavigationProp<HomeStackParamList>;
@@ -43,6 +45,7 @@ export default function HomeStack() {
       <Stack.Screen name="Rewards" component={RewardsScreen} />
       <Stack.Screen name="HashtagFeed" component={HashtagFeedScreen} />
       <Stack.Screen name="Leaderboards" component={LeaderboardsScreen} />
+      <Stack.Screen name="Achievements" component={AchievementsScreen} />
     </Stack.Navigator>
   );
 }

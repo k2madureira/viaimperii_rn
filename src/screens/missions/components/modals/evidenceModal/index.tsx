@@ -19,7 +19,6 @@ import { ImageIcon } from '../../../../../components/icons';
 import {
   Mission,
   MissionEvidence,
-  uploadEvidenceImage,
 } from '../../../../../api/missions/missionsApi';
 import { EVIDENCE_COMPRESS, MAX_EVIDENCE_WIDTH } from '../../../../../constants/evidence';
 import {
@@ -28,6 +27,7 @@ import {
   validateLink,
   validateText,
 } from '../../../../../utils/evidenceValidation';
+import { uploadMedia } from '../../../../../api/upload';
 
 /**
  * Redimensiona (sem upscale) e comprime a imagem para JPEG antes do upload,
@@ -46,12 +46,23 @@ async function compressEvidence(uri: string, originalWidth?: number): Promise<st
 interface Props {
   mission: Mission | null;
   submitting: boolean;
+  // Dedup do backend: a imagem enviada já foi usada antes por este usuário (422).
+  imageAlreadyUsed?: boolean;
+  // Limpa a sinalização de imagem repetida ao trocar/remover a imagem.
+  onClearImageError?: () => void;
   onClose: () => void;
   onSubmit: (evidence: MissionEvidence) => void;
 }
 
 // Modal de evidência para concluir missões com proof_type != none.
-export default function EvidenceModal({ mission, submitting, onClose, onSubmit }: Props) {
+export default function EvidenceModal({
+  mission,
+  submitting,
+  imageAlreadyUsed,
+  onClearImageError,
+  onClose,
+  onSubmit,
+}: Props) {
   const { t } = useTranslation();
   const proof = mission?.proof_type ?? 'none';
   const wantsLink = proof === 'link' || proof === 'any';
@@ -78,7 +89,7 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       quality: 1, // a compressão real é feita no compressEvidence (resize + JPEG)
     });
     if (result.canceled || !result.assets[0]) return;
@@ -87,6 +98,8 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
       setUploading(true); // reaproveita o estado de "ocupado" enquanto comprime
       const compressed = await compressEvidence(asset.uri, asset.width);
       setImageUri(compressed);
+      // Imagem nova → limpa eventual aviso de "imagem já utilizada".
+      onClearImageError?.();
     } catch (e: any) {
       Toast.show({ type: 'error', text1: t('evidenceModal.toastImageError'), text2: e?.message });
     } finally {
@@ -118,7 +131,7 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
       if (hasImage && imageUri) {
         setUploading(true);
         // compressEvidence sempre gera JPEG, então o content-type é fixo.
-        evidence.image_key = await uploadEvidenceImage(imageUri, 'image/jpeg');
+        evidence.image_key = await uploadMedia(imageUri, 'image/jpeg');
         setUploading(false);
       }
       onSubmit(evidence);
@@ -214,7 +227,10 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
                 <View className="rounded-[12px] overflow-hidden border border-[#e0e0e0]">
                   <Image source={{ uri: imageUri }} style={{ width: '100%', height: 160 }} resizeMode="cover" />
                   <TouchableOpacity
-                    onPress={() => setImageUri(null)}
+                    onPress={() => {
+                      setImageUri(null);
+                      onClearImageError?.();
+                    }}
                     className="absolute top-2 right-2 bg-black/60 rounded-full px-2 py-1">
                     <Text className="text-[11px] font-bold text-white">{t('evidenceModal.remove')}</Text>
                   </TouchableOpacity>
@@ -227,6 +243,13 @@ export default function EvidenceModal({ mission, submitting, onClose, onSubmit }
                   <ImageIcon size={18} color="#9E1B32" />
                   <Text className="text-[13px] font-bold text-primary-500">{t('evidenceModal.chooseImage')}</Text>
                 </TouchableOpacity>
+              )}
+              {imageAlreadyUsed && (
+                <View className="bg-primary-500/10 border border-primary-500/30 rounded-[10px] px-3 py-2">
+                  <Text className="text-[11px] font-semibold text-primary-500 leading-[15px]">
+                    {t('evidenceModal.imageAlreadyUsed')}
+                  </Text>
+                </View>
               )}
             </View>
           )}
