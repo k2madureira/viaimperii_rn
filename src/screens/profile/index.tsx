@@ -11,7 +11,13 @@ import { ChangePasswordModal } from '../dashboard/components';
 import { useUserProfile } from '../dashboard/model/queries/useUserProfile';
 import { useWallet } from '../dashboard/model/queries/useWallet';
 import { useUserStats } from '../missions/model/queries/useUserStats';
-import { AvatarPickerModal, AvatarViewerModal, ErrorState, XpProgress } from './components';
+import {
+  AchievementsCard,
+  AvatarPickerModal,
+  AvatarViewerModal,
+  ErrorState,
+  XpProgress,
+} from './components';
 import {
   MasterySection,
   PrivateSection,
@@ -97,8 +103,15 @@ export default function ProfileScreen() {
             onEditAvatar={() => setShowAvatarPicker(true)}
           />
 
-          {/* Destaque de XP total */}
-          <XpProgress totalXp={totalXp} />
+          {/* Conquistas (25%) + destaque de XP total (restante) */}
+          <View className="flex-row items-stretch gap-2.5">
+            <AchievementsCard
+              count={stats?.achievements_unlocked ?? data?.achievements?.length ?? 0}
+            />
+            <View className="flex-1">
+              <XpProgress totalXp={totalXp} />
+            </View>
+          </View>
 
           <ProfileCards data={data} rankName={rankName} totalXp={totalXp} />
 

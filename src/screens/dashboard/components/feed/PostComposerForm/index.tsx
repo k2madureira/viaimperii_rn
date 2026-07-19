@@ -9,10 +9,8 @@ import { ImageIcon } from '../../../../../components/icons';
 import {
   FeedAuthor,
   FeedScope,
-  FeedMediaContentType,
   MediaType,
   PostMediaInput,
-  uploadFeedMedia,
 } from '../../../../../api/feed/feedApi';
 import { useCreatePost } from '../../../model/mutations/useCreatePost';
 import MarkdownEditor, { Selection } from '../MarkdownEditor';
@@ -20,6 +18,7 @@ import MentionSuggestions from '../MentionSuggestions';
 import AnchoredPopover, { Anchor } from '../AnchoredPopover';
 import { markdownToHtml } from '../markdown';
 import { activeToken, replaceRange } from '../tokenUtils';
+import { MediaContentType, uploadMedia } from '../../../../../api/upload';
 
 // Imagem de feed é pública e exibida maior que a evidência — qualidade/resolução
 // um pouco mais altas, ainda comprimida para não enviar fotos de vários MB.
@@ -31,7 +30,7 @@ const MAX_MEDIA = 10; // espelha MAX_MEDIA_PER_POST do backend
 interface PickedMedia {
   uri: string;
   type: MediaType;
-  contentType: FeedMediaContentType;
+  contentType: MediaContentType;
 }
 
 async function compressFeedImage(uri: string, originalWidth?: number): Promise<string> {
@@ -44,7 +43,7 @@ async function compressFeedImage(uri: string, originalWidth?: number): Promise<s
   return out.uri;
 }
 
-function videoContentType(asset: ImagePicker.ImagePickerAsset): FeedMediaContentType {
+function videoContentType(asset: ImagePicker.ImagePickerAsset): MediaContentType {
   const mime = asset.mimeType ?? '';
   if (mime.includes('quicktime') || asset.uri.toLowerCase().endsWith('.mov')) return 'video/quicktime';
   return 'video/mp4';
@@ -84,7 +83,7 @@ export default function PostComposerForm({
 }: Props) {
   const { t } = useTranslation();
   const createM = useCreatePost();
-
+ 
   const [text, setText] = useState(initialText ?? '');
   const [selection, setSelection] = useState<Selection>({
     start: (initialText ?? '').length,
@@ -144,7 +143,7 @@ export default function PostComposerForm({
     const remaining = MAX_MEDIA - media.length;
     if (remaining <= 0) return;
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All, // imagens e vídeos
+      mediaTypes: ['images', 'videos'], // imagens e vídeos
       allowsMultipleSelection: true,
       selectionLimit: remaining,
       quality: 1,
@@ -161,7 +160,7 @@ export default function PostComposerForm({
           const compressed = await compressFeedImage(asset.uri, asset.width);
           picked.push({ uri: compressed, type: 'image', contentType: 'image/jpeg' });
         }
-      }
+      } 
       setMedia((prev) => [...prev, ...picked].slice(0, MAX_MEDIA));
     } catch (e: any) {
       Toast.show({ type: 'error', text1: t('evidenceModal.toastImageError'), text2: e?.message });
@@ -181,7 +180,7 @@ export default function PostComposerForm({
         setUploading(true);
         mediaInput = [];
         for (const m of media) {
-          const key = await uploadFeedMedia(m.uri, m.contentType);
+          const key = await uploadMedia(m.uri, m.contentType, 'feed');
           mediaInput.push({ key, type: m.type });
         }
         setUploading(false);

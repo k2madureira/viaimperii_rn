@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import { joinLegion } from '../../../../api/legions/legionsApi';
+import { viaimperiiApi } from '../../../../api';
 
 const BALANCE_LABEL: Record<string, string> = {
   shortage: i18n.t('toasts.balanceShortage'),
@@ -13,7 +13,7 @@ export function useJoinLegion(userId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (legionId: number) => joinLegion(userId as string, legionId),
+    mutationFn: (legionId: number) => viaimperiiApi.legion.join(userId as string, legionId),
     onSuccess: (result) => {
       // Sem nome (caso do 409 "já pertence") não mostra o toast de boas-vindas.
       if (result.legion_name) {

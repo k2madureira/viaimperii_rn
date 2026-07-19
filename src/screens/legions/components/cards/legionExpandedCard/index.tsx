@@ -4,7 +4,7 @@ import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
 import { LegionAttributes } from '../../../../../components';
-import { Legion } from '../../../../../api/legions/legionsApi';
+import { Legion } from '../../../../../api/legion/dto';
 import { HomeNavigationProp } from '../../../../../navigation/HomeStack';
 import ChangeLegionModal from '../../modals/changeLegionModal';
 

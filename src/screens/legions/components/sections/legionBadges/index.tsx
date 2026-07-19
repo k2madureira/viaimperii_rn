@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ScrollView, View } from 'react-native';
-import { Legion } from '../../../../../api/legions/legionsApi';
+import { Legion } from '../../../../../api/legion/dto';
 import { legionColorByIndex } from '../../../../../utils/legionColors';
 import LegionBadge from '../../cards/legionBadge';
 import LegionExpandedCard from '../../cards/legionExpandedCard';

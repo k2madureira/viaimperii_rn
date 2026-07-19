@@ -282,47 +282,6 @@ export async function completeMission(
   return readContent<CompleteMissionResult>(response);
 }
 
-// ── Upload de evidência (imagem) ──────────────────────────────────────────────
-
-export type EvidenceContentType = 'image/jpeg' | 'image/png' | 'image/webp';
-
-interface PresignResult {
-  upload_url: string;
-  key: string;
-  expires_in: number;
-}
-
-export async function presignEvidenceUpload(contentType: EvidenceContentType): Promise<PresignResult> {
-  const response = await apiFetch('/uploads/presign', {
-    method: 'POST',
-    body: JSON.stringify({ content_type: contentType }),
-  });
-  if (!response.ok) {
-    throw new Error(await readError(response, 'Erro ao preparar o envio da imagem'));
-  }
-  return readContent<PresignResult>(response);
-}
-
-/**
- * Faz upload do arquivo local direto ao S3 via presigned PUT e retorna a `key`
- * para enviar como `image_key` no /complete. O PUT vai direto ao bucket (sem auth).
- */
-export async function uploadEvidenceImage(
-  localUri: string,
-  contentType: EvidenceContentType,
-): Promise<string> {
-  const { upload_url, key } = await presignEvidenceUpload(contentType);
-  const blob = await (await fetch(localUri)).blob();
-  const put = await fetch(upload_url, {
-    method: 'PUT',
-    headers: { 'Content-Type': contentType },
-    body: blob,
-  });
-  if (!put.ok) {
-    throw new Error('Falha ao enviar a imagem para o armazenamento.');
-  }
-  return key;
-}
 
 // ── Revisão de missões (aprovação de pares) ───────────────────────────────────
 

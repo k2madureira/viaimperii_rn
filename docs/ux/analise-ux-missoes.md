@@ -2,7 +2,7 @@
 
 Auditoria criteriosa da tela de Missões (`src/screens/missions/`), o loop central do
 app. Cada ponto tem **severidade**, **evidência no código**, **impacto no usuário** e
-**recomendação**. Complementa `docs/engajamento-missoes.md` (foco em engajamento);
+**recomendação**. Complementa [`engajamento-missoes.md`](engajamento-missoes.md) (foco em engajamento);
 aqui o foco é **usabilidade, clareza e fricção**.
 
 Legenda de severidade:

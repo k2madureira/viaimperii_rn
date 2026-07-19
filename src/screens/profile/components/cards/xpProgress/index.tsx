@@ -11,7 +11,7 @@ interface Props {
 export default function XpProgress({ totalXp }: Props) {
   const { t } = useTranslation();
   return (
-    <View className="bg-[#6B1221] rounded-[16px] px-5 py-4 flex-row items-center justify-between">
+    <View className="bg-[#6B1221] rounded-[16px] px-5 py-4 flex-1 flex-row items-center justify-between">
       <Text className="text-[10px] font-bold text-white/40 tracking-[2px] uppercase">
         {t('profile.totalXp')}
       </Text>

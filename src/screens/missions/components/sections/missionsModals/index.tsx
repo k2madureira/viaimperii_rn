@@ -23,6 +23,8 @@ interface Props {
   evidence: {
     mission: Mission | null;
     submitting: boolean;
+    imageAlreadyUsed?: boolean;
+    onClearImageError?: () => void;
     onClose: () => void;
     onSubmit: (evidence: MissionEvidence) => void;
   };
@@ -92,6 +94,8 @@ export default function MissionsModals({
       <EvidenceModal
         mission={evidence.mission}
         submitting={evidence.submitting}
+        imageAlreadyUsed={evidence.imageAlreadyUsed}
+        onClearImageError={evidence.onClearImageError}
         onClose={evidence.onClose}
         onSubmit={evidence.onSubmit}
       />

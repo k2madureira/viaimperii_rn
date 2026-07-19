@@ -6,7 +6,7 @@ Documento de trabalho para atacar os problemas relatados:
 2. As missões **não chamam atenção**.
 3. Objetivo: **engajamento alto no dia-a-dia** (hábito diário).
 
-> Base: mapeamento em [`docs/appMap`](appMap/README.md) + leitura do código
+> Base: mapeamento em [`docs/architecture`](../architecture/README.md) + leitura do código
 > (`src/screens/missions`, `src/screens/dashboard`). Marca-se **[Front]**,
 > **[Back]** ou **[Front+Back]** por item, além de esforço e impacto estimados.
 

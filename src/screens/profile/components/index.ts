@@ -2,6 +2,7 @@
 
 // cards
 export { default as XpProgress } from './cards/xpProgress';
+export { default as AchievementsCard } from './cards/achievementsCard';
 export { default as LocalCard } from './cards/localCard';
 export { default as LocalRow } from './cards/localRow';
 export { default as StatCard } from './cards/statCard';
