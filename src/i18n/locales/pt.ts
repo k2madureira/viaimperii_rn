@@ -571,8 +571,10 @@ export default {
       reserved: 'Reservado pela votação',
       available: 'Disponível',
       reservedHint: 'O valor fica travado até a votação terminar. Nenhuma moeda sai do cofre antes da aprovação.',
-      // Centurião (líder derivado do XP, não eleito)
-      centurion: 'Centurião',
+      // Praefectus (líder derivado do XP, não eleito). O backend chama o cargo
+      // de "Centurião" no domínio e no `rule_description` — a troca é só de
+      // rótulo de UI, então as chaves e os tipos mantêm o nome do contrato.
+      centurion: 'Praefectus',
       centurionWhy: 'Ver por que ele lidera',
       daysInPost: '{{count}} dias no cargo',
       // `days_in_post: null` = mandato ainda não registrado. Nunca dizer "0 dias".
@@ -600,7 +602,7 @@ export default {
       hoistSuccessBody: '{{name}} — +{{pct}}% de XP para todos os membros.',
       standardActive: 'Já há um estandarte içado',
       treasuryInsufficient: 'O cofre não tem fundos disponíveis para este estandarte.',
-      notLeader: 'Apenas o Centurião pode propor estandartes.',
+      notLeader: 'Apenas o Praefectus pode propor estandartes.',
       // Votação aberta
       openVote: 'Votação aberta',
       votesProgress: '{{yes}} de {{required}} votos',

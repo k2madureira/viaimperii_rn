@@ -571,8 +571,10 @@ export default {
       reserved: 'Reserved by the vote',
       available: 'Available',
       reservedHint: 'This amount is locked until the vote ends. No coin leaves the treasury before approval.',
-      // Centurion (leader derived from XP, not elected)
-      centurion: 'Centurion',
+      // Praefectus (leader derived from XP, not elected). The backend calls the
+      // post "Centurião" in its domain and in `rule_description` — this is a UI
+      // label change only, so keys and types keep the contract's name.
+      centurion: 'Praefectus',
       centurionWhy: 'See why they lead',
       daysInPost: '{{count}} days in post',
       // `days_in_post: null` = no recorded term yet. Never say "0 days".
@@ -600,7 +602,7 @@ export default {
       hoistSuccessBody: '{{name}} — +{{pct}}% XP for all members.',
       standardActive: 'A standard is already flying',
       treasuryInsufficient: 'The treasury has no available funds for this standard.',
-      notLeader: 'Only the Centurion can propose standards.',
+      notLeader: 'Only the Praefectus can propose standards.',
       // Open vote
       openVote: 'Open vote',
       votesProgress: '{{yes}} of {{required}} votes',

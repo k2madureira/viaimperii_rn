@@ -11,7 +11,7 @@ export async function getLegionLeader(legionId: number): Promise<LegionLeaderRes
   if (!response.ok) {
     throw new LegionTreasuryApiError(
       response.status,
-      await readError(response, 'Erro ao carregar o Centurião da legião'),
+      await readError(response, 'Erro ao carregar o Praefectus da legião'),
     );
   }
 
