@@ -41,6 +41,14 @@ export default function CenturionCard({ leader, color, onPress }: Props) {
         <Text className="text-[13px] font-extrabold text-[#333]" numberOfLines={1}>
           {leader.user.name}
         </Text>
+        {/* `days_in_post: null` = DESCONHECIDO (mandato ainda não registrado
+            pelo job, ou o posto acabou de trocar) — nunca zero. Mostrar "0 dias"
+            aqui seria inventar um fato que o backend se recusou a afirmar. */}
+        <Text className="text-[10.5px] text-[#999] mt-0.5">
+          {leader.days_in_post == null
+            ? t('legions.treasury.justAppointed')
+            : t('legions.treasury.daysInPost', { count: leader.days_in_post })}
+        </Text>
       </View>
 
       <Text className="text-[16px] text-[#ccc]">›</Text>

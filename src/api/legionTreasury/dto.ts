@@ -65,6 +65,13 @@ export interface LegionLeader {
   rule_description: string; // texto pronto em PT-BR — exibir como veio
   active_days: number;
   active_members: number;
+  // Mandato (tabela `legion_leadership_terms`, gravada por job de hora em hora).
+  // AMBOS vêm null quando não há mandato registrado para este líder — o posto
+  // acabou de mudar, ou o job ainda não observou. `null` significa
+  // DESCONHECIDO, nunca "zero dias": a história é forward-only, então recém-
+  // empossado é estado normal e a UI precisa dizer isso em vez de mostrar 0.
+  since: string | null;
+  days_in_post: number | null;
   candidates: LeaderCandidate[]; // top 5, na ordem do critério
 }
 

@@ -4,7 +4,7 @@ import { Legion } from '../../../../../api/legion/dto';
 import { legionColorByIndex } from '../../../../../utils/legionColors';
 import LegionBadge from '../../cards/legionBadge';
 import LegionExpandedCard from '../../cards/legionExpandedCard';
-import LegionTreasurySection from '../legionTreasury';
+import LegionCenturionSection from '../legionCenturion';
 
 interface Props {
   legions: Legion[];
@@ -57,11 +57,11 @@ export default function LegionBadges({
         />
       )}
 
-      {/* Cofre — só na legião do próprio viewer (o contrato exige ser membro) */}
-      {selected && selected.id === userLegionId && (
-        <LegionTreasurySection
+      {/* Centurião de QUALQUER legião do carrossel — o endpoint de líder não
+          exige ser membro. O cofre saiu daqui para o Quartel General. */}
+      {selected && (
+        <LegionCenturionSection
           legionId={selected.id}
-          legionName={selected.name}
           color={legionColorByIndex(selectedIndex)}
         />
       )}

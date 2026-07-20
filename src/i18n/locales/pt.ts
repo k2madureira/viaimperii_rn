@@ -538,6 +538,7 @@ export default {
     membersPlural: 'membros',
     territories: 'Territórios',
     noTerritories: 'Nenhum território registrado.',
+    noProvinces: 'Nenhuma província registrada neste país.',
     province: 'província',
     provinces: 'províncias',
     users: 'usuários',
@@ -573,6 +574,9 @@ export default {
       // Centurião (líder derivado do XP, não eleito)
       centurion: 'Centurião',
       centurionWhy: 'Ver por que ele lidera',
+      daysInPost: '{{count}} dias no cargo',
+      // `days_in_post: null` = mandato ainda não registrado. Nunca dizer "0 dias".
+      justAppointed: 'Recém-empossado',
       activeMembers: '{{count}} membros ativos nos últimos {{days}} dias',
       ranking: 'Ranking do critério',
       criterionNote: 'Ordenado pelo XP ganho nos últimos {{days}} dias — não pelo XP total.',
