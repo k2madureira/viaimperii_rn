@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, TouchableOpacity } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { PRODUCT_TYPES, ProductType } from '../../../../../api/physical/physicalApi';
+import { PRODUCT_TYPES, ProductType } from '../../../../../api/physical';
 import { ShopIcon } from '../../../../../components/icons';
 import ProductPlaceholder from '../../cards/productPlaceholder';
 import { TYPE_COLOR } from '../../icons';

@@ -1,14 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import { rejectMission } from '../../../../api/missions/missionsApi';
+import { viaimperiiApi } from '../../../../api';
 
 export function useRejectMission() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ slug, executorId, reason }: { slug: string; executorId: string; reason?: string }) =>
-      rejectMission(slug, executorId, reason),
+      viaimperiiApi.missions.reject(slug, executorId, reason),
     onSuccess: () => {
       Toast.show({
         type: 'success',

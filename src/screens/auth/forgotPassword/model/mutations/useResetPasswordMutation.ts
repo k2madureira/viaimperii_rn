@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../../i18n';
-import { resetPasswordRequest } from '../../../../../api/auth/authApi';
+import { viaimperiiApi } from '../../../../../api';
 
 interface Vars {
   token: string;
@@ -10,7 +10,7 @@ interface Vars {
 
 export function useResetPasswordMutation(onSuccess?: () => void) {
   return useMutation({
-    mutationFn: ({ token, newPassword }: Vars) => resetPasswordRequest(token, newPassword),
+    mutationFn: ({ token, newPassword }: Vars) => viaimperiiApi.auth.resetPassword(token, newPassword),
     onSuccess: () => {
       Toast.show({
         type: 'success',

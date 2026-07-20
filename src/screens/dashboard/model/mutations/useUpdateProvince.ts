@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import { updateUserProvince } from '../../../../api/provinces/provincesApi';
+import { viaimperiiApi } from '../../../../api';
 
 export function useUpdateProvince(userId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (provinceId: number) => updateUserProvince(userId as string, provinceId),
+    mutationFn: (provinceId: number) => viaimperiiApi.provinces.updateUserProvince(userId as string, provinceId),
     onSuccess: (result) => {
       Toast.show({
         type: 'success',

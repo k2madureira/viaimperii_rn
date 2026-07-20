@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image, View } from 'react-native';
 import Text from '../../../../../components/text';
-import { FeedComment } from '../../../../../api/feed/feedApi';
+import { FeedComment } from '../../../../../api/feed';
 import { parseBackendDate } from '../../../../../utils/date';
 import { initials } from '../../../../../utils/name';
 

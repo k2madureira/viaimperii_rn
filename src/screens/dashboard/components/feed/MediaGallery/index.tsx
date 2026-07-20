@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Image, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
-import { FeedItem, PostMedia } from '../../../../../api/feed/feedApi';
+import { FeedItem, PostMedia } from '../../../../../api/feed';
 import ImageViewerModal from '../ImageViewerModal';
 import VideoViewerModal from '../VideoViewerModal';
 

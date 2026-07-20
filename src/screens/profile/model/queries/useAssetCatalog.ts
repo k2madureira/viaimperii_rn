@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { AssetRarity, getAssetCatalog } from '../../../../api/assets/assetsApi';
+import { viaimperiiApi } from '../../../../api';
+import { AssetRarity } from '../../../../api/assets';
 
 // Catálogo de avatares filtrado NO SERVIDOR por posse (aba) e raridade.
 // Filtrar no servidor é essencial: há >100 avatares e a paginação cortaria as
@@ -12,7 +13,7 @@ export function useAvatarCatalog(
   return useQuery({
     queryKey: ['asset-catalog', 'avatar', owned, rarity ?? 'all'],
     queryFn: () =>
-      getAssetCatalog({ type: 'avatar', owned, rarity: rarity ?? undefined, perPage: 100 }),
+      viaimperiiApi.assets.catalog({ type: 'avatar', owned, rarity: rarity ?? undefined, perPage: 100 }),
     enabled,
   });
 }

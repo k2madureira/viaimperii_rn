@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { AssetRarity } from '../../../../../api/assets/assetsApi';
+import { AssetRarity } from '../../../../../api/assets';
 import { AureusCoin, CoinAmount, ShopIcon, UnlockedIcon } from '../../../../../components/icons';
 import { useWallet } from '../../../../dashboard/model/queries/useWallet';
 import { useAvatarCatalog } from '../../../model/queries/useAssetCatalog';

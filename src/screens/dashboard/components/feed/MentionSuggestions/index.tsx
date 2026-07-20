@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Image, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
-import { FeedAuthor, searchUsers } from '../../../../../api/feed/feedApi';
+import { viaimperiiApi } from '../../../../../api';
+import { FeedAuthor } from '../../../../../api/feed';
 
 interface Props {
   query: string | null; // termo ativo (sem o @); null = escondido
@@ -34,7 +35,7 @@ export default function MentionSuggestions({ query, onSelect }: Props) {
     setLoading(true);
     const handle = setTimeout(async () => {
       try {
-        const res = await searchUsers(q, 8);
+        const res = await viaimperiiApi.feed.searchUsers(q, 8);
         if (alive) setItems(res);
       } catch {
         if (alive) setItems([]);

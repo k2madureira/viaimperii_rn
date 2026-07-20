@@ -2,8 +2,8 @@ import React from 'react';
 import { Image, LayoutChangeEvent, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { Rank } from '../../../../../api/ranks/ranksApi';
-import { UserTrack } from '../../../../../api/users/userApi';
+import { Rank } from '../../../../../api/ranks';
+import { UserTrack } from '../../../../../api/users';
 import { LockIcon } from '../../../../../components/icons';
 import { CHOICE_RANK_LEVEL } from '../../../../../constants/ranks';
 

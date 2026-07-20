@@ -3,7 +3,7 @@ import { Image, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { DenariusCoin, MedalIcon } from '../../../../../components/icons';
-import { LeaderboardItem } from '../../../../../api/leaderboards/leaderboardsApi';
+import { LeaderboardItem } from '../../../../../api/leaderboards';
 
 // Linha do placar: posição (medalha nos 3 primeiros), avatar, nome, patente
 // (mini) e XP. Pódio 1–3 recebe destaque de fundo + badge de prêmio em denarii.

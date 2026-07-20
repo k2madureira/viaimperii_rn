@@ -7,7 +7,7 @@ import {
 import { useEffect } from 'react';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../../i18n';
-import { oauthRequest } from '../../../../../api/auth/authApi';
+import { viaimperiiApi } from '../../../../../api';
 
 const redirectUri = makeRedirectUri({ scheme: 'viaimperii' });
 
@@ -19,7 +19,7 @@ const GITHUB_DISCOVERY = {
 
 function useOAuthMutation(provider: 'google' | 'github') {
   return useMutation({
-    mutationFn: (accessToken: string) => oauthRequest(provider, accessToken),
+    mutationFn: (accessToken: string) => viaimperiiApi.auth.oauth(provider, accessToken),
     onSuccess: () => {
       Toast.show({ type: 'success', text1: i18n.t('toasts.oauthSuccess') });
     },

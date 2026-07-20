@@ -2,7 +2,7 @@ import * as SecureStore from 'expo-secure-store';
 import { ACCESS_KEY, refreshAccessToken } from '../config/tokenManager';
 import { isTokenExpired } from '../config/jwt';
 import { apiFetch } from '../config/defaultApi';
-import { FeedAuthor } from '../feed/feedApi';
+import { FeedAuthor } from '../feed';
 
 const API_HOST = process.env.EXPO_PUBLIC_API_HOST;
 

@@ -1,8 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import {
-  getLeaderboardHistory,
-  LeaderboardScope,
-} from '../../../../api/leaderboards/leaderboardsApi';
+import { viaimperiiApi } from '../../../../api';
+import { LeaderboardScope } from '../../../../api/leaderboards';
 
 // Semana FECHADA do escopo. Sem `isoYear`/`isoWeek` volta a última semana
 // fechada; com eles (ex.: vindo de uma notificação de prêmio) abre a semana exata.
@@ -24,7 +22,7 @@ export function useLeaderboardHistory(
       isoWeek ?? null,
     ],
     queryFn: () =>
-      getLeaderboardHistory({
+      viaimperiiApi.leaderboards.history({
         scope,
         scopeId,
         professionId,

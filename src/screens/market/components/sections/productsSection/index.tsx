@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { PhysicalProduct, ProductType } from '../../../../../api/physical/physicalApi';
+import { PhysicalProduct, ProductType } from '../../../../../api/physical';
 import { useRedeemProduct } from '../../../model/mutations/useRedeemProduct';
 import TypeFilter from '../../filters/typeFilter';
 import ProductCard from '../../cards/productCard';

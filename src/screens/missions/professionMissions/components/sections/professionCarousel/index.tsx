@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import Text from '../../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { Profession } from '../../../../../../api/professions/professionsApi';
+import { Profession } from '../../../../../../api/professions';
 import { CarouselCard, PROF_CARD_WIDTH } from '../..';
 
 interface Props {

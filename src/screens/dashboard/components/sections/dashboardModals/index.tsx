@@ -5,7 +5,7 @@ import {
   ProvinceSetupModal,
   TrackSelectModal,
 } from '../../../../../components';
-import { FeedItem } from '../../../../../api/feed/feedApi';
+import { FeedItem } from '../../../../../api/feed';
 
 import { useJoinLegion } from '../../../../missions/model/mutations/useJoinLegion';
 import { useTracks } from '../../../../ranks/model/queries/useTracks';

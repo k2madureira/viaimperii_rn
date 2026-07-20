@@ -4,7 +4,7 @@ import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
-import { Mission } from '../../../../../api/missions/missionsApi';
+import { Mission } from '../../../../../api/missions';
 import { formatBackendDateTime } from '../../../../../utils/date';
 import { useMissionStatus } from '../../../model/queries/useMissionStatus';
 import { useAuth } from '../../../../../contexts/AuthContext';

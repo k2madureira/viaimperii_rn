@@ -2,7 +2,7 @@ import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { StatsPeriod } from '../../../../../api/users/userApi';
+import { StatsPeriod } from '../../../../../api/users';
 
 interface Props {
   value: StatsPeriod;

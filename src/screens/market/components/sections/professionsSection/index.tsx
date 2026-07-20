@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from 'react';
 import { View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { Profession } from '../../../../../api/professions/professionsApi';
+import { Profession } from '../../../../../api/professions';
 import { LockIcon } from '../../../../../components/icons';
 import SpecialtyFilter, { SpecialtyOption } from '../../filters/specialtyFilter';
 import ProfessionCard from '../../cards/professionCard';

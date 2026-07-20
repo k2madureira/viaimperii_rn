@@ -3,7 +3,7 @@ import { TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { useNavigation } from '@react-navigation/native';
-import { FeedItem, ReactionType } from '../../../../../api/feed/feedApi';
+import { FeedItem, ReactionType } from '../../../../../api/feed';
 import { HomeNavigationProp } from '../../../../../navigation/HomeStack';
 import { useLegions } from '../../../../missions/model/queries/useLegions';
 import { FeedCard } from '../../../../dashboard/components/feed';

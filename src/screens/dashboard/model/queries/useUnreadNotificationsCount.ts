@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { AppState, AppStateStatus } from 'react-native';
-import { getUnreadNotificationsCount } from '../../../../api/notifications/notificationsApi';
+import { viaimperiiApi } from '../../../../api';
 
 // O push em tempo real (SSE, via useNotificationEvents) mantém a contagem fresca
 // enquanto o app está em primeiro plano — não precisa de polling. O único gap é
@@ -25,7 +25,7 @@ export function useUnreadNotificationsCount(enabled = true) {
 
   return useQuery({
     queryKey: ['notifications-unread-count'],
-    queryFn: getUnreadNotificationsCount,
+    queryFn: viaimperiiApi.notifications.unreadCount,
     enabled,
   });
 }

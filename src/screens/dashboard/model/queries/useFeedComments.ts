@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { getFeedComments } from '../../../../api/feed/feedApi';
+import { viaimperiiApi } from '../../../../api';
 
 // Mesma lógica de carregamento do feed: primeira leva maior, incrementos menores.
 const FIRST_PAGE_SIZE = 10;
@@ -14,7 +14,7 @@ export function useFeedComments(eventId: number | null, enabled = true) {
   return useInfiniteQuery({
     queryKey: ['feed-comments', eventId],
     queryFn: ({ pageParam }) =>
-      getFeedComments(
+      viaimperiiApi.feed.comments(
         eventId as number,
         pageParam as number | null,
         pageParam == null ? FIRST_PAGE_SIZE : NEXT_PAGE_SIZE,

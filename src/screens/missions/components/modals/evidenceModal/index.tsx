@@ -19,7 +19,7 @@ import { ImageIcon } from '../../../../../components/icons';
 import {
   Mission,
   MissionEvidence,
-} from '../../../../../api/missions/missionsApi';
+} from '../../../../../api/missions';
 import { EVIDENCE_COMPRESS, MAX_EVIDENCE_WIDTH } from '../../../../../constants/evidence';
 import {
   MIN_EVIDENCE_TEXT_LENGTH,
@@ -27,7 +27,7 @@ import {
   validateLink,
   validateText,
 } from '../../../../../utils/evidenceValidation';
-import { uploadMedia } from '../../../../../api/upload';
+import { viaimperiiApi } from '../../../../../api';
 
 /**
  * Redimensiona (sem upscale) e comprime a imagem para JPEG antes do upload,
@@ -131,7 +131,7 @@ export default function EvidenceModal({
       if (hasImage && imageUri) {
         setUploading(true);
         // compressEvidence sempre gera JPEG, então o content-type é fixo.
-        evidence.image_key = await uploadMedia(imageUri, 'image/jpeg');
+        evidence.image_key = await viaimperiiApi.upload.media(imageUri, 'image/jpeg');
         setUploading(false);
       }
       onSubmit(evidence);

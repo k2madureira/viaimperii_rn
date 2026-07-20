@@ -1,20 +1,15 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import {
-  abandonMission,
-  completeMission,
-  MissionEvidence,
-  PaginatedMissions,
-  startMission,
-} from '../../../../api/missions/missionsApi';
+import { viaimperiiApi } from '../../../../api';
+import { MissionEvidence, PaginatedMissions } from '../../../../api/missions';
 import { isDuplicateImageError } from '../../../../utils/missionEvidence';
 
 export function useStartMission() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (slug: string) => startMission(slug),
+    mutationFn: (slug: string) => viaimperiiApi.missions.start(slug),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['missions'] });
       queryClient.invalidateQueries({ queryKey: ['missions-available'] });
@@ -34,7 +29,7 @@ export function useCompleteMission() {
 
   return useMutation({
     mutationFn: (vars: { slug: string; evidence?: MissionEvidence }) =>
-      completeMission(vars.slug, vars.evidence),
+      viaimperiiApi.missions.complete(vars.slug, vars.evidence),
     onSuccess: (result, vars) => {
       // Reflete o novo status IMEDIATAMENTE nas listas em cache (['missions', ...]),
       // sem depender do refetch: o card em "Ativas" troca na hora para o painel de
@@ -101,7 +96,7 @@ export function useAbandonMission() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (slug: string) => abandonMission(slug),
+    mutationFn: (slug: string) => viaimperiiApi.missions.abandon(slug),
     onSuccess: () => {
       Toast.show({ type: 'success', text1: i18n.t('toasts.abandonTitle'), text2: i18n.t('toasts.abandonBody') });
       queryClient.invalidateQueries({ queryKey: ['missions'] });

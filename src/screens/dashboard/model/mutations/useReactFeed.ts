@@ -1,13 +1,8 @@
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import {
-  FeedItem,
-  FeedListResponse,
-  reactFeed,
-  ReactionType,
-  unreactFeed,
-} from '../../../../api/feed/feedApi';
+import { viaimperiiApi } from '../../../../api';
+import { FeedItem, FeedListResponse, ReactionType } from '../../../../api/feed';
 
 interface Vars {
   eventId: number;
@@ -46,7 +41,7 @@ export function useReactFeed() {
 
   return useMutation({
     mutationFn: ({ eventId, type, currentMine }: Vars) =>
-      currentMine === type ? unreactFeed(eventId) : reactFeed(eventId, type),
+      currentMine === type ? viaimperiiApi.feed.unreact(eventId) : viaimperiiApi.feed.react(eventId, type),
 
     onMutate: async ({ eventId, type, currentMine }: Vars) => {
       await queryClient.cancelQueries({ queryKey: ['feed'] });

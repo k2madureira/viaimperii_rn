@@ -11,7 +11,8 @@ import Text from '../text';
 import TextInput from '../textInput';
 import * as Location from 'expo-location';
 import { useTranslation } from 'react-i18next';
-import { getProvinces, Province } from '../../api/provinces/provincesApi';
+import { viaimperiiApi } from '../../api';
+import { Province } from '../../api/provinces';
 
 type Step = 'intro' | 'locating' | 'confirm' | 'manual';
 
@@ -49,7 +50,7 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
     setLoadingList(true);
     const t = setTimeout(async () => {
       try {
-        const list = await getProvinces(search.trim() || undefined);
+        const list = await viaimperiiApi.provinces.list(search.trim() || undefined);
         if (active) setResults(list);
       } catch {
         if (active) setResults([]);
@@ -88,7 +89,7 @@ export default function ProvinceSetupModal({ visible, pending = false, onConfirm
         return;
       }
 
-      const matches = await getProvinces(region);
+      const matches = await viaimperiiApi.provinces.list(region);
       if (matches.length > 0) {
         setDetected(matches[0]);
         setStep('confirm');

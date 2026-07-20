@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getMission, Mission } from '../../../../api/missions/missionsApi';
+import { viaimperiiApi } from '../../../../api';
+import { Mission } from '../../../../api/missions';
 import { parseBackendDate } from '../../../../utils/date';
 
 /**
@@ -30,7 +31,7 @@ function intervalForRemaining(seconds: number): number {
 export function useMissionStatus(slug: string | null, enabled: boolean) {
   return useQuery({
     queryKey: ['mission-status', slug],
-    queryFn: () => getMission(slug as string),
+    queryFn: () => viaimperiiApi.missions.detail(slug as string),
     enabled: enabled && !!slug,
     refetchInterval: (query) => {
       const data = query.state.data as Mission | undefined;

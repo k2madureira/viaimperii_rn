@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getMissions, Mission, MissionSort, MissionStatus } from '../../../../api/missions/missionsApi';
+import { viaimperiiApi } from '../../../../api';
+import { Mission, MissionSort, MissionStatus } from '../../../../api/missions';
 
 export function useMissions(
   status?: MissionStatus,
@@ -9,7 +10,7 @@ export function useMissions(
 ) {
   return useQuery({
     queryKey: ['missions', status ?? 'all', sort ?? null, professionId ?? null],
-    queryFn: () => getMissions(status, sort, professionId ?? undefined),
+    queryFn: () => viaimperiiApi.missions.list(status, sort, professionId ?? undefined),
     enabled,
     select: (data): Mission[] => data.items,
   });

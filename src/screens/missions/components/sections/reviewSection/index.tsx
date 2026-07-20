@@ -2,7 +2,7 @@ import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { ToReviewItem } from '../../../../../api/missions/missionsApi';
+import { ToReviewItem } from '../../../../../api/missions';
 import { useApproveMission } from '../../../model/mutations/useApproveMission';
 import { useRejectMission } from '../../../model/mutations/useRejectMission';
 import ReviewItem from '../../cards/reviewItem';

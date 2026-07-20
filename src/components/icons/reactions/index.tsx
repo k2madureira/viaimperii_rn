@@ -1,6 +1,6 @@
 import React from 'react';
 import Svg, { Circle, G, Path } from 'react-native-svg';
-import { ReactionType } from '../../../api/feed/feedApi';
+import { ReactionType } from '../../../api/feed';
 
 interface IconProps {
   size?: number;

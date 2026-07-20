@@ -1,5 +1,5 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { getHashtagFeed } from '../../../../api/feed/feedApi';
+import { viaimperiiApi } from '../../../../api';
 
 const FIRST_PAGE_SIZE = 10;
 const NEXT_PAGE_SIZE = 5;
@@ -9,7 +9,7 @@ export function useHashtagFeed(tag: string, enabled = true) {
   return useInfiniteQuery({
     queryKey: ['feed-hashtag', tag],
     queryFn: ({ pageParam }) =>
-      getHashtagFeed(
+      viaimperiiApi.feed.hashtag(
         tag,
         pageParam as number | null,
         pageParam == null ? FIRST_PAGE_SIZE : NEXT_PAGE_SIZE,

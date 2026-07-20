@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { getReactors, ReactionType } from '../../../../api/feed/feedApi';
+import { viaimperiiApi } from '../../../../api';
+import { ReactionType } from '../../../../api/feed';
 
 /**
  * Lista (paginada, keyset) os usuários que reagiram a um evento do feed,
@@ -14,7 +15,7 @@ export function useReactors(
   return useInfiniteQuery({
     queryKey: ['feed-reactors', eventId, type],
     queryFn: ({ pageParam }) =>
-      getReactors(eventId as number, type, pageParam as number | null),
+      viaimperiiApi.feed.reactors(eventId as number, type, pageParam as number | null),
     initialPageParam: null as number | null,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
     enabled: enabled && eventId != null,

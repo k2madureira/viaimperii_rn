@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { LeaderboardViewer } from '../../../../../api/leaderboards/leaderboardsApi';
+import { LeaderboardViewer } from '../../../../../api/leaderboards';
 
 // Linha fixada do próprio viewer ("Você — #14") quando ele está fora do top-N
 // visível. Se `viewer.position === null`, ele ainda não pontuou na semana.

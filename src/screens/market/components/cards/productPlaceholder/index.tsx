@@ -1,6 +1,6 @@
 import React from 'react';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
-import { ProductType } from '../../../../../api/physical/physicalApi';
+import { ProductType } from '../../../../../api/physical';
 
 interface Props {
   type: ProductType;

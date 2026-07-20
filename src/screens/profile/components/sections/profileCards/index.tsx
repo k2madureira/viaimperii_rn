@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { GetUserResponse } from '../../../../../api/users/userApi';
+import { GetUserResponse } from '../../../../../api/users';
 import { legionColorById } from '../../../../../utils/legionColors';
 import { LegionCard, RankCard } from '../../../../dashboard/components';
 import { useLegions } from '../../../../missions/model/queries/useLegions';
