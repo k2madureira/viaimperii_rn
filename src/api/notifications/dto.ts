@@ -9,7 +9,12 @@ export type NotificationType =
   | 'mission_finalized'
   | 'rank_up'
   | 'medal_earned'
-  | 'new_follower';
+  | 'new_follower'
+  // Votação de estandarte: proposta aberta (para todos menos o proponente) e
+  // encerrada (qualquer desfecho). Sem o aviso ninguém vota e a proposta
+  // expiraria por inércia — o deep-link faz parte da mecânica.
+  | 'legion_standard_proposed'
+  | 'legion_standard_resolved';
 
 export interface NotificationItem {
   id: number;

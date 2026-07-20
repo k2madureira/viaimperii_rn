@@ -4,6 +4,7 @@ import { Legion } from '../../../../../api/legion/dto';
 import { legionColorByIndex } from '../../../../../utils/legionColors';
 import LegionBadge from '../../cards/legionBadge';
 import LegionExpandedCard from '../../cards/legionExpandedCard';
+import LegionTreasurySection from '../legionTreasury';
 
 interface Props {
   legions: Legion[];
@@ -53,6 +54,15 @@ export default function LegionBadges({
           userHasLegion={userHasLegion}
           totalXp={totalXp}
           userId={userId}
+        />
+      )}
+
+      {/* Cofre — só na legião do próprio viewer (o contrato exige ser membro) */}
+      {selected && selected.id === userLegionId && (
+        <LegionTreasurySection
+          legionId={selected.id}
+          legionName={selected.name}
+          color={legionColorByIndex(selectedIndex)}
         />
       )}
     </View>
