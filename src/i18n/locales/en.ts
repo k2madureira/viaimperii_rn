@@ -575,7 +575,8 @@ export default {
       centurionWhy: 'See why they lead',
       activeMembers: '{{count}} active members in the last {{days}} days',
       ranking: 'Criterion ranking',
-      recentXp: '{{xp}} XP in the window',
+      criterionNote: 'Ranked by XP earned in the last {{days}} days — not by lifetime XP.',
+      totalXp: 'Lifetime: {{xp}} XP',
       // Standard
       activeStandard: 'Active standard',
       xpBoost: '+{{pct}}% XP',

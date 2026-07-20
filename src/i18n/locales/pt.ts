@@ -575,7 +575,8 @@ export default {
       centurionWhy: 'Ver por que ele lidera',
       activeMembers: '{{count}} membros ativos nos últimos {{days}} dias',
       ranking: 'Ranking do critério',
-      recentXp: '{{xp}} XP na janela',
+      criterionNote: 'Ordenado pelo XP ganho nos últimos {{days}} dias — não pelo XP total.',
+      totalXp: 'Total: {{xp}} XP',
       // Estandarte
       activeStandard: 'Estandarte ativo',
       xpBoost: '+{{pct}}% XP',

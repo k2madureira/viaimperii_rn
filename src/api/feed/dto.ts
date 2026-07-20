@@ -39,6 +39,12 @@ export interface FeedAuthor {
   active_avatar: FeedActiveAvatar | null;
   rank: FeedRankMini | null;
   legion_id: number | null;
+  // Centurião da legião (§14.1). Vem resolvido ao vivo em TODO payload de autor
+  // — feed, comentários, fila de revisão, leaderboards, notificações, menções —
+  // então o selo pode ser exibido em qualquer um desses pontos sem chamada
+  // extra. Best-effort no backend: uma falha derruba o selo, nunca a identidade,
+  // por isso o default é `false` e não um estado de erro.
+  is_legion_leader?: boolean;
 }
 
 export interface ReactionSummary {

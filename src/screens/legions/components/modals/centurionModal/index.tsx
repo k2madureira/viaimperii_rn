@@ -55,8 +55,12 @@ export default function CenturionModal({ visible, leader, color, onClose }: Prop
           {/* Ranking do critério */}
           {leader.candidates.length > 0 && (
             <>
-              <Text className="text-[11px] font-bold text-[#999] tracking-[1.5px] uppercase mt-5 mb-2">
+              <Text className="text-[11px] font-bold text-[#999] tracking-[1.5px] uppercase mt-5 mb-1">
                 {t('legions.treasury.ranking')}
+              </Text>
+              {/* Sem isto o leitor assume que a ordem segue o XP total. */}
+              <Text className="text-[10.5px] text-[#aaa] leading-[14px] mb-2">
+                {t('legions.treasury.criterionNote', { days: leader.active_days })}
               </Text>
 
               <ScrollView style={{ maxHeight: 260 }} showsVerticalScrollIndicator={false}>
@@ -103,14 +107,17 @@ function CandidateRow({
         <Text className="text-[12.5px] font-bold text-[#333]" numberOfLines={1}>
           {candidate.user.name}
         </Text>
-        {/* `recent_xp` é o que qualificou o membro como ativo na janela. */}
+        {/* `total_xp` é só o DESEMPATE — vai como contexto, nunca em destaque:
+            a lista é ordenada por `recent_xp`, então dar destaque ao vitalício
+            faria o ranking parecer fora de ordem. */}
         <Text className="text-[10.5px] text-[#999] mt-0.5">
-          {t('legions.treasury.recentXp', { xp: candidate.recent_xp })}
+          {t('legions.treasury.totalXp', { xp: candidate.total_xp.toLocaleString() })}
         </Text>
       </View>
 
+      {/* O critério: XP ganho DENTRO da janela de atividade. */}
       <Text className="text-[12.5px] font-extrabold" style={{ color: '#555' }}>
-        {candidate.total_xp.toLocaleString()} XP
+        {candidate.recent_xp.toLocaleString()} XP
       </Text>
     </View>
   );
