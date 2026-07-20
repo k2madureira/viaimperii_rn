@@ -4,7 +4,7 @@ import { registerAuthHandlers } from '../api/config/authBridge';
 import { closeMissionEvents } from '../api/missions/missionEvents';
 import { closeFeedEvents } from '../api/feed/feedEvents';
 import { closeNotificationEvents } from '../api/notifications/notificationEvents';
-import { LoginStreak } from '../api/auth/authApi';
+import { LoginStreak } from '../api/auth';
 
 const ACCESS_KEY = 'access_token';
 const REFRESH_KEY = 'refresh_token';

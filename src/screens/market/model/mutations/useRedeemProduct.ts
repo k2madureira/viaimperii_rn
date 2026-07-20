@@ -1,14 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import { redeemProduct } from '../../../../api/physical/physicalApi';
+import { viaimperiiApi } from '../../../../api';
 
 export function useRedeemProduct() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (vars: { slug: string; shippingInfo?: string }) =>
-      redeemProduct(vars.slug, vars.shippingInfo),
+      viaimperiiApi.physical.redeem(vars.slug, vars.shippingInfo),
     onSuccess: (result) => {
       Toast.show({
         type: 'success',

@@ -1,14 +1,14 @@
 import { useMutation } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../../i18n';
-import { loginRequest } from '../../../../../api/auth/authApi';
+import { viaimperiiApi } from '../../../../../api';
 import { useAuth } from '../../../../../contexts/AuthContext';
 
 export function useLoginMutation(onIncompleteSignup?: (email: string) => void) {
   const { signIn } = useAuth();
 
   return useMutation({
-    mutationFn: loginRequest,
+    mutationFn: viaimperiiApi.auth.login,
     onSuccess: async (data) => {
       await signIn(data.access_token, data.refresh_token, {
         user_id: data.user_id,

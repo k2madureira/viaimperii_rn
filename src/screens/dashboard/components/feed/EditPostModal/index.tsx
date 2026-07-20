@@ -14,13 +14,13 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
 import { ImageIcon } from '../../../../../components/icons';
-import { FeedAuthor, FeedItem } from '../../../../../api/feed/feedApi';
+import { viaimperiiApi } from '../../../../../api';
+import { FeedAuthor, FeedItem } from '../../../../../api/feed';
 import { useUpdatePost } from '../../../model/mutations/useUpdatePost';
 import MarkdownEditor, { Selection } from '../MarkdownEditor';
 import MentionSuggestions from '../MentionSuggestions';
 import { htmlToMarkdown, markdownToHtml } from '../markdown';
 import { activeToken, replaceRange } from '../tokenUtils';
-import { uploadMedia } from '../../../../../api/upload';
 
 const FEED_IMAGE_MAX_WIDTH = 1280;
 const FEED_IMAGE_COMPRESS = 0.7;
@@ -137,7 +137,7 @@ function EditPostForm({ item, onClose }: { item: FeedItem; onClose: () => void }
       if (newImageUri) {
         // nova imagem escolhida → sobe e troca
         setUploading(true);
-        input.image_key = await uploadMedia(newImageUri, 'image/jpeg', 'feed');
+        input.image_key = await viaimperiiApi.upload.media(newImageUri, 'image/jpeg', 'feed');
         setUploading(false);
       } else if (keptImageUrl == null && item.image_url != null) {
         // imagem existente foi removida

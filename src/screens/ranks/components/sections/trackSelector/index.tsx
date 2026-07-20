@@ -1,6 +1,6 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Track } from '../../../../../api/ranks/ranksApi';
+import { Track } from '../../../../../api/ranks';
 import TrackTab from '../../buttons/trackTab';
 
 interface Props {

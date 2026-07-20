@@ -1,6 +1,6 @@
 import React from 'react';
 import { LegionSelectModal } from '../../../../../../components';
-import { Mission, MissionEvidence } from '../../../../../../api/missions/missionsApi';
+import { Mission, MissionEvidence } from '../../../../../../api/missions';
 import { EvidenceModal, MissionCelebration, RankUpModal } from '../../../../components';
 import { useLegions } from '../../../../model/queries/useLegions';
 import { useJoinLegion } from '../../../../model/mutations/useJoinLegion';

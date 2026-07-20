@@ -4,7 +4,7 @@ import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import Svg, { Path, Rect } from 'react-native-svg';
 import { CoinAmount, LockIcon } from '../../../../../components/icons';
-import { Profession } from '../../../../../api/professions/professionsApi';
+import { Profession } from '../../../../../api/professions';
 
 interface Props {
   profession: Profession;

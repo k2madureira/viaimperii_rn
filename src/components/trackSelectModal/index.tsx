@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import Text from '../text';
 import { useTranslation } from 'react-i18next';
-import { Track } from '../../api/ranks/ranksApi';
+import { Track } from '../../api/ranks';
 
 const TRACK_FLAVOR_SLUGS = ['legionarios', 'patricios'];
 

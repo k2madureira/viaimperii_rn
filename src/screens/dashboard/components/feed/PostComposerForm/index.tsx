@@ -11,14 +11,15 @@ import {
   FeedScope,
   MediaType,
   PostMediaInput,
-} from '../../../../../api/feed/feedApi';
+} from '../../../../../api/feed';
 import { useCreatePost } from '../../../model/mutations/useCreatePost';
 import MarkdownEditor, { Selection } from '../MarkdownEditor';
 import MentionSuggestions from '../MentionSuggestions';
 import AnchoredPopover, { Anchor } from '../AnchoredPopover';
 import { markdownToHtml } from '../markdown';
 import { activeToken, replaceRange } from '../tokenUtils';
-import { MediaContentType, uploadMedia } from '../../../../../api/upload';
+import { viaimperiiApi } from '../../../../../api';
+import { MediaContentType } from '../../../../../api/upload';
 
 // Imagem de feed é pública e exibida maior que a evidência — qualidade/resolução
 // um pouco mais altas, ainda comprimida para não enviar fotos de vários MB.
@@ -180,7 +181,7 @@ export default function PostComposerForm({
         setUploading(true);
         mediaInput = [];
         for (const m of media) {
-          const key = await uploadMedia(m.uri, m.contentType, 'feed');
+          const key = await viaimperiiApi.upload.media(m.uri, m.contentType, 'feed');
           mediaInput.push({ key, type: m.type });
         }
         setUploading(false);

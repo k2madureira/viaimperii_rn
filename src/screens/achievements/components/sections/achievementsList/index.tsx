@@ -2,7 +2,7 @@ import React from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { Achievement } from '../../../../../api/users/userApi';
+import { Achievement } from '../../../../../api/users';
 import AchievementRow from '../../cards/achievementRow';
 
 interface Props {

@@ -4,7 +4,7 @@ import { Alert, Image, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { HomeNavigationProp } from '../../../../../navigation/HomeStack';
-import { FeedItem, ReactionType } from '../../../../../api/feed/feedApi';
+import { FeedItem, ReactionType } from '../../../../../api/feed';
 import { formatPostTime } from '../../../../../utils/date';
 import { CommentIcon, EditIcon, EyeIcon, TrashIcon } from '../../../../../components/icons';
 import FeedReactions, { ReactionCluster } from '../FeedReactions';

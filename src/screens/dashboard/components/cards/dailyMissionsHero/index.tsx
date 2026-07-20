@@ -4,7 +4,7 @@ import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import Toast from 'react-native-toast-message';
 import ProgressRing from '../../../../../components/progressRing';
-import { MissionAllowance } from '../../../../../api/missions/missionsApi';
+import { MissionAllowance } from '../../../../../api/missions';
 import {
   DAILY_GOAL_REWARD_DENARIUS,
   DAILY_MISSION_GOAL,

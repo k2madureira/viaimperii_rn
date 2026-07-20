@@ -2,7 +2,7 @@ import React from 'react';
 import { View } from 'react-native';
 import Text from '../../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { Mission, MissionDifficulty } from '../../../../../../api/missions/missionsApi';
+import { Mission, MissionDifficulty } from '../../../../../../api/missions';
 import { ProfessionTheme } from '../../../../../../utils/color';
 import { DifficultyFilter, EmptyBox, ErrorBox } from '../../../../components';
 import { Loading, StatusTab } from '../..';

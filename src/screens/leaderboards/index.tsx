@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { WalletButton } from '../dashboard/components';
 import { useWallet } from '../dashboard/model/queries/useWallet';
 import { HomeStackParamList } from '../../navigation/HomeStack';
-import { LeaderboardScope } from '../../api/leaderboards/leaderboardsApi';
+import { LeaderboardScope } from '../../api/leaderboards';
 import { useLeaderboardScopes } from './model/queries/useLeaderboardScopes';
 import { useLeaderboard } from './model/queries/useLeaderboard';
 import { useLeaderboardHistory } from './model/queries/useLeaderboardHistory';

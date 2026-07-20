@@ -1,11 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../../i18n';
-import { createUserRequest, CreateUserPayload } from '../../../../../api/auth/authApi';
+import { viaimperiiApi } from '../../../../../api';
+import { CreateUserPayload } from '../../../../../api/auth';
 
 export function useSignupMutation(onSuccess: () => void) {
   return useMutation({
-    mutationFn: (data: CreateUserPayload) => createUserRequest(data),
+    mutationFn: (data: CreateUserPayload) => viaimperiiApi.auth.createUser(data),
     onSuccess: () => onSuccess(),
     onError: (error: Error) => {
       Toast.show({

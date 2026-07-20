@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import { claimAllDailyRewards, claimDailyReward } from '../../../../api/rewards/dailyRewardsApi';
+import { viaimperiiApi } from '../../../../api';
 
 // Chaves invalidadas após qualquer resgate (carteira/perfil mudam com o grant).
 const REWARD_KEYS = [['daily-rewards'], ['wallet'], ['user-profile'], ['ranking']];
@@ -12,7 +12,7 @@ export function useClaimDailyReward() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ slug, count }: { slug: string; count?: number }) =>
-      claimDailyReward(slug, count),
+      viaimperiiApi.dailyRewards.claim(slug, count),
     onSuccess: () => {
       Toast.show({ type: 'success', text1: i18n.t('rewards.claimedToast') });
       REWARD_KEYS.forEach((queryKey) => queryClient.invalidateQueries({ queryKey }));
@@ -27,7 +27,7 @@ export function useClaimDailyReward() {
 export function useClaimAllDailyRewards() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (slugs: string[]) => claimAllDailyRewards(slugs),
+    mutationFn: (slugs: string[]) => viaimperiiApi.dailyRewards.claimAll(slugs),
     onSuccess: (results) => {
       const ok = results.filter((r) => r.status === 'fulfilled').length;
       if (ok > 0) {

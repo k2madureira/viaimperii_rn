@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { LeaderboardScope } from '../../../../../api/leaderboards/leaderboardsApi';
+import { LeaderboardScope } from '../../../../../api/leaderboards';
 import { HistoryToggle, ResetCountdown, ScopeTab } from '../../index';
 
 // Cabeçalho da tela: título + toggle live/histórico, fileira de abas de escopo

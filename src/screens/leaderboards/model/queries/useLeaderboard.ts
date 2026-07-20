@@ -1,8 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import {
-  getLeaderboard,
-  LeaderboardScope,
-} from '../../../../api/leaderboards/leaderboardsApi';
+import { viaimperiiApi } from '../../../../api';
+import { LeaderboardScope } from '../../../../api/leaderboards';
 
 // Placar ao vivo do escopo selecionado. `scopeKey` = id da instância
 // (legião/província) ou `professionId`; null no global.
@@ -15,7 +13,7 @@ export function useLeaderboard(
   return useQuery({
     queryKey: ['leaderboard', scope, scopeId ?? null, professionId ?? null],
     queryFn: () =>
-      getLeaderboard({ scope, scopeId, professionId, perPage: 50 }),
+      viaimperiiApi.leaderboards.board({ scope, scopeId, professionId, perPage: 50 }),
     enabled,
   });
 }

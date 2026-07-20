@@ -1,4 +1,4 @@
-import { Mission } from '../api/missions/missionsApi';
+import { Mission } from '../api/missions';
 import { MIN_EVIDENCE_TEXT_LENGTH } from './evidenceValidation';
 
 /**

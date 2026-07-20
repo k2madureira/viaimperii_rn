@@ -1,5 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { FeedView, getFeed } from '../../../../api/feed/feedApi';
+import { viaimperiiApi } from '../../../../api';
+import { FeedView } from '../../../../api/feed';
 
 // Primeira leva maior; leituras seguintes menores (carregamento incremental
 // conforme o usuário se aproxima do fim da lista).
@@ -15,7 +16,7 @@ export function useFeed(scope: FeedView = 'home', enabled = true) {
   return useInfiniteQuery({
     queryKey: ['feed', scope],
     queryFn: ({ pageParam }) =>
-      getFeed(scope, pageParam as number | null, pageParam == null ? FIRST_PAGE_SIZE : NEXT_PAGE_SIZE),
+      viaimperiiApi.feed.list(scope, pageParam as number | null, pageParam == null ? FIRST_PAGE_SIZE : NEXT_PAGE_SIZE),
     initialPageParam: null as number | null,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
     enabled,

@@ -6,8 +6,8 @@ import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import { BellIcon } from '../../../../../components/icons';
 import { formatRelativeTime } from '../../../../../utils/date';
-import { getFeedEvent } from '../../../../../api/feed/feedApi';
-import { NotificationItem } from '../../../../../api/notifications/notificationsApi';
+import { viaimperiiApi } from '../../../../../api';
+import { NotificationItem } from '../../../../../api/notifications';
 import { HomeNavigationProp } from '../../../../../navigation/HomeStack';
 import AnchoredPopover, { Anchor } from '../../feed/AnchoredPopover';
 import { useNotifications } from '../../../model/queries/useNotifications';
@@ -106,7 +106,7 @@ export default function NotificationsButton() {
 
     setOpeningId(item.id);
     try {
-      const post = await getFeedEvent(feedEventId);
+      const post = await viaimperiiApi.feed.detail(feedEventId);
       setAnchor(null);
       navigation.navigate('PostDetail', { post });
     } catch (error: any) {

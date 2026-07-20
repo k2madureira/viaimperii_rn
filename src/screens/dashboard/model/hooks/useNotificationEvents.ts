@@ -9,7 +9,7 @@ import {
   NotificationItem,
   NotificationsListResponse,
   UnreadCountResponse,
-} from '../../../../api/notifications/notificationsApi';
+} from '../../../../api/notifications';
 
 type NotificationsCache = InfiniteData<NotificationsListResponse>;
 

@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Navbar, SearchBar } from '../../components';
 import { useAuth } from '../../contexts/AuthContext';
 import { DailyMissionsHero, WalletButton } from './components';
-import { FeedItem } from '../../api/feed/feedApi';
+import { FeedItem } from '../../api/feed';
 import { useLegions } from '../missions/model/queries/useLegions';
 import { useDailyBriefing } from '../missions/model/queries/useDailyBriefing';
 import { useUserProfile } from './model/queries/useUserProfile';

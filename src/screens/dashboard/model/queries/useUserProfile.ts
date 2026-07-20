@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { getUserProfile } from '../../../../api/users/userApi';
+import { viaimperiiApi } from '../../../../api';
 
 export function useUserProfile(userId: string | undefined) {
   return useQuery({
     queryKey: ['user-profile', userId],
-    queryFn: () => getUserProfile(userId as string),
+    queryFn: () => viaimperiiApi.users.profile(userId as string),
     enabled: !!userId,
   });
 }

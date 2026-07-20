@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { getWallet } from '../../../../api/wallet/walletApi';
+import { viaimperiiApi } from '../../../../api';
 
 export function useWallet(enabled = true) {
   return useQuery({
     queryKey: ['wallet'],
-    queryFn: getWallet,
+    queryFn: viaimperiiApi.wallet.balance,
     enabled,
   });
 }

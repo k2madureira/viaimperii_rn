@@ -3,7 +3,7 @@ import { ActivityIndicator, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { CoinAmount, MASTERY_ICONS } from '../../../../../components/icons';
-import { UserActivitySummary } from '../../../../../api/users/userApi';
+import { UserActivitySummary } from '../../../../../api/users';
 
 interface Props {
   summary?: UserActivitySummary;

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getRecommendedMissions, MissionDifficulty } from '../../../../api/missions/missionsApi';
+import { viaimperiiApi } from '../../../../api';
+import { MissionDifficulty } from '../../../../api/missions';
 
 export function useRecommendedMissions(
   specialtyId: number | null,
@@ -10,7 +11,7 @@ export function useRecommendedMissions(
   return useQuery({
     queryKey: ['missions-recommended', specialtyId, difficulty, type],
     queryFn: () =>
-      getRecommendedMissions(specialtyId ?? undefined, difficulty ?? undefined, type),
+      viaimperiiApi.missions.recommended(specialtyId ?? undefined, difficulty ?? undefined, type),
     enabled,
   });
 }

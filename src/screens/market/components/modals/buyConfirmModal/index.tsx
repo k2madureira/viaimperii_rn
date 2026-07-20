@@ -4,7 +4,7 @@ import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import Svg, { Path, Rect } from 'react-native-svg';
 import { CoinAmount } from '../../../../../components/icons';
-import { Profession } from '../../../../../api/professions/professionsApi';
+import { Profession } from '../../../../../api/professions';
 
 const OUTLINE = '#d6c9c9';
 

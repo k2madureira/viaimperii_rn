@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Navbar } from '../../../components';
-import { Mission, MissionDifficulty, MissionEvidence } from '../../../api/missions/missionsApi';
+import { Mission, MissionDifficulty, MissionEvidence } from '../../../api/missions';
 import { useAuth } from '../../../contexts/AuthContext';
 import { XP_PER_RANK } from '../../../constants/game';
 import { sortByDifficulty } from '../../../constants/missions';

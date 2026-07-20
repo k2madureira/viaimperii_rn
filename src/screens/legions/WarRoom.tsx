@@ -16,7 +16,7 @@ import { useRoute, RouteProp } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LegionAttributes, Navbar } from '../../components';
 import { useLegionDetail } from '../dashboard/model/queries/useLegionDetail';
-import { LegionCountry } from '../../api/legion/legionApi';
+import { LegionCountry } from '../../api/legion';
 import { HomeStackParamList } from '../../navigation/HomeStack';
 import { legionColorById } from '../../utils/legionColors';
 import { useLegions } from '../missions/model/queries/useLegions';

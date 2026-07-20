@@ -11,8 +11,8 @@ import RewardsScreen from '../screens/rewards';
 import HashtagFeedScreen from '../screens/hashtagFeed';
 import LeaderboardsScreen from '../screens/leaderboards';
 import AchievementsScreen from '../screens/achievements';
-import { FeedItem } from '../api/feed/feedApi';
-import { LeaderboardScope } from '../api/leaderboards/leaderboardsApi';
+import { FeedItem } from '../api/feed';
+import { LeaderboardScope } from '../api/leaderboards';
 
 export type HomeStackParamList = {
   Dashboard: undefined;

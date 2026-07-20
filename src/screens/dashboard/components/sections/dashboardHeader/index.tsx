@@ -2,7 +2,7 @@ import React from 'react';
 import { Platform, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { LoginStreak } from '../../../../../api/auth/authApi';
+import { LoginStreak } from '../../../../../api/auth';
 import NotificationsButton from '../../buttons/notificationsButton';
 import RewardsButton from '../../buttons/rewardsButton';
 import StreakButton from '../../buttons/streakButton';

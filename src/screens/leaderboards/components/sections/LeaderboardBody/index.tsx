@@ -1,7 +1,7 @@
 import React from 'react';
 import { FlatList, RefreshControl, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Leaderboard, LeaderboardItem } from '../../../../../api/leaderboards/leaderboardsApi';
+import { Leaderboard, LeaderboardItem } from '../../../../../api/leaderboards';
 import {
   EmptyBox,
   ErrorState,

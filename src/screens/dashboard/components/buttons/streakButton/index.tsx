@@ -3,7 +3,7 @@ import { TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { FireIcon } from '../../../../../components/icons';
-import { LoginStreak } from '../../../../../api/auth/authApi';
+import { LoginStreak } from '../../../../../api/auth';
 import { useAuth } from '../../../../../contexts/AuthContext';
 import AnchoredPopover, { Anchor } from '../../feed/AnchoredPopover';
 import { useStreak } from '../../../model/queries/useStreak';

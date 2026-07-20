@@ -1,6 +1,6 @@
 import React from 'react';
 import { RefreshControl, ScrollView } from 'react-native';
-import { DailyReward } from '../../../../../api/rewards/dailyRewardsApi';
+import { DailyReward } from '../../../../../api/dailyRewards';
 import {
   useClaimAllDailyRewards,
   useClaimDailyReward,
