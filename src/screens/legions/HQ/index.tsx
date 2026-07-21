@@ -48,14 +48,10 @@ export default function LegionHQScreen() {
   const legion = detailQuery.data;
 
   // Posse da Sala de Guerra vem do cofre (mesma key da section abaixo, então
-  // não custa requisição extra). Substitui a constante de build que existia
-  // enquanto o contrato não expunha o campo.
-  //
-  // A sala NUNCA fica escondida: mesmo trancada o botão aparece, porque um
-  // botão ausente não ensina que a sala existe — e a descoberta é o que leva
-  // a legião a votar a compra.
+  // não custa requisição extra). Aqui ela só muda o RÓTULO do botão — quem
+  // não tem acesso entra na mesma tela e vê a prévia censurada pelo servidor.
   const treasuryQuery = useLegionTreasury(legionId, legionId != null);
-  const warRoomUnlocked = treasuryQuery.data?.war_room?.unlocked ?? false;
+  const warRoom = treasuryQuery.data?.war_room ?? null;
 
   const totalXp = profileQuery.data?.user?.total_xp ?? user?.total_xp ?? 0;
 
@@ -108,7 +104,8 @@ export default function LegionHQScreen() {
 
               <WarRoomButton
                 color={color}
-                unlocked={warRoomUnlocked}
+                unlocked={warRoom?.unlocked ?? false}
+                remainingSeconds={warRoom?.remaining_seconds ?? 0}
                 onPress={() => navigation.navigate('WarRoom')}
               />
 

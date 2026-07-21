@@ -551,8 +551,8 @@ export default {
     changePickerHint: 'Escolha a nova legião. A troca tem custo em XP.',
     // Sala de Guerra (espiar as outras legiões) — acesso pago
     warRoom: 'Sala de Guerra',
-    warRoomHint: 'Espie os números das outras legiões',
-    warRoomLocked: 'Sua legião ainda não tem acesso',
+    warRoomPreview: 'Prévia gratuita — veja onde sua legião está',
+    warRoomActive: 'Acesso ativo · {{time}} restantes',
     warRoomProposeSuccess: 'Votação da Sala de Guerra aberta!',
     warRoomProposeError: 'Não foi possível propor a Sala de Guerra.',
     // QG sem legião: progressão pendente, não erro

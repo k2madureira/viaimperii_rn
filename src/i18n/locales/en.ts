@@ -551,8 +551,8 @@ export default {
     changePickerHint: 'Pick your new legion. Switching costs XP.',
     // War Room (peek at other legions) — paid access
     warRoom: 'War Room',
-    warRoomHint: "Peek at the other legions' numbers",
-    warRoomLocked: 'Your legion has no access yet',
+    warRoomPreview: 'Free preview — see where your legion stands',
+    warRoomActive: 'Access active · {{time}} left',
     warRoomProposeSuccess: 'War Room vote opened!',
     warRoomProposeError: 'Could not propose the War Room.',
     // HQ without a legion: pending progression, not an error
