@@ -19,18 +19,26 @@ interface Props {
 // A métrica em destaque ACOMPANHA a ordenação ativa: ordenar por cofre e
 // destacar XP faria a lista parecer fora de ordem — o mesmo erro já cometido
 // (e corrigido) no ranking de candidatos a Praefectus.
+// Na prévia, todo campo pago vem `null` e o backend força a ordenação por
+// `xp_week` — o fallback abaixo cobre os dois casos com o mesmo caminho.
 function highlightedMetric(item: LegionBoardItem, sortField: BoardSortField) {
   switch (sortField) {
     case 'treasury':
-      return { kind: 'coins' as const, atomic: item.treasury_balance };
+      return item.treasury_balance != null
+        ? { kind: 'coins' as const, atomic: item.treasury_balance }
+        : { kind: 'number' as const, value: item.xp_week, suffix: ' XP' };
     case 'missions_week':
-      return { kind: 'number' as const, value: item.missions_week, suffix: '' };
+      return { kind: 'number' as const, value: item.missions_week ?? item.xp_week, suffix: '' };
     case 'avg_xp_per_active':
-      return { kind: 'number' as const, value: item.avg_xp_per_active, suffix: ' XP' };
+      return {
+        kind: 'number' as const,
+        value: item.avg_xp_per_active ?? item.xp_week,
+        suffix: ' XP',
+      };
     case 'active_members':
-      return { kind: 'number' as const, value: item.active_members, suffix: '' };
+      return { kind: 'number' as const, value: item.active_members ?? item.xp_week, suffix: '' };
     case 'total_members':
-      return { kind: 'number' as const, value: item.total_members, suffix: '' };
+      return { kind: 'number' as const, value: item.total_members ?? item.xp_week, suffix: '' };
     default:
       return { kind: 'number' as const, value: item.xp_week, suffix: ' XP' };
   }
@@ -75,13 +83,16 @@ export default function LegionBoardRow({ item, sortField, color, highlight = fal
           )}
         </View>
 
-        {/* Ativos E totais juntos — o contraste é a informação. */}
-        <Text className="text-[10.5px] text-[#999] mt-0.5">
-          {t('legions.board.members', {
-            active: item.active_members,
-            total: item.total_members,
-          })}
-        </Text>
+        {/* Ativos E totais juntos — o contraste é a informação. Ausentes na
+            prévia (campos pagos vêm null), então a linha simplesmente some. */}
+        {item.active_members != null && item.total_members != null && (
+          <Text className="text-[10.5px] text-[#999] mt-0.5">
+            {t('legions.board.members', {
+              active: item.active_members,
+              total: item.total_members,
+            })}
+          </Text>
+        )}
 
         {item.active_standard && (
           <Text className="text-[9.5px] text-[#bbb] mt-0.5">

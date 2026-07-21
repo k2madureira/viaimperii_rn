@@ -552,7 +552,9 @@ export default {
     // Sala de Guerra (espiar as outras legiões) — acesso pago
     warRoom: 'Sala de Guerra',
     warRoomHint: 'Espie os números das outras legiões',
-    warRoomLocked: 'Acesso ainda não disponível',
+    warRoomLocked: 'Sua legião ainda não tem acesso',
+    warRoomProposeSuccess: 'Votação da Sala de Guerra aberta!',
+    warRoomProposeError: 'Não foi possível propor a Sala de Guerra.',
     // QG sem legião: progressão pendente, não erro
     hqLockedTitle: 'Quartel General trancado',
     hqLockedBody: 'Sua legião é definida ao concluir a primeira missão. Complete-a para assumir seu posto.',
@@ -573,6 +575,14 @@ export default {
       yourLegion: 'Sua legião',
       weekResets: 'Reseta em {{time}}',
       empty: 'Nenhuma legião neste escopo',
+      // Prévia gratuita: 3 linhas + silhuetas
+      lockedTitle: 'Mais {{count}} legiões no ranking',
+      lockedTitleGeneric: 'Ranking completo bloqueado',
+      lockedBody: 'A Sala de Guerra abre o ranking inteiro, o efetivo ativo de cada legião, os cofres, os estandartes vigentes e os filtros por território.',
+      lockedBodyShort: 'Abre o ranking completo das legiões',
+      lockedPriceHint: 'por {{days}} dias · escala com os {{active}} membros ativos',
+      lockedCta: 'Propor a compra ao cofre',
+      lockedNeedsLeader: 'Só o Praefectus pode abrir essa votação.',
       // A janela de "ativo" vem do backend (`active_window_days`) — não cravar 7.
       activeWindow: 'Ativo = ganhou XP nos últimos {{days}} dias. O XP da semana reseta na segunda.',
     },

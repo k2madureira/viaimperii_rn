@@ -38,6 +38,7 @@ export interface LegionStandardMini {
 }
 
 export interface LegionBoardItem {
+  // ── sempre presentes (também na prévia gratuita) ──────────────────────────
   position: number;
   legion_id: number;
   name: string;
@@ -45,16 +46,20 @@ export interface LegionBoardItem {
   image_url: string | null;
   thumb_url: string | null;
   specialty_id: number | null;
-  // Os DOIS sempre: `total_members` sozinho esconde efetivo dormente e
-  // `active_members` sozinho esconde o tamanho real. Juntos, o inchaço fica
-  // visível (há legião com 208 totais e 0 ativos).
-  active_members: number;
-  total_members: number;
   xp_week: number; // critério default do ranking
-  missions_week: number;
-  avg_xp_per_active: number; // deixa legião pequena e dedicada competir
-  treasury_balance: number; // asses atômicos
-  treasury_balance_display: string;
+
+  // ── campos PAGOS: `null` quando `access === 'preview'` ────────────────────
+  // A censura acontece no SERVIDOR. Mascarar no cliente significaria que a
+  // resposta completa já chegou ao device, onde qualquer proxy a lê.
+  //
+  // `active_members`/`total_members` continuam vindo juntos no `full`: um
+  // sozinho esconde metade da verdade (há legião com 208 totais e 0 ativos).
+  active_members: number | null;
+  total_members: number | null;
+  missions_week: number | null;
+  avg_xp_per_active: number | null; // deixa legião pequena e dedicada competir
+  treasury_balance: number | null; // asses atômicos
+  treasury_balance_display: string | null;
   active_standard: LegionStandardMini | null;
   top_member: FeedAuthor | null;
 }
@@ -79,6 +84,20 @@ export interface LegionLeaderboardResponse {
   active_window_days: number;
   sort_field: BoardSortField;
   sort_order: 'asc' | 'desc';
+  // 'preview' = prévia gratuita (3 linhas, só brasão e xp_week);
+  // 'full' = a legião tem acesso à Sala de Guerra.
+  //
+  // Na prévia o backend IGNORA scope/sortField/limit e responde sempre global
+  // por xp_week — honrá-los deixaria varrer o board de três em três linhas e
+  // remontar o conteúdo pago. Por isso a UI desabilita abas e chips no preview.
+  access: 'preview' | 'full';
+  // Posse da Sala de Guerra, para o cliente travar a tela a partir do DADO em
+  // vez de uma constante de build.
+  war_room_unlocked: boolean;
+  war_room_expires_at: string | null;
+  // Quantas legiões existem no escopo. Três linhas não expressam "você é #7 de
+  // 12", e essa razão é boa parte do que puxa para a compra.
+  total_legions: number;
   // A linha da legião do requisitante, repetida quando ela fica FORA do top-N.
   // Null se ele não tem legião ou ela não tem membros no escopo.
   viewer_legion: LegionBoardItem | null;

@@ -81,6 +81,7 @@ export const viaimperiiApi = {
     donate: legionTreasuryService.donateToTreasury,
     leader: legionTreasuryService.getLegionLeader,
     proposeStandard: legionTreasuryService.proposeStandard,
+    proposeWarRoom: legionTreasuryService.proposeWarRoom,
     proposals: legionTreasuryService.getStandardProposals,
     vote: legionTreasuryService.voteStandardProposal,
   },

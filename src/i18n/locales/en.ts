@@ -552,7 +552,9 @@ export default {
     // War Room (peek at other legions) — paid access
     warRoom: 'War Room',
     warRoomHint: "Peek at the other legions' numbers",
-    warRoomLocked: 'Access not available yet',
+    warRoomLocked: 'Your legion has no access yet',
+    warRoomProposeSuccess: 'War Room vote opened!',
+    warRoomProposeError: 'Could not propose the War Room.',
     // HQ without a legion: pending progression, not an error
     hqLockedTitle: 'Headquarters locked',
     hqLockedBody: 'Your legion is set when you complete your first mission. Finish it to take your post.',
@@ -573,6 +575,14 @@ export default {
       yourLegion: 'Your legion',
       weekResets: 'Resets in {{time}}',
       empty: 'No legions in this scope',
+      // Free preview: 3 rows + ghost rows
+      lockedTitle: '{{count}} more legions in the ranking',
+      lockedTitleGeneric: 'Full ranking locked',
+      lockedBody: 'The War Room opens the full ranking, every legion active roster, treasuries, flying standards and the territory filters.',
+      lockedBodyShort: 'Opens the full legion ranking',
+      lockedPriceHint: 'for {{days}} days · scales with the {{active}} active members',
+      lockedCta: 'Propose the purchase',
+      lockedNeedsLeader: 'Only the Praefectus can open this vote.',
       // The "active" window comes from the backend (`active_window_days`).
       activeWindow: 'Active = earned XP in the last {{days}} days. Weekly XP resets on Monday.',
     },

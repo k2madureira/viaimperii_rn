@@ -85,6 +85,26 @@ export interface LegionLeaderResponse {
 
 export type ProposalStatus = 'open' | 'approved' | 'rejected' | 'expired';
 
+// O que está sendo comprado. Desde a migration 0074 a votação é genérica: o
+// índice de "uma proposta aberta" passou a ser por (legião, kind), então a
+// legião pode votar Estandarte e Sala de Guerra ao mesmo tempo — antes uma
+// votação de estandarte travava a outra por até 5 dias.
+export type ProposalKind = 'standard' | 'war_room';
+
+// Acesso da legião à Sala de Guerra + o que custa comprar/estender AGORA.
+// O preço escala pelo efetivo ativo, então não é constante entre legiões.
+export interface WarRoomAccess {
+  unlocked: boolean;
+  expires_at: string | null;
+  remaining_seconds: number;
+  price: number; // asses atômicos, escalado pelo efetivo
+  price_display: string;
+  active_members: number; // base do escalonamento — mostrar junto do preço
+  duration_days: number;
+  affordable: boolean; // vs o `available` do cofre
+  can_propose: boolean; // o requisitante pode abrir a votação
+}
+
 export interface ProposalVote {
   user: FeedAuthor;
   approve: boolean;
@@ -93,6 +113,11 @@ export interface ProposalVote {
 export interface StandardProposal {
   id: number;
   legion_id: number;
+  // `standard` | `war_room` — a UI da votação muda: a Sala de Guerra não tem
+  // multiplicador de XP nem duração em horas, os campos abaixo são do catálogo
+  // de estandartes e não descrevem o que se está comprando.
+  kind: ProposalKind;
+  item_slug: string | null;
   standard_slug: string;
   standard_name: string;
   multiplier_pct: number;
@@ -119,6 +144,7 @@ export interface StandardProposal {
 // GET /legions/{id}/treasury
 export interface LegionTreasury {
   legion_id: number;
+  war_room: WarRoomAccess | null;
   balance: number;
   balance_display: string;
   // Travado por uma votação aberta (reserva sem escrow: nenhuma moeda se move

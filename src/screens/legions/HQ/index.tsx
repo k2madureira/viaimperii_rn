@@ -9,6 +9,7 @@ import { Navbar } from '../../../components';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useUserProfile } from '../../dashboard/model/queries/useUserProfile';
 import { useLegionDetail } from '../../dashboard/model/queries/useLegionDetail';
+import { useLegionTreasury } from '../model/queries/useLegionTreasury';
 import { HomeNavigationProp } from '../../../navigation/HomeStack';
 import { legionColorById } from '../../../utils/legionColors';
 import { useLegions } from '../../missions/model/queries/useLegions';
@@ -23,13 +24,6 @@ import {
 } from './components';
 import { HQTerritories } from './components/sections';
 
-// Regras de compra da Sala de Guerra ainda não existem no backend — não há
-// campo de posse para ler. Fica em stand-by até o contrato expor algo como
-// `war_room_unlocked`, e então esta constante some.
-//
-// Aberta em DEV para dar como testar a sala; fechada em release para não
-// entregar de graça o que vai ser vendido. NÃO trocar por `true` fixo.
-const WAR_ROOM_UNLOCKED = __DEV__;
 
 // Quartel General — tela INICIAL da legião. Mostra a legião do próprio viewer
 // (derivada do perfil, não de param de rota): carteira, Praefectus e ações do
@@ -52,6 +46,16 @@ export default function LegionHQScreen() {
 
   const detailQuery = useLegionDetail(legionId as number);
   const legion = detailQuery.data;
+
+  // Posse da Sala de Guerra vem do cofre (mesma key da section abaixo, então
+  // não custa requisição extra). Substitui a constante de build que existia
+  // enquanto o contrato não expunha o campo.
+  //
+  // A sala NUNCA fica escondida: mesmo trancada o botão aparece, porque um
+  // botão ausente não ensina que a sala existe — e a descoberta é o que leva
+  // a legião a votar a compra.
+  const treasuryQuery = useLegionTreasury(legionId, legionId != null);
+  const warRoomUnlocked = treasuryQuery.data?.war_room?.unlocked ?? false;
 
   const totalXp = profileQuery.data?.user?.total_xp ?? user?.total_xp ?? 0;
 
@@ -104,7 +108,7 @@ export default function LegionHQScreen() {
 
               <WarRoomButton
                 color={color}
-                unlocked={WAR_ROOM_UNLOCKED}
+                unlocked={warRoomUnlocked}
                 onPress={() => navigation.navigate('WarRoom')}
               />
 

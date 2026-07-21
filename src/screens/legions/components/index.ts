@@ -9,6 +9,7 @@ export { default as CenturionCard } from './cards/centurionCard';
 export { default as ProposalCard } from './cards/proposalCard';
 export { default as ProposalHistoryRow } from './cards/proposalHistoryRow';
 export { default as LegionBoardRow } from './cards/legionBoardRow';
+export { default as LockedBoardRows } from './cards/lockedBoardRows';
 
 // buttons
 export { default as DonateButton } from './buttons/donateButton';

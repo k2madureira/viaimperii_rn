@@ -7,8 +7,11 @@ import { UserProvince } from '../../../../../api/users';
 import { Legion } from '../../../../../api/legion/dto';
 import { legionColorById } from '../../../../../utils/legionColors';
 import { useLegionLeaderboard } from '../../../model/queries/useLegionLeaderboard';
+import { useLegionTreasury } from '../../../model/queries/useLegionTreasury';
+import { useProposeWarRoom } from '../../../model/mutations/useProposeWarRoom';
 import { formatCountdown } from '../../../model/hooks/useStandardCountdown';
 import LegionBoardRow from '../../cards/legionBoardRow';
+import LockedBoardRows from '../../cards/lockedBoardRows';
 import ScopeTab, { ScopeOption } from '../../buttons/scopeTab';
 import BoardSortChips from '../../filters/boardSortChips';
 import BoardSkeleton from '../../skeletons/boardSkeleton';
@@ -78,6 +81,14 @@ export default function LegionBoardSection({
 
   const board = boardQuery.data;
   const items = board?.items ?? [];
+  const isPreview = board?.access === 'preview';
+
+  // O preço e o `can_propose` da Sala vivem no cofre, e o cofre exige ser
+  // membro — por isso a query só roda quando o viewer tem legião. Mesma key do
+  // QG, então não custa requisição extra.
+  const treasuryQuery = useLegionTreasury(viewerLegionId ?? undefined, viewerLegionId != null);
+  const warRoom = treasuryQuery.data?.war_room ?? null;
+  const proposeWarRoom = useProposeWarRoom(viewerLegionId ?? undefined);
 
   return (
     <View className="gap-3">
@@ -93,15 +104,27 @@ export default function LegionBoardSection({
         )}
       </View>
 
-      <ScopeTab options={scopeOptions} value={scope} color={color} onChange={setScope} />
+      {/* Na prévia o backend ignora escopo e ordenação — deixar os controles
+          ativos prometeria um filtro que não acontece. Desabilitados, eles
+          continuam mostrando o que existe do outro lado do acesso. */}
+      <ScopeTab
+        options={
+          isPreview ? scopeOptions.map((o) => ({ ...o, disabled: true })) : scopeOptions
+        }
+        value={isPreview ? 'global' : scope}
+        color={color}
+        onChange={setScope}
+      />
 
-      {scope !== 'global' && (
+      {!isPreview && scope !== 'global' && (
         <Text className="text-[10.5px] text-[#aaa] leading-[14px]">
           {t('legions.board.scopeHint')}
         </Text>
       )}
 
-      <BoardSortChips value={sortField} color={color} onChange={setSortField} />
+      {!isPreview && (
+        <BoardSortChips value={sortField} color={color} onChange={setSortField} />
+      )}
 
       {boardQuery.isLoading ? (
         <BoardSkeleton />
@@ -121,6 +144,21 @@ export default function LegionBoardSection({
             />
           ))}
         </View>
+      )}
+
+      {/* Prévia: silhuetas + CTA no lugar do resto do ranking */}
+      {isPreview && board && (
+        <LockedBoardRows
+          totalLegions={board.total_legions}
+          shownRows={items.length}
+          price={warRoom?.price ?? null}
+          activeMembers={warRoom?.active_members ?? null}
+          durationDays={warRoom?.duration_days ?? null}
+          canPropose={warRoom?.can_propose ?? false}
+          proposing={proposeWarRoom.isPending}
+          onPropose={() => proposeWarRoom.mutate()}
+          color={color}
+        />
       )}
 
       {/* Legião do viewer fora do top-N — o gancho "você está em #N".
