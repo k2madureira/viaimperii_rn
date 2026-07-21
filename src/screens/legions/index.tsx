@@ -7,9 +7,14 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useUserProfile } from '../dashboard/model/queries/useUserProfile';
 import { useLegions } from '../missions/model/queries/useLegions';
 import { ErrorState, ImagePreloader, LegionSkeleton } from './components';
-import { LegionBadges } from './components/sections';
+import { LegionBadges, LegionBoardSection } from './components/sections';
 
-export default function LegionsScreen() {
+// War Room — sala de inteligência (acesso pago): compara as legiões entre si.
+//
+// O RANKING é o corpo da tela; o carrossel de brasões fica abaixo, como seletor
+// de identidade. A promessa é "espiar os números das outras legiões", e brasão
+// com descrição não é número.
+export default function WarRoomScreen() {
   const insets = useSafeAreaInsets();
   const { user } = useAuth();
 
@@ -58,6 +63,13 @@ export default function LegionsScreen() {
             tintColor="#9E1B32"
           />
         }>
+        {/* Ranking — corpo da tela, independente do carregamento dos brasões */}
+        <LegionBoardSection
+          province={profileQuery.data?.province ?? null}
+          viewerLegionId={userLegion?.id ?? null}
+          color="#9E1B32"
+        />
+
         {showSkeleton && <LegionSkeleton />}
 
         {!allImagesLoaded && legions.length > 0 && (

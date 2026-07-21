@@ -8,10 +8,12 @@ export { default as TreasuryTxRow } from './cards/treasuryTxRow';
 export { default as CenturionCard } from './cards/centurionCard';
 export { default as ProposalCard } from './cards/proposalCard';
 export { default as ProposalHistoryRow } from './cards/proposalHistoryRow';
+export { default as LegionBoardRow } from './cards/legionBoardRow';
 
 // buttons
 export { default as DonateButton } from './buttons/donateButton';
 export { default as ProposeButton } from './buttons/proposeButton';
+export { default as ScopeTab } from './buttons/scopeTab';
 
 // modals
 export { default as ChangeLegionModal } from './modals/changeLegionModal';
@@ -22,6 +24,7 @@ export { default as CenturionModal } from './modals/centurionModal';
 // skeletons
 export { default as LegionSkeleton } from './skeletons/legionSkeleton';
 export { default as TreasurySkeleton } from './skeletons/treasurySkeleton';
+export { default as BoardSkeleton } from './skeletons/boardSkeleton';
 
 // feedback
 export { default as ErrorState } from './feedback/errorState';

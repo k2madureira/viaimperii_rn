@@ -556,6 +556,20 @@ export default {
     // QG sem legião: progressão pendente, não erro
     hqLockedTitle: 'Quartel General trancado',
     hqLockedBody: 'Sua legião é definida ao concluir a primeira missão. Complete-a para assumir seu posto.',
+    // Ranking de legiões (War Room)
+    board: {
+      title: 'Ranking de Legiões',
+      scopeGlobal: 'Global',
+      scopeCountry: 'País',
+      scopeProvince: 'Província',
+      scopeHint: 'A mais forte aqui — conta só os membros deste território.',
+      members: '{{active}} ativos · {{total}} totais',
+      yourLegion: 'Sua legião',
+      weekResets: 'Reseta em {{time}}',
+      empty: 'Nenhuma legião neste escopo',
+      // A janela de "ativo" vem do backend (`active_window_days`) — não cravar 7.
+      activeWindow: 'Ativo = ganhou XP nos últimos {{days}} dias. O XP da semana reseta na segunda.',
+    },
     changeConfirmTitle: 'Alterar legião',
     changeConfirmDesc: 'Tem certeza que deseja trocar para a {{name}}?',
     penaltyTitle: 'Penalidade de troca',

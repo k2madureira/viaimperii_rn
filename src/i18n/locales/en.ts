@@ -556,6 +556,20 @@ export default {
     // HQ without a legion: pending progression, not an error
     hqLockedTitle: 'Headquarters locked',
     hqLockedBody: 'Your legion is set when you complete your first mission. Finish it to take your post.',
+    // Legion ranking (War Room)
+    board: {
+      title: 'Legion Ranking',
+      scopeGlobal: 'Global',
+      scopeCountry: 'Country',
+      scopeProvince: 'Province',
+      scopeHint: 'The strongest here — counts only members in this territory.',
+      members: '{{active}} active · {{total}} total',
+      yourLegion: 'Your legion',
+      weekResets: 'Resets in {{time}}',
+      empty: 'No legions in this scope',
+      // The "active" window comes from the backend (`active_window_days`).
+      activeWindow: 'Active = earned XP in the last {{days}} days. Weekly XP resets on Monday.',
+    },
     changeConfirmTitle: 'Change legion',
     changeConfirmDesc: 'Are you sure you want to switch to {{name}}?',
     penaltyTitle: 'Switch penalty',

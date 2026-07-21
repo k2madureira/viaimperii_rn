@@ -5,6 +5,7 @@ import * as dailyRewardsService from './dailyRewards';
 import * as feedService from './feed';
 import * as leaderboardsService from './leaderboards';
 import * as legionService from './legion';
+import * as legionLeaderboardService from './legionLeaderboard';
 import * as legionTreasuryService from './legionTreasury';
 import * as missionsService from './missions';
 import * as notificationsService from './notifications';
@@ -71,6 +72,9 @@ export const viaimperiiApi = {
     list: legionService.getLegions,
     detail: legionService.getLegion,
     join: legionService.joinLegion,
+  },
+  legionLeaderboard: {
+    board: legionLeaderboardService.getLegionLeaderboard,
   },
   legionTreasury: {
     detail: legionTreasuryService.getLegionTreasury,
