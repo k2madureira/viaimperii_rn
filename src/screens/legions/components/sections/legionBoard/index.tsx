@@ -9,6 +9,7 @@ import { legionColorById } from '../../../../../utils/legionColors';
 import { useLegionLeaderboard } from '../../../model/queries/useLegionLeaderboard';
 import { useLegionTreasury } from '../../../model/queries/useLegionTreasury';
 import { useProposeWarRoom } from '../../../model/mutations/useProposeWarRoom';
+import { useLegionVoteEvents } from '../../../model/hooks/useLegionVoteEvents';
 import { formatCountdown } from '../../../model/hooks/useStandardCountdown';
 import LegionBoardRow from '../../cards/legionBoardRow';
 import LockedBoardRows from '../../cards/lockedBoardRows';
@@ -92,6 +93,11 @@ export default function LegionBoardSection({
     (p) => p.kind === 'war_room',
   );
   const proposeWarRoom = useProposeWarRoom(viewerLegionId ?? undefined);
+
+  // A War Room é a tela onde a votação de acesso mais importa: quando ela
+  // resolve, o board sai de `preview` para `full` — o hook invalida o
+  // leaderboard nesse caso, então a tela se abre sozinha sem recarregar.
+  useLegionVoteEvents(viewerLegionId ?? undefined, viewerLegionId != null);
 
   return (
     <View className="gap-3">

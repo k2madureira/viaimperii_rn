@@ -7,6 +7,7 @@ import { useStandardProposals } from '../../../model/queries/useStandardProposal
 import { useDonateToTreasury } from '../../../model/mutations/useDonateToTreasury';
 import { useProposeStandard } from '../../../model/mutations/useProposeStandard';
 import { useVoteProposal } from '../../../model/mutations/useVoteProposal';
+import { useLegionVoteEvents } from '../../../model/hooks/useLegionVoteEvents';
 import { useWallet } from '../../../../dashboard/model/queries/useWallet';
 import TreasuryCard from '../../cards/treasuryCard';
 import TreasuryTxRow from '../../cards/treasuryTxRow';
@@ -39,6 +40,10 @@ export default function LegionTreasurySection({ legionId, legionName, color }: P
 
   const treasuryQuery = useLegionTreasury(legionId);
   const walletQuery = useWallet();
+
+  // Progresso das votações ao vivo: sem isto a barra de 60% só anda no
+  // pull-to-refresh, e o limiar parece morto enquanto a legião vota.
+  useLegionVoteEvents(legionId);
 
   const [donateOpen, setDonateOpen] = useState(false);
   const [standardOpen, setStandardOpen] = useState(false);

@@ -4,6 +4,7 @@ import { registerAuthHandlers } from '../api/config/authBridge';
 import { closeMissionEvents } from '../api/missions/missionEvents';
 import { closeFeedEvents } from '../api/feed/feedEvents';
 import { closeNotificationEvents } from '../api/notifications/notificationEvents';
+import { closeLegionEvents } from '../api/legionTreasury/legionEvents';
 import { LoginStreak } from '../api/auth';
 
 const ACCESS_KEY = 'access_token';
@@ -100,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       closeMissionEvents(),
       closeFeedEvents(),
       closeNotificationEvents(),
+      closeLegionEvents(),
     ]).catch(() => {});
     await Promise.race([
       closeStreams,
