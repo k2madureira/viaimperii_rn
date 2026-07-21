@@ -69,13 +69,15 @@ export default function LegionTreasurySection({ legionId, legionName, color }: P
 
   const transactions = treasury.transactions ?? [];
   const standards = treasury.standards ?? [];
-  const openProposal = treasury.open_proposal;
+  // TODAS as votações abertas: desde a migration 0074 a legião pode ter uma por
+  // kind (Estandarte + Sala de Guerra). O campo `open_proposal` legado traz só
+  // a mais antiga e esconderia a outra.
+  const openProposals = treasury.open_proposals ?? [];
   const leader = treasury.leader;
 
-  // Propor exige: permissão do backend, catálogo, e nenhuma votação em curso
-  // (o índice parcial do backend garante uma proposta aberta por legião).
-  const showPropose =
-    treasury.can_propose && !proposeBlocked && standards.length > 0 && !openProposal;
+  // `can_propose` já é por kind no backend (uma votação de Sala aberta não
+  // trava mais o botão de Estandarte), então não repetir a checagem aqui.
+  const showPropose = treasury.can_propose && !proposeBlocked && standards.length > 0;
 
   // Propostas já encerradas — a aberta já aparece no `ProposalCard` acima.
   const pastProposals = (proposalsQuery.data?.items ?? []).filter((p) => p.status !== 'open');
@@ -95,15 +97,16 @@ export default function LegionTreasurySection({ legionId, legionName, color }: P
         <CenturionCard leader={leader} color={color} onPress={() => setCenturionOpen(true)} />
       )}
 
-      {/* Votação aberta */}
-      {openProposal && (
+      {/* Votações abertas — até duas ao mesmo tempo (Estandarte e Sala) */}
+      {openProposals.map((proposal) => (
         <ProposalCard
-          proposal={openProposal}
+          key={proposal.id}
+          proposal={proposal}
           color={color}
           pending={vote.isPending}
-          onVote={(approve) => vote.mutate({ proposalId: openProposal.id, approve })}
+          onVote={(approve) => vote.mutate({ proposalId: proposal.id, approve })}
         />
-      )}
+      ))}
 
       {/* Ações */}
       <View className="flex-row gap-2">

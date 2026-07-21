@@ -583,6 +583,7 @@ export default {
       lockedPriceHint: 'por {{days}} dias · escala com os {{active}} membros ativos',
       lockedCta: 'Propor a compra ao cofre',
       lockedNeedsLeader: 'Só o Praefectus pode abrir essa votação.',
+      lockedVoteOpen: 'Votação em curso — vote no Quartel General.',
       // A janela de "ativo" vem do backend (`active_window_days`) — não cravar 7.
       activeWindow: 'Ativo = ganhou XP nos últimos {{days}} dias. O XP da semana reseta na segunda.',
     },

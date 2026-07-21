@@ -88,6 +88,9 @@ export default function LegionBoardSection({
   // QG, então não custa requisição extra.
   const treasuryQuery = useLegionTreasury(viewerLegionId ?? undefined, viewerLegionId != null);
   const warRoom = treasuryQuery.data?.war_room ?? null;
+  const warRoomVoteOpen = (treasuryQuery.data?.open_proposals ?? []).some(
+    (p) => p.kind === 'war_room',
+  );
   const proposeWarRoom = useProposeWarRoom(viewerLegionId ?? undefined);
 
   return (
@@ -155,6 +158,7 @@ export default function LegionBoardSection({
           activeMembers={warRoom?.active_members ?? null}
           durationDays={warRoom?.duration_days ?? null}
           canPropose={warRoom?.can_propose ?? false}
+          voteOpen={warRoomVoteOpen}
           proposing={proposeWarRoom.isPending}
           onPropose={() => proposeWarRoom.mutate()}
           color={color}

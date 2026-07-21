@@ -583,6 +583,7 @@ export default {
       lockedPriceHint: 'for {{days}} days · scales with the {{active}} active members',
       lockedCta: 'Propose the purchase',
       lockedNeedsLeader: 'Only the Praefectus can open this vote.',
+      lockedVoteOpen: 'Vote in progress — cast yours in the Headquarters.',
       // The "active" window comes from the backend (`active_window_days`).
       activeWindow: 'Active = earned XP in the last {{days}} days. Weekly XP resets on Monday.',
     },

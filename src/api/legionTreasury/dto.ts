@@ -156,7 +156,12 @@ export interface LegionTreasury {
   leader: LegionLeader | null;
   can_propose: boolean; // o requisitante pode abrir uma votação agora
   active_standard: ActiveStandard | null;
+  // Legado: só a votação mais ANTIGA. Como a legião pode ter uma aberta por
+  // kind (Estandarte + Sala de Guerra), este campo sozinho esconde a outra —
+  // ler `open_proposals`. Mantido só por compatibilidade.
   open_proposal: StandardProposal | null;
+  // Todas as votações abertas, cada uma marcada com seu `kind`.
+  open_proposals: StandardProposal[];
   standards: StandardOption[];
   transactions: TreasuryTransaction[];
 }

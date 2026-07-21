@@ -11,6 +11,11 @@ interface Props {
   activeMembers: number | null; // base do escalonamento do preço
   durationDays: number | null;
   canPropose: boolean;
+  // Já existe uma votação de Sala aberta. Sem isto o CTA cairia em
+  // "só o Praefectus pode abrir", porque `can_propose` fica false pelos DOIS
+  // motivos — falta de permissão e votação em curso — e a mensagem errada
+  // faria o membro achar que não tem nada acontecendo.
+  voteOpen: boolean;
   proposing: boolean;
   onPropose: () => void;
   color: string;
@@ -29,6 +34,7 @@ export default function LockedBoardRows({
   activeMembers,
   durationDays,
   canPropose,
+  voteOpen,
   proposing,
   onPropose,
   color,
@@ -86,7 +92,13 @@ export default function LockedBoardRows({
           </View>
         )}
 
-        {canPropose ? (
+        {voteOpen ? (
+          // A votação já corre — o que falta é voto, não proposta. O card de
+          // voto vive no Quartel General.
+          <Text className="text-[11.5px] font-bold" style={{ color }}>
+            {t('legions.board.lockedVoteOpen')}
+          </Text>
+        ) : canPropose ? (
           <TouchableOpacity
             onPress={onPropose}
             disabled={proposing}
