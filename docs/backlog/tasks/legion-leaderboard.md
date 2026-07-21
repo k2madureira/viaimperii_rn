@@ -64,12 +64,17 @@ GET /api/v1/legions/leaderboard          (auth)
 
   content: LegionLeaderboardResponse {
     scope, scope_id, scope_name,
-    week: { iso_year, iso_week, starts_at, ends_at },   // offset SP
+    week: { iso_year, iso_week, starts_at, ends_at },   // offset SP — janela de xp_week
+    active_window_days: 7,                              // janela de active_members
     sort_field, sort_order,
     viewer_legion: LegionBoardItem | null,
     items: LegionBoardItem[]
   }
 ```
+
+> As **duas janelas vêm na resposta** de propósito: `week` mede `xp_week`/`missions_week`,
+> `active_window_days` mede `active_members`. Rotular a partir desses campos, **nunca**
+> com um `7` cravado no cliente.
 
 `LegionBoardItem`:
 
@@ -170,7 +175,9 @@ GET /api/v1/legions/leaderboard          (auth)
 | `sortAvgXp` | Média por ativo | Avg per active |
 | `sortMissions` | Missões | Missions |
 | `sortActive` | Ativos | Active |
+| `sortTreasury` | Cofre | Treasury |
 | `members` | {{active}} ativos · {{total}} totais | {{active}} active · {{total}} total |
+| `activeWindow` | ativo = XP nos últimos {{days}} dias | active = XP in the last {{days}} days |
 | `yourLegion` | Sua legião | Your legion |
 | `weekResets` | Reseta em {{time}} | Resets in {{time}} |
 | `empty` | Nenhuma legião neste escopo | No legions in this scope |
@@ -201,22 +208,29 @@ Nenhum stream. Refetch on-focus; o countdown da semana é client-side a partir d
 
 ## 9. Riscos / conflitos
 
-- **`sortField=treasury` mente sutilmente.** O saldo é somado do ledger, fora do agregado, e
-  ordenado **sobre a página já rankeada por `xp_week`** — o resultado é "as N melhores por XP,
-  reordenadas por cofre", **não** o top-N global por cofre. **Decisão: não expor esse chip na
-  v1.** Se for exposto depois, o rótulo tem de dizer o que ele realmente é.
+- ~~**`sortField=treasury` mente sutilmente**~~ — **resolvido no backend** (`aef6fbc`): o saldo
+  passou a ser somado **dentro do agregado**, como mais um CTE, e ordena todas as legiões no
+  banco. O chip **pode** ser exposto e significa o que diz. (De quebra sumiram até 50 queries
+  de saldo por request.)
 - **Legião grande ainda pesa**: `xp_week` é soma. Mitigado pelo chip `avg_xp_per_active`.
-- **Duas janelas diferentes na mesma tela**: `active_members` usa 7 dias corridos; `xp_week`
-  usa a semana SP. Uma legião pode aparecer com ativos e XP baixo (ganhou antes de segunda).
-  Não é bug — mas a microcopy não deve sugerir que os dois medem a mesma coisa.
-- **Dívida herdada do backend**: `quantityUsers` de `GET /provinces/{id}` conta **todos** os
-  membros enquanto `dominant_legion`, na **mesma resposta**, conta **ativos**. Os territórios
-  do QG usam `quantityUsers` hoje. O backend registrou como não corrigido por ser breaking —
-  se o board e os territórios mostrarem números diferentes para a mesma província, **é isso**.
+- **Duas janelas diferentes na mesma tela** (não é bug, e fica): `active_members` usa 7 dias
+  corridos; `xp_week` usa a semana SP. Legião com ativos e XP baixo no meio da semana é o caso
+  normal. O backend agora devolve **as duas janelas** (`week` e `active_window_days`) para o
+  rótulo sair do dado — a microcopy não pode sugerir que medem o mesmo período.
+- ~~**Dívida herdada**: `quantityUsers` × `dominant_legion` se contradiziam~~ — **resolvido**
+  (`51e732a`): `GET /provinces/{id}` passou a expor `activeUsers` por legião e `active_users` +
+  `active_window_days` na província, sem mudar o significado de `quantityUsers` (a ordenação
+  também segue por ele). A `CLAUDE.md`, que dizia que `quantityUsers` contava ativos, foi
+  corrigida.
+- **Ainda aberto — territórios do QG**: o `activeUsers` entrou no `GET /provinces/{id}`, mas o
+  `GET /legions/{id}` (que os territórios do Quartel General consomem) segue só com
+  `quantityUsers`. Enquanto isso, o board mostra ativos e os territórios não. Se quisermos
+  paridade, é um pedido de backend — **fora do escopo desta task**.
 
 ## 10. Ordem de build recomendada
 
 1. **Board + abas de escopo + `viewer_legion`** — a tela funcionando; já justifica o acesso pago.
-2. **Chips de ordenação** (com `avg_xp_per_active`, sem `treasury`).
+2. **Chips de ordenação** — incluindo `avg_xp_per_active` e `treasury` (este último passou a
+   ser honesto em `aef6fbc`).
 3. **Decorações**: selo de Estandarte ativo, `top_member` com selo de Praefectus, countdown
    da semana.
