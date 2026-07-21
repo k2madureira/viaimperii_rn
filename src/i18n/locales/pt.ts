@@ -545,6 +545,9 @@ export default {
     detailError: 'Não foi possível carregar os detalhes.',
     changeLegion: 'Trocar de legião',
     changeLegionCta: 'Trocar para esta legião',
+    // O backend não tem "sair para lugar nenhum" — abandonar é trocar, e o
+    // modal exige escolher o destino.
+    leaveLegion: 'Abandonar {{name}}',
     changePickerHint: 'Escolha a nova legião. A troca tem custo em XP.',
     // Sala de Guerra (espiar as outras legiões) — acesso pago
     warRoom: 'Sala de Guerra',

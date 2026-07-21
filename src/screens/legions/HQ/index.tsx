@@ -14,8 +14,14 @@ import { legionColorById } from '../../../utils/legionColors';
 import { useLegions } from '../../missions/model/queries/useLegions';
 import { LegionTreasurySection } from '../components/sections';
 import ChangeLegionPickerModal from '../components/modals/changeLegionPickerModal';
-import { LegionHeader, HQSkeleton, NoLegionState } from './components';
-import { HQTerritories, HQActions } from './components/sections';
+import {
+  LegionHeader,
+  HQSkeleton,
+  NoLegionState,
+  WarRoomButton,
+  LeaveLegionButton,
+} from './components';
+import { HQTerritories } from './components/sections';
 
 // Regras de compra da Sala de Guerra ainda não existem no backend — não há
 // campo de posse para ler. Fica em stand-by: o botão aparece bloqueado até o
@@ -93,6 +99,12 @@ export default function LegionHQScreen() {
             <>
               <LegionHeader legion={legion} color={color} />
 
+              <WarRoomButton
+                color={color}
+                unlocked={WAR_ROOM_UNLOCKED}
+                onPress={() => navigation.navigate('WarRoom')}
+              />
+
               {/* Carteira + Praefectus + ações do cofre (tributo, proposta, voto) */}
               <LegionTreasurySection
                 legionId={legion.id}
@@ -100,14 +112,14 @@ export default function LegionHQScreen() {
                 color={color}
               />
 
-              <HQActions
-                color={color}
-                warRoomUnlocked={WAR_ROOM_UNLOCKED}
-                onOpenWarRoom={() => navigation.navigate('WarRoom')}
-                onChangeLegion={() => setChangeOpen(true)}
-              />
-
               <HQTerritories countries={legion.countries ?? []} color={color} />
+
+              {/* Abandonar fecha a tela: é destrutivo (−25% XP) e não deve
+                  disputar atenção com as ações do dia a dia. */}
+              <LeaveLegionButton
+                legionName={legion.name}
+                onPress={() => setChangeOpen(true)}
+              />
             </>
           ) : null}
         </ScrollView>

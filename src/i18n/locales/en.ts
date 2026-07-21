@@ -545,6 +545,9 @@ export default {
     detailError: 'Could not load details.',
     changeLegion: 'Switch legion',
     changeLegionCta: 'Switch to this legion',
+    // The backend has no "leave to nowhere" — leaving is a switch, and the
+    // modal requires picking a destination.
+    leaveLegion: 'Leave {{name}}',
     changePickerHint: 'Pick your new legion. Switching costs XP.',
     // War Room (peek at other legions) — paid access
     warRoom: 'War Room',
