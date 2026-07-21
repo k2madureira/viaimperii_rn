@@ -3,6 +3,7 @@ import { Image, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Text from '../../../../../components/text';
 import { CoinAmount, StandardIcon } from '../../../../../components/icons';
+import PraefectusBadge from '../../../../../components/praefectusBadge';
 import { BoardSortField, LegionBoardItem } from '../../../../../api/legionLeaderboard';
 import { formatCountdown } from '../../../model/hooks/useStandardCountdown';
 
@@ -89,6 +90,32 @@ export default function LegionBoardRow({ item, sortField, color, highlight = fal
               time: formatCountdown(item.active_standard.remaining_seconds),
             })}
           </Text>
+        )}
+
+        {/* Rosto da legião. `is_legion_leader` é best-effort no backend, então
+            a ausência do selo não é erro — só não renderiza. */}
+        {item.top_member && (
+          <View className="flex-row items-center gap-1.5 mt-1">
+            <View className="w-4 h-4 rounded-full bg-[#efeaea] items-center justify-center overflow-hidden">
+              {item.top_member.active_avatar?.url ?? item.top_member.image ? (
+                <Image
+                  source={{
+                    uri: (item.top_member.active_avatar?.url ?? item.top_member.image) as string,
+                  }}
+                  style={{ width: 16, height: 16 }}
+                  resizeMode="cover"
+                />
+              ) : (
+                <Text className="text-[8px]">⚔️</Text>
+              )}
+            </View>
+
+            <Text className="text-[9.5px] text-[#999] flex-shrink" numberOfLines={1}>
+              {item.top_member.name}
+            </Text>
+
+            {item.top_member.is_legion_leader && <PraefectusBadge size="sm" />}
+          </View>
         )}
       </View>
 

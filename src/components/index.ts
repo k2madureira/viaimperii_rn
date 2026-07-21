@@ -2,6 +2,7 @@ export { default as Footer } from './footer';
 export { default as GlobalSearchModal } from './globalSearchModal';
 export { default as LegionAttributes } from './legionAttributes';
 export { default as LegionSelectModal } from './legionSelectModal';
+export { default as PraefectusBadge } from './praefectusBadge';
 export { default as LogoIcon } from './logoIcon';
 export { default as Navbar } from './navbar';
 export { default as ProgressRing } from './progressRing';

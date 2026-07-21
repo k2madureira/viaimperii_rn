@@ -2,12 +2,15 @@ import React, { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Text from '../../../../../components/text';
-import { BoardScope } from '../../../../../api/legionLeaderboard';
+import { BoardScope, BoardSortField } from '../../../../../api/legionLeaderboard';
 import { UserProvince } from '../../../../../api/users';
+import { Legion } from '../../../../../api/legion/dto';
+import { legionColorById } from '../../../../../utils/legionColors';
 import { useLegionLeaderboard } from '../../../model/queries/useLegionLeaderboard';
 import { formatCountdown } from '../../../model/hooks/useStandardCountdown';
 import LegionBoardRow from '../../cards/legionBoardRow';
 import ScopeTab, { ScopeOption } from '../../buttons/scopeTab';
+import BoardSortChips from '../../filters/boardSortChips';
 import BoardSkeleton from '../../skeletons/boardSkeleton';
 import EmptyBox from '../../feedback/emptyBox';
 import ErrorState from '../../feedback/errorState';
@@ -15,6 +18,11 @@ import ErrorState from '../../feedback/errorState';
 interface Props {
   province: UserProvince | null;
   viewerLegionId: number | null;
+  // Catálogo de legiões — só para derivar a cor de cada linha (a cor vem da
+  // POSIÇÃO na listagem, então cada legião mantém a mesma cor em todas as telas).
+  legions: Legion[];
+  // Cor dos controles (abas/chips). Não é a cor de nenhuma legião: a War Room
+  // é sobre todas elas.
   color: string;
 }
 
@@ -30,9 +38,15 @@ function secondsUntil(iso: string): number {
 //
 // Dona da query (§0.2). O escopo territorial usa a província do viewer: sem
 // província, as abas de país/província ficam desabilitadas em vez de sumir.
-export default function LegionBoardSection({ province, viewerLegionId, color }: Props) {
+export default function LegionBoardSection({
+  province,
+  viewerLegionId,
+  legions,
+  color,
+}: Props) {
   const { t } = useTranslation();
   const [scope, setScope] = useState<BoardScope>('global');
+  const [sortField, setSortField] = useState<BoardSortField>('xp_week');
 
   const countryId = province?.country_id ?? province?.country?.id ?? undefined;
   const provinceId = province?.id;
@@ -58,6 +72,7 @@ export default function LegionBoardSection({ province, viewerLegionId, color }: 
     scope,
     countryId: scope === 'country' ? countryId : undefined,
     provinceId: scope === 'province' ? provinceId : undefined,
+    sortField,
     limit: 10,
   });
 
@@ -86,6 +101,8 @@ export default function LegionBoardSection({ province, viewerLegionId, color }: 
         </Text>
       )}
 
+      <BoardSortChips value={sortField} color={color} onChange={setSortField} />
+
       {boardQuery.isLoading ? (
         <BoardSkeleton />
       ) : boardQuery.isError ? (
@@ -98,8 +115,8 @@ export default function LegionBoardSection({ province, viewerLegionId, color }: 
             <LegionBoardRow
               key={item.legion_id}
               item={item}
-              sortField={board?.sort_field ?? 'xp_week'}
-              color={color}
+              sortField={board?.sort_field ?? sortField}
+              color={legionColorById(legions, item.legion_id) ?? color}
               highlight={item.legion_id === viewerLegionId}
             />
           ))}
@@ -117,7 +134,7 @@ export default function LegionBoardSection({ province, viewerLegionId, color }: 
           <LegionBoardRow
             item={board.viewer_legion}
             sortField={board.sort_field}
-            color={color}
+            color={legionColorById(legions, board.viewer_legion.legion_id) ?? color}
             highlight
           />
         </View>

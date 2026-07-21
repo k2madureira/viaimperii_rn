@@ -67,6 +67,7 @@ export default function WarRoomScreen() {
         <LegionBoardSection
           province={profileQuery.data?.province ?? null}
           viewerLegionId={userLegion?.id ?? null}
+          legions={legions}
           color="#9E1B32"
         />
 

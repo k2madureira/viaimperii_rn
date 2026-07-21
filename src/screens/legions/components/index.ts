@@ -15,6 +15,9 @@ export { default as DonateButton } from './buttons/donateButton';
 export { default as ProposeButton } from './buttons/proposeButton';
 export { default as ScopeTab } from './buttons/scopeTab';
 
+// filters
+export { default as BoardSortChips } from './filters/boardSortChips';
+
 // modals
 export { default as ChangeLegionModal } from './modals/changeLegionModal';
 export { default as DonateModal } from './modals/donateModal';
