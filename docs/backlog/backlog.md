@@ -15,7 +15,10 @@ repo do app (`E:\projetos\mobile\ViaImperiiExpo\docs\backlog\`).
 
 _Last updated: 2026-07-20 (cruzamento com o backlog do backend `docs/product/backlog/completed/`:
 F4 Weekly Leaderboards movida para `completed/`; novas tasks **F6 Coin Tributes** e
-**F7 Profession Mastery Tiers**)._
+**F7 Profession Mastery Tiers**. Depois: **F1 shipado** na branch `feature/legion-treasury`
+— cofre + votação de estandarte + Praefectus + reestruturação QG/War Room — e nova task
+**F8 Legion Leaderboard**, que preenche a War Room paga com o ranking de legiões
+(backend `3a6f736`))._
 
 ---
 
@@ -53,7 +56,8 @@ Loops e sistemas já vivos (regras no `CLAUDE.md` do backend). **Front já cobre
 
 | # | Task | Effort | ROI | Endpoints prontos | Spec | Status |
 |--:|------|:------:|:---:|---|---|---|
-| F1 | **Legion Treasury + Estandartes (UI)** — section no card da legião do viewer: saldo do cofre + histórico, modal de doação (padrão `LegionSelectModal`), loja de estandartes só p/ líder (carrossel) + countdown do buff ativo. | M | 4.0 | `GET /legions/{id}/treasury`, `POST .../treasury/donate`, `POST .../standard/{slug}` | `tasks/legion-treasury.md` | Ready for build |
+| F1 | **Legion Treasury + Estandartes (UI)** — section no card da legião do viewer: saldo do cofre + histórico, modal de doação (padrão `LegionSelectModal`), loja de estandartes só p/ líder (carrossel) + countdown do buff ativo. | M | 4.0 | `GET /legions/{id}/treasury`, `POST .../treasury/donate`, `POST .../standard/{slug}` | `tasks/legion-treasury.md` | **Shipado no front** (branch `feature/legion-treasury`) — inclui a votação de estandarte (§14.1) e o Praefectus derivado. Mover p/ `completed/` ao integrar |
+| F8 | **Legion Leaderboard (UI)** — ranking de legiões como corpo da `WarRoom` (tela paga): abas de escopo Global/País/Província, chips de ordenação, `active_members` **e** `total_members` por linha, selo de Estandarte ativo, `top_member` com selo de Praefectus e a legião do viewer fixada no rodapé. | M | 4.4 | `GET /legions/leaderboard` | `tasks/legion-leaderboard.md` | Ready for build |
 | F6 | **Coin Tributes (UI)** — botão "Tributar" no `FeedCard` (feed/hashtag/postDetail) + no `reviewItem` de missões; modal de valor (presets 5–100 denarii, padrão `LegionSelectModal`); resumo de tributos no post; notificação `coin_tribute`. | M | 4.3 | `POST /feed/{id}/tribute`, `POST /missions/{slug}/tribute`, `tributes` nos itens do feed | `tasks/coin-tributes.md` | Ready for build |
 | F5 | **Legion Weekly Objective (UI)** — section no card da legião: barra de progresso da meta semanal + mini-placar de contribuição + recompensa (cofre + bônus) + notificação `legion_objective_completed`. | M | 4.2 | `GET /legions/{id}/objective`, `/objective/history` | `tasks/legion-weekly-objective.md` | Ready for build (após F1) |
 | F7 | **Profession Mastery Tiers (UI)** — badge de tier + barra de progresso da profissão no `market`, `professionHero` e `professionMissions`; modal de tier-up com bônus em moedas; notificação `profession_tier_up`. | S/M | 3.4 | `mastery` em `GET /users/{id}/professions`; `profession_tier_ups[]` em complete/approve | `tasks/profession-mastery-tiers.md` | Ready for build |
