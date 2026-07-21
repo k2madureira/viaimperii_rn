@@ -24,9 +24,12 @@ import {
 import { HQTerritories } from './components/sections';
 
 // Regras de compra da Sala de Guerra ainda não existem no backend — não há
-// campo de posse para ler. Fica em stand-by: o botão aparece bloqueado até o
-// contrato expor algo como `war_room_unlocked`, e então esta constante some.
-const WAR_ROOM_UNLOCKED = false;
+// campo de posse para ler. Fica em stand-by até o contrato expor algo como
+// `war_room_unlocked`, e então esta constante some.
+//
+// Aberta em DEV para dar como testar a sala; fechada em release para não
+// entregar de graça o que vai ser vendido. NÃO trocar por `true` fixo.
+const WAR_ROOM_UNLOCKED = __DEV__;
 
 // Quartel General — tela INICIAL da legião. Mostra a legião do próprio viewer
 // (derivada do perfil, não de param de rota): carteira, Praefectus e ações do
