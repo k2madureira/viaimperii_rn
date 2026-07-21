@@ -103,7 +103,7 @@ export default function NotificationsButton() {
       return;
     }
 
-    // Votação de estandarte → abre a tela de Legiões, onde o cofre da legião do
+    // Votação de estandarte → abre o Quartel General, onde o cofre da legião do
     // viewer traz o card de votação. Sem esse atalho a proposta morre por
     // inércia: o deep-link é parte do que faz a mecânica girar.
     if (
@@ -111,7 +111,7 @@ export default function NotificationsButton() {
       item.type === 'legion_standard_resolved'
     ) {
       setAnchor(null);
-      navigation.navigate('Legions');
+      navigation.navigate('LegionHQ');
       return;
     }
 

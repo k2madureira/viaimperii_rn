@@ -543,7 +543,16 @@ export default {
     provinces: 'províncias',
     users: 'usuários',
     detailError: 'Não foi possível carregar os detalhes.',
-    changeLegion: 'Alterar para esta legião',
+    changeLegion: 'Trocar de legião',
+    changeLegionCta: 'Trocar para esta legião',
+    changePickerHint: 'Escolha a nova legião. A troca tem custo em XP.',
+    // Sala de Guerra (espiar as outras legiões) — acesso pago
+    warRoom: 'Sala de Guerra',
+    warRoomHint: 'Espie os números das outras legiões',
+    warRoomLocked: 'Acesso ainda não disponível',
+    // QG sem legião: progressão pendente, não erro
+    hqLockedTitle: 'Quartel General trancado',
+    hqLockedBody: 'Sua legião é definida ao concluir a primeira missão. Complete-a para assumir seu posto.',
     changeConfirmTitle: 'Alterar legião',
     changeConfirmDesc: 'Tem certeza que deseja trocar para a {{name}}?',
     penaltyTitle: 'Penalidade de troca',

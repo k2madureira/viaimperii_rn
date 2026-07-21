@@ -543,7 +543,16 @@ export default {
     provinces: 'provinces',
     users: 'users',
     detailError: 'Could not load details.',
-    changeLegion: 'Switch to this legion',
+    changeLegion: 'Switch legion',
+    changeLegionCta: 'Switch to this legion',
+    changePickerHint: 'Pick your new legion. Switching costs XP.',
+    // War Room (peek at other legions) — paid access
+    warRoom: 'War Room',
+    warRoomHint: "Peek at the other legions' numbers",
+    warRoomLocked: 'Access not available yet',
+    // HQ without a legion: pending progression, not an error
+    hqLockedTitle: 'Headquarters locked',
+    hqLockedBody: 'Your legion is set when you complete your first mission. Finish it to take your post.',
     changeConfirmTitle: 'Change legion',
     changeConfirmDesc: 'Are you sure you want to switch to {{name}}?',
     penaltyTitle: 'Switch penalty',

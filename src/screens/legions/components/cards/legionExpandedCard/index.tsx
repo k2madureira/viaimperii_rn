@@ -72,7 +72,7 @@ export default function LegionExpandedCard({
           {isUserLegion ? (
             <TouchableOpacity
               activeOpacity={0.85}
-              onPress={() => navigation.navigate('WarRoom', { legionId: legion.id })}
+              onPress={() => navigation.navigate('LegionHQ')}
               className="mt-4 rounded-[12px] py-3 items-center"
               style={{ backgroundColor: color }}>
               <Text className="text-[14px] font-bold text-white">
@@ -86,7 +86,7 @@ export default function LegionExpandedCard({
               className="mt-4 rounded-[12px] py-3 items-center border-2"
               style={{ borderColor: color }}>
               <Text className="text-[14px] font-bold" style={{ color }}>
-                {t('legions.changeLegion')}
+                {t('legions.changeLegionCta')}
               </Text>
             </TouchableOpacity>
           ) : (

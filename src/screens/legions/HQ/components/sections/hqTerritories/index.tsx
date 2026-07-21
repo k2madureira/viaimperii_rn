@@ -12,7 +12,7 @@ interface Props {
 
 // Territórios do Quartel General: lista só os PAÍSES com o total agregado;
 // as províncias aparecem ao expandir cada país (dado já carregado).
-export default function WarRoomTerritories({ countries, color }: Props) {
+export default function HQTerritories({ countries, color }: Props) {
   const { t } = useTranslation();
 
   return (

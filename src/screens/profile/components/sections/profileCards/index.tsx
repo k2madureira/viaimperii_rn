@@ -34,7 +34,7 @@ export default function ProfileCards({ data, rankName, totalXp }: Props) {
       <LegionCard
         legion={data?.legion ?? null}
         color={legionColorById(legionsQuery.data, data?.legion?.id)}
-        onPress={() => navigation.navigate('Home', { screen: 'Legions' })}
+        onPress={() => navigation.navigate('Home', { screen: 'LegionHQ' })}
       />
       <LocalCard
         country={data?.province?.country ?? null}

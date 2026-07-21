@@ -3,7 +3,7 @@ import { Animated, View } from 'react-native';
 
 // Esqueleto do Quartel General (mesmo ritmo do legionSkeleton): cabeçalho,
 // carteira, Centurião e territórios.
-export default function WarRoomSkeleton() {
+export default function HQSkeleton() {
   const pulseAnim = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
