@@ -20,6 +20,10 @@ export { default as PlusCircleIcon } from './plusCircle';
 export { default as ShopIcon } from './shop';
 export { default as UnlockedIcon } from './unlocked';
 
+// Cofre da Legião (arca) e Estandarte (vexillum) — economia coletiva da legião
+export { default as TreasuryIcon } from './treasury';
+export { default as StandardIcon } from './standard';
+
 // Moedas (denominações) + valor formatado
 export { AureusCoin, DenariusCoin, AsCoin, CoinIcon, CoinAmount } from './coins';
 

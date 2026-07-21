@@ -25,6 +25,8 @@ const SELF_TYPE_EMOJI: Record<string, string> = {
   mission_finalized: '⚔️',
   rank_up: '🎖️',
   medal_earned: '🏅',
+  // `legion_standard_resolved` não tem ator (é da legião, não de alguém)
+  legion_standard_resolved: '🏛️',
 };
 
 function initials(name: string) {
@@ -98,6 +100,18 @@ export default function NotificationsButton() {
         isoYear: p.iso_year ?? undefined,
         isoWeek: p.iso_week ?? undefined,
       });
+      return;
+    }
+
+    // Votação de estandarte → abre o Quartel General, onde o cofre da legião do
+    // viewer traz o card de votação. Sem esse atalho a proposta morre por
+    // inércia: o deep-link é parte do que faz a mecânica girar.
+    if (
+      item.type === 'legion_standard_proposed' ||
+      item.type === 'legion_standard_resolved'
+    ) {
+      setAnchor(null);
+      navigation.navigate('LegionHQ');
       return;
     }
 

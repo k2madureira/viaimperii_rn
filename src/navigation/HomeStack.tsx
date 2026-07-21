@@ -3,8 +3,11 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import DashboardScreen from '../screens/dashboard';
 import RanksScreen from '../screens/ranks';
-import LegionsScreen from '../screens/legions';
-import WarRoomScreen from '../screens/legions/WarRoom';
+// `LegionHQ` é a tela inicial da legião (Quartel General do próprio viewer).
+// `WarRoom` é a sala de inteligência: espia os números das OUTRAS legiões e
+// fica atrás de uma compra (regras ainda não implementadas no backend).
+import LegionHQScreen from '../screens/legions/HQ';
+import WarRoomScreen from '../screens/legions';
 import ProfileScreen from '../screens/profile';
 import PostDetailScreen from '../screens/postDetail';
 import RewardsScreen from '../screens/rewards';
@@ -17,8 +20,9 @@ import { LeaderboardScope } from '../api/leaderboards';
 export type HomeStackParamList = {
   Dashboard: undefined;
   Ranks: undefined;
-  Legions: undefined;
-  WarRoom: { legionId: number };
+  // O QG deriva a legião do perfil do usuário — não recebe param.
+  LegionHQ: undefined;
+  WarRoom: undefined;
   Profile: { userId?: string } | undefined;
   PostDetail: { post: FeedItem };
   Rewards: undefined;
@@ -38,7 +42,7 @@ export default function HomeStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Dashboard" component={DashboardScreen} />
       <Stack.Screen name="Ranks" component={RanksScreen} />
-      <Stack.Screen name="Legions" component={LegionsScreen} />
+      <Stack.Screen name="LegionHQ" component={LegionHQScreen} />
       <Stack.Screen name="WarRoom" component={WarRoomScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="PostDetail" component={PostDetailScreen} />

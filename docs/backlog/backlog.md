@@ -13,7 +13,12 @@ repo do app (`E:\projetos\mobile\ViaImperiiExpo\docs\backlog\`).
 > ℹ️ **Regra de git:** este é o **repo do app** — seguir a regra normal do projeto:
 > **só commitar/pushar quando o usuário pedir**.
 
-_Last updated: 2026-07-17 (estrutura simplificada para `tasks/` + `completed/`; front lê de `tasks/`)._
+_Last updated: 2026-07-20 (cruzamento com o backlog do backend `docs/product/backlog/completed/`:
+F4 Weekly Leaderboards movida para `completed/`; novas tasks **F6 Coin Tributes** e
+**F7 Profession Mastery Tiers**. Depois: **F1 shipado** na branch `feature/legion-treasury`
+— cofre + votação de estandarte + Praefectus + reestruturação QG/War Room — e nova task
+**F8 Legion Leaderboard**, que preenche a War Room paga com o ranking de legiões
+(backend `3a6f736`))._
 
 ---
 
@@ -27,18 +32,20 @@ Loops e sistemas já vivos (regras no `CLAUDE.md` do backend). **Front já cobre
   campanhas, maestria/medalhas, 500 conquistas. + **Rewarded videos** (AdMob SSV).
 - **Legions & provinces** — legiões abertas, dominante por província.
 - **Economy** — ledger double-entry; `/rewards`; **daily-rewards** (tela `rewards`);
-  loja rank-gated; professions.
+  loja rank-gated; professions (compra + filtro de missões).
 - **Feed** social (timeline, follows, reações, comentários, hashtags/menções, SSE) +
   **hashtagFeed** + **postDetail**.
 - **Notifications** — histórico + SSE (dropdown de sino na Home).
 - **Login streak** — bônus linear, decay 3× (`StreakButton` tooltip).
 - **Streak Shield** (F2) — **shipado no front** → `completed/streak-shield.md`.
 - **Ranking all-time** (`/ranking`, consumido no dashboard).
+- **Weekly Leaderboards** (F4) — **shipado no front** (screen `leaderboards` + `src/api/leaderboards/`)
+  → `completed/weekly-leaderboards.md`. Coexiste com o `/ranking` all-time do dashboard.
 - **AI Chronicler** (posts de crônica no feed).
 
-> Backend já shipou **leaderboards semanais escopados** (§23) e **Legion Weekly Objective**
-> (§24) — front ainda **não consome** (tasks F4/F5 abaixo). O `/ranking` all-time do dashboard
-> continua existindo e coexiste com o placar semanal.
+> Backend já shipou **Legion Weekly Objective** (§24), **Coin Tributes** (§26, migration 0070) e
+> **Profession Mastery Tiers** (§25, migration 0069) — front ainda **não consome**
+> (tasks F5/F6/F7 abaixo).
 
 ---
 
@@ -49,15 +56,20 @@ Loops e sistemas já vivos (regras no `CLAUDE.md` do backend). **Front já cobre
 
 | # | Task | Effort | ROI | Endpoints prontos | Spec | Status |
 |--:|------|:------:|:---:|---|---|---|
-| F1 | **Legion Treasury + Estandartes (UI)** — section no card da legião do viewer: saldo do cofre + histórico, modal de doação (padrão `LegionSelectModal`), loja de estandartes só p/ líder (carrossel) + countdown do buff ativo. | M | 4.0 | `GET /legions/{id}/treasury`, `POST .../treasury/donate`, `POST .../standard/{slug}` | `tasks/legion-treasury.md` | Ready for build |
-| F3 | **Store Promotions (UI)** — faixa "Promoções da semana" no `market` + badge de desconto nos itens em promoção; countdown até `ends_at`. | M | 3.2 | `GET /promotions?active=true`, `GET /promotions/{id}` | `tasks/store-promotions.md` | Ready for build (bloqueador de backend a confirmar) |
-| F4 | **Weekly Leaderboards (UI)** — nova screen `leaderboards`: placar semanal por escopo (global/legião/província/ofício), pin da linha do viewer, countdown de reset, badges de prêmio + notificação `leaderboard_prize`. | M | 4.5 | `GET /leaderboards`, `/leaderboards/history`, `/leaderboards/scopes` | `tasks/weekly-leaderboards.md` | Ready for build |
+| F1 | **Legion Treasury + Estandartes (UI)** — section no card da legião do viewer: saldo do cofre + histórico, modal de doação (padrão `LegionSelectModal`), loja de estandartes só p/ líder (carrossel) + countdown do buff ativo. | M | 4.0 | `GET /legions/{id}/treasury`, `POST .../treasury/donate`, `POST .../standard/{slug}` | `tasks/legion-treasury.md` | **Shipado no front** (branch `feature/legion-treasury`) — inclui a votação de estandarte (§14.1) e o Praefectus derivado. Mover p/ `completed/` ao integrar |
+| F8 | **Legion Leaderboard (UI)** — ranking de legiões como corpo da `WarRoom` (tela paga): abas de escopo Global/País/Província, chips de ordenação, `active_members` **e** `total_members` por linha, selo de Estandarte ativo, `top_member` com selo de Praefectus e a legião do viewer fixada no rodapé. | M | 4.4 | `GET /legions/leaderboard` | `tasks/legion-leaderboard.md` | Ready for build |
+| F6 | **Coin Tributes (UI)** — botão "Tributar" no `FeedCard` (feed/hashtag/postDetail) + no `reviewItem` de missões; modal de valor (presets 5–100 denarii, padrão `LegionSelectModal`); resumo de tributos no post; notificação `coin_tribute`. | M | 4.3 | `POST /feed/{id}/tribute`, `POST /missions/{slug}/tribute`, `tributes` nos itens do feed | `tasks/coin-tributes.md` | Ready for build |
 | F5 | **Legion Weekly Objective (UI)** — section no card da legião: barra de progresso da meta semanal + mini-placar de contribuição + recompensa (cofre + bônus) + notificação `legion_objective_completed`. | M | 4.2 | `GET /legions/{id}/objective`, `/objective/history` | `tasks/legion-weekly-objective.md` | Ready for build (após F1) |
+| F7 | **Profession Mastery Tiers (UI)** — badge de tier + barra de progresso da profissão no `market`, `professionHero` e `professionMissions`; modal de tier-up com bônus em moedas; notificação `profession_tier_up`. | S/M | 3.4 | `mastery` em `GET /users/{id}/professions`; `profession_tier_ups[]` em complete/approve | `tasks/profession-mastery-tiers.md` | Ready for build |
+| F3 | **Store Promotions (UI)** — faixa "Promoções da semana" no `market` + badge de desconto nos itens em promoção; countdown até `ends_at`. | M | 3.2 | `GET /promotions?active=true`, `GET /promotions/{id}` | `tasks/store-promotions.md` | Ready for build (bloqueador de backend parcialmente resolvido: `Profession` já traz `discount_pct`/`on_sale`/`effective_price_display`; **falta confirmar** os mesmos campos em assets/produtos físicos) |
 
-**Build order (front):** **F1 → F5 → F4 → F3**. F5 sai logo após **F1 (Legion Treasury)** — dividem
-o card expandido da legião e a recompensa do objetivo aponta pro cofre. **F3 tem dependência de
-backend**: confirmar se os itens da loja já retornam preço **com desconto** + preço original (§9 da
-spec) — se não, abrir task de backend; a faixa informativa pode shipar antes.
+**Build order (front):** **F1 → F6 → F5 → F7 → F3**.
+- **F1 primeiro** (cofre) porque **F5** depende dele conceitualmente — dividem o card expandido
+  da legião e a recompensa do objetivo aponta pro cofre.
+- **F6 (Tributes) subiu** para logo depois de F1: é o maior ROI das novas, sem screen nova
+  (só o `FeedCard` já compartilhado por 3 telas) e fecha o primeiro sink jogador→jogador.
+- **F7** é a mais barata (só estende tipos + 3 pontos de render) — bom candidato a slot curto.
+- **F3** por último: depende de confirmar os campos de desconto fora de professions.
 
 ---
 
@@ -65,32 +77,37 @@ spec) — se não, abrir task de backend; a faixa informativa pode shipar antes.
 
 | # | Feature | Spec | Notas |
 |--:|---------|---|---|
-| F2 | **Streak Shield (UI)** | `completed/streak-shield.md` | Shipado no front (contador + compra no tooltip). Spec alinhada ao contrato real. **Pendência de backend BR-1** documentada na §9 da spec: expor o preço do escudo no `GET /users/{id}/streak` (hoje só vem pós-compra) para o confirm mostrar `{{price}}` na 1ª compra. |
+| F2 | **Streak Shield (UI)** | `completed/streak-shield.md` | Shipado no front (contador + compra no tooltip). **Pendência de backend BR-1** na §9 da spec: expor o preço do escudo no `GET /users/{id}/streak` (hoje só vem pós-compra) para o confirm mostrar `{{price}}` na 1ª compra. |
+| F4 | **Weekly Leaderboards (UI)** | `completed/weekly-leaderboards.md` | Shipado no front (`src/screens/leaderboards/` + `src/api/leaderboards/` + facade `viaimperiiApi.leaderboards`). Commit `ce60c7f` / PR #29. |
 
 ---
 
 ## 🧭 Backlog priorizado (ROI = Reach×Impact ÷ Effort)
 
-Próximo a construir no backend: **#1 Scoped Weekly Leaderboards**.
+Backend já shipou #1, #2, #5 e #9 — a fila de valor agora está **no front** (F1/F5/F6/F7).
 
 | # | Idea | Effort | ROI | Status |
 |--:|------|:------:|:---:|--------|
-| 1 | **Scoped Weekly Leaderboards** — global/legion/province/profession boards, reset segunda-SP, top-N pago do ledger; retorna a linha do próprio viewer. | M | 4.5 | Spec full-stack pronta; não construída. Próxima migration = **0066** |
-| 2 | **Coin Tributes (peer tipping)** — enviar moedas a outro usuário num post/missão revisada; sink player-to-player via `transfer`. | S/M | 4.0 | Open |
-| 3 | **Trophy Case + Rare-Unlock Broadcasts** — fixar medalhas/conquistas no perfil; unlocks raros auto-postam no feed. | S/M | 4.0 | Open |
-| 4 | **Weekly Recap by a Chronista** — dispatch semanal personalizado em voz de persona via notificação + email; win-back. | S/M | 4.0 | Open |
-| 5 | **Legion Weekly Objective** — meta compartilhada automática que deposita no cofre ao concluir (alimenta o loop de tesouro/estandarte). | M | 3.0 | Open — dependência (treasury) shipada; UI = F1 |
-| 6 | **Cosmetic Drops on Mission Finalize** — drop cosmético de razão variável ao finalizar (recompensa surpresa). | M | 3.0 | Open |
-| 7 | **Mission Combo Multiplier** — conclusões consecutivas no mesmo dia acumulam multiplicador de XP que reseta meia-noite SP. | M | 3.0 | Open |
-| 8 | **Referral Rewards** — convide um amigo; ambos ganham moedas na 1ª missão concluída do amigo (reusa `invite_code` + ledger). | S/M | 2.7 | Open |
-| 9 | **Profession Mastery Tiers** — leveling dentro de uma profissão (Aprendiz→Mestre) a partir das missões concluídas nela. | M | 2.0 | Open |
-| 10 | **Province Conquest Season** — províncias como território sazonal disputado; legião vencedora ganha payout do cofre + cosmético sazonal. | L | 2.0 | Open — compõe sobre leaderboards + treasury; por último |
+| 1 | **Scoped Weekly Leaderboards** | M | 4.5 | ✅ Shipped (backend + front) |
+| 2 | **Coin Tributes (peer tipping)** | S/M | 4.0 | ✅ Backend shipped (0070) — **UI = F6** |
+| 3 | **Trophy Case + Rare-Unlock Broadcasts** — fixar medalhas/conquistas no perfil; unlocks raros auto-postam no feed. | S/M | 4.0 | Open (backend) |
+| 4 | **Weekly Recap by a Chronista** — dispatch semanal personalizado em voz de persona via notificação + email; win-back. | S/M | 4.0 | Open (backend) |
+| 5 | **Legion Weekly Objective** | M | 3.0 | ✅ Backend shipped (0068) — **UI = F5** |
+| 6 | **Cosmetic Drops on Mission Finalize** — drop cosmético de razão variável ao finalizar. | M | 3.0 | Open (backend) |
+| 7 | **Mission Combo Multiplier** — conclusões consecutivas no mesmo dia acumulam multiplicador de XP que reseta meia-noite SP. | M | 3.0 | Open (backend) |
+| 8 | **Referral Rewards** — convide um amigo; ambos ganham moedas na 1ª missão do amigo (reusa `invite_code` + ledger). | S/M | 2.7 | Open (backend) |
+| 9 | **Profession Mastery Tiers** | M | 2.0 | ✅ Backend shipped (0069) — **UI = F7** |
+| 10 | **Wallet / Extrato (UI)** — consumir `GET /wallet/transactions` (hoje `src/api/wallet/` só tem `balance`): histórico com filtros `referenceType` (tribute, profession_tier_up, legion_objective_bonus, rank_up…). | S | 3.0 | **Novo (2026-07-20)** — gap de front sobre backend já pago; pré-requisito natural de F6 (ver histórico de tributos) |
+| 11 | **Province Conquest Season** — províncias como território sazonal disputado. | L | 2.0 | Open (backend) — compõe sobre leaderboards + treasury; por último |
 
-**Notas p/ o próximo run do PO:** **F1 & F3 têm precedência** (F2 já shipou) — é backend já pago
-sem retorno de UX. Ordem de backend = **#1 → #2 → #5**; #10 por último.
+**Notas p/ o próximo run do PO:** o backend está **à frente do front em 4 features**
+(F1/F5/F6/F7). Não abrir novas ideias de backend antes de fechar essa dívida de UI —
+é backend já pago sem retorno de UX. Próxima ideia de backend na fila: **#3 Trophy Case**.
 
 ---
 
 ## ❌ Rejected / Parked
 
-_(nenhum ainda — adicionar aqui com motivo de uma linha ao descartar, para não re-propor.)_
+| Item | Motivo |
+|---|---|
+| _Discovery do backend_ (`viaimperii/docs/product/backlog/discovery/`: clans, chat, friends, VIP subscription, wearables, avatares passivos…) | Ainda **idea-level, sem contrato de API** — não vira task de front até o backend shipar. |

@@ -4,6 +4,7 @@ import { Legion } from '../../../../../api/legion/dto';
 import { legionColorByIndex } from '../../../../../utils/legionColors';
 import LegionBadge from '../../cards/legionBadge';
 import LegionExpandedCard from '../../cards/legionExpandedCard';
+import LegionCenturionSection from '../legionCenturion';
 
 interface Props {
   legions: Legion[];
@@ -53,6 +54,15 @@ export default function LegionBadges({
           userHasLegion={userHasLegion}
           totalXp={totalXp}
           userId={userId}
+        />
+      )}
+
+      {/* Centurião de QUALQUER legião do carrossel — o endpoint de líder não
+          exige ser membro. O cofre saiu daqui para o Quartel General. */}
+      {selected && (
+        <LegionCenturionSection
+          legionId={selected.id}
+          color={legionColorByIndex(selectedIndex)}
         />
       )}
     </View>
