@@ -18,6 +18,7 @@ import BoardSortChips from '../../filters/boardSortChips';
 import BoardSkeleton from '../../skeletons/boardSkeleton';
 import EmptyBox from '../../feedback/emptyBox';
 import ErrorState from '../../feedback/errorState';
+import LegionInfoModal from '../../modals/legionInfoModal';
 
 interface Props {
   province: UserProvince | null;
@@ -51,6 +52,9 @@ export default function LegionBoardSection({
   const { t } = useTranslation();
   const [scope, setScope] = useState<BoardScope>('global');
   const [sortField, setSortField] = useState<BoardSortField>('xp_week');
+  // Legião cujo modal de identidade está aberto (tocada no ranking).
+  const [infoLegionId, setInfoLegionId] = useState<number | null>(null);
+  const infoLegion = legions.find((l) => l.id === infoLegionId) ?? null;
 
   const countryId = province?.country_id ?? province?.country?.id ?? undefined;
   const provinceId = province?.id;
@@ -150,6 +154,7 @@ export default function LegionBoardSection({
               sortField={board?.sort_field ?? sortField}
               color={legionColorById(legions, item.legion_id) ?? color}
               highlight={item.legion_id === viewerLegionId}
+              onPressInfo={setInfoLegionId}
             />
           ))}
         </View>
@@ -184,6 +189,7 @@ export default function LegionBoardSection({
             sortField={board.sort_field}
             color={legionColorById(legions, board.viewer_legion.legion_id) ?? color}
             highlight
+            onPressInfo={setInfoLegionId}
           />
         </View>
       )}
@@ -194,6 +200,14 @@ export default function LegionBoardSection({
           {t('legions.board.activeWindow', { days: board.active_window_days })}
         </Text>
       )}
+
+      {/* Identidade da legião tocada — brasão, nome e descrição, no lugar do
+          antigo carrossel abaixo da tabela. */}
+      <LegionInfoModal
+        legion={infoLegion}
+        color={legionColorById(legions, infoLegionId) ?? color}
+        onClose={() => setInfoLegionId(null)}
+      />
     </View>
   );
 }

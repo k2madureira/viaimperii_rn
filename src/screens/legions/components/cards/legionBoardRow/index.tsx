@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, View } from 'react-native';
+import { Image, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Text from '../../../../../components/text';
 import { CoinAmount, StandardIcon } from '../../../../../components/icons';
@@ -12,6 +12,9 @@ interface Props {
   sortField: BoardSortField;
   color: string;
   highlight?: boolean; // legião do viewer
+  // Abre o modal de identidade da legião. Só o brasão e o nome são o gatilho —
+  // o resto da linha é dado numérico, não navegação.
+  onPressInfo?: (legionId: number) => void;
 }
 
 // Linha do ranking de legiões.
@@ -44,10 +47,18 @@ function highlightedMetric(item: LegionBoardItem, sortField: BoardSortField) {
   }
 }
 
-export default function LegionBoardRow({ item, sortField, color, highlight = false }: Props) {
+export default function LegionBoardRow({
+  item,
+  sortField,
+  color,
+  highlight = false,
+  onPressInfo,
+}: Props) {
   const { t } = useTranslation();
   const metric = highlightedMetric(item, sortField);
   const crest = item.thumb_url ?? item.image_url;
+
+  const openInfo = onPressInfo ? () => onPressInfo(item.legion_id) : undefined;
 
   return (
     <View
@@ -57,19 +68,32 @@ export default function LegionBoardRow({ item, sortField, color, highlight = fal
         {item.position}
       </Text>
 
-      <View className="w-9 h-9 rounded-full bg-white items-center justify-center overflow-hidden">
+      <TouchableOpacity
+        onPress={openInfo}
+        disabled={!openInfo}
+        activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={item.name}
+        className="w-9 h-9 rounded-full bg-white items-center justify-center overflow-hidden">
         {crest ? (
           <Image source={{ uri: crest }} style={{ width: 32, height: 32 }} resizeMode="contain" />
         ) : (
           <Text className="text-[16px]">🦅</Text>
         )}
-      </View>
+      </TouchableOpacity>
 
       <View className="flex-1">
         <View className="flex-row items-center gap-1.5">
-          <Text className="text-[13px] font-extrabold text-[#333]" numberOfLines={1}>
-            {item.name}
-          </Text>
+          <TouchableOpacity
+            onPress={openInfo}
+            disabled={!openInfo}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            className="shrink">
+            <Text className="text-[13px] font-extrabold text-[#333]" numberOfLines={1}>
+              {item.name}
+            </Text>
+          </TouchableOpacity>
 
           {/* Estandarte ativo: quem está com buff AGORA. É o que cria a tensão
               "estão na frente e ainda com +X% de XP". */}
