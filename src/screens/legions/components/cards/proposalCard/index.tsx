@@ -25,23 +25,39 @@ export default function ProposalCard({ proposal, color, pending, onVote }: Props
 
   const pct = Math.min(100, (proposal.votes_yes / Math.max(1, proposal.votes_required)) * 100);
   const missing = Math.max(0, proposal.votes_required - proposal.votes_yes);
+  const isWarRoom = proposal.kind === 'war_room';
 
   return (
     <View className="bg-accent-500/10 border border-accent-500/30 rounded-[14px] p-4 gap-3">
-      {/* Cabeçalho: estandarte proposto + preço travado */}
+      {/* Cabeçalho: o que está sendo comprado + preço travado.
+          `multiplier_pct`/`duration_hours` são campos do catálogo de
+          estandartes — não descrevem a Sala de Guerra, então a linha de
+          atributos só sai no kind `standard`. */}
       <View className="flex-row items-center gap-2.5">
-        <StandardIcon size={22} color="#9a7b1f" />
+        {isWarRoom ? (
+          <Text className="text-[20px]">🗺️</Text>
+        ) : (
+          <StandardIcon size={22} color="#9a7b1f" />
+        )}
+
         <View className="flex-1">
           <Text className="text-[10.5px] font-bold text-[#9a7b1f] tracking-[1.2px] uppercase">
             {t('legions.treasury.openVote')}
           </Text>
           <Text className="text-[14px] font-extrabold text-[#333]" numberOfLines={1}>
-            {proposal.standard_name}
+            {isWarRoom ? t('legions.warRoom') : proposal.standard_name}
           </Text>
-          <Text className="text-[11px] text-[#888] mt-0.5">
-            {t('legions.treasury.xpBoost', { pct: proposal.multiplier_pct })} ·{' '}
-            {t('legions.treasury.duration', { hours: proposal.duration_hours })}
-          </Text>
+
+          {isWarRoom ? (
+            <Text className="text-[11px] text-[#888] mt-0.5">
+              {t('legions.board.lockedBodyShort')}
+            </Text>
+          ) : (
+            <Text className="text-[11px] text-[#888] mt-0.5">
+              {t('legions.treasury.xpBoost', { pct: proposal.multiplier_pct })} ·{' '}
+              {t('legions.treasury.duration', { hours: proposal.duration_hours })}
+            </Text>
+          )}
         </View>
         <CoinAmount atomic={proposal.price} size={13} compact />
       </View>

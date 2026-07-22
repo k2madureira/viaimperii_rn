@@ -9,6 +9,7 @@ import { Navbar } from '../../../components';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useUserProfile } from '../../dashboard/model/queries/useUserProfile';
 import { useLegionDetail } from '../../dashboard/model/queries/useLegionDetail';
+import { useLegionTreasury } from '../model/queries/useLegionTreasury';
 import { HomeNavigationProp } from '../../../navigation/HomeStack';
 import { legionColorById } from '../../../utils/legionColors';
 import { useLegions } from '../../missions/model/queries/useLegions';
@@ -23,10 +24,6 @@ import {
 } from './components';
 import { HQTerritories } from './components/sections';
 
-// Regras de compra da Sala de Guerra ainda não existem no backend — não há
-// campo de posse para ler. Fica em stand-by: o botão aparece bloqueado até o
-// contrato expor algo como `war_room_unlocked`, e então esta constante some.
-const WAR_ROOM_UNLOCKED = false;
 
 // Quartel General — tela INICIAL da legião. Mostra a legião do próprio viewer
 // (derivada do perfil, não de param de rota): carteira, Praefectus e ações do
@@ -49,6 +46,12 @@ export default function LegionHQScreen() {
 
   const detailQuery = useLegionDetail(legionId as number);
   const legion = detailQuery.data;
+
+  // Posse da Sala de Guerra vem do cofre (mesma key da section abaixo, então
+  // não custa requisição extra). Aqui ela só muda o RÓTULO do botão — quem
+  // não tem acesso entra na mesma tela e vê a prévia censurada pelo servidor.
+  const treasuryQuery = useLegionTreasury(legionId, legionId != null);
+  const warRoom = treasuryQuery.data?.war_room ?? null;
 
   const totalXp = profileQuery.data?.user?.total_xp ?? user?.total_xp ?? 0;
 
@@ -101,7 +104,8 @@ export default function LegionHQScreen() {
 
               <WarRoomButton
                 color={color}
-                unlocked={WAR_ROOM_UNLOCKED}
+                unlocked={warRoom?.unlocked ?? false}
+                remainingSeconds={warRoom?.remaining_seconds ?? 0}
                 onPress={() => navigation.navigate('WarRoom')}
               />
 

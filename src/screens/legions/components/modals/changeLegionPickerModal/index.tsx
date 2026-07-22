@@ -20,8 +20,8 @@ interface Props {
 //
 // Não dá para reusar o `LegionSelectModal` puro aqui: a cópia dele é de
 // primeira escolha e não menciona custo nenhum — o usuário trocaria de legião
-// e perderia 25% do XP sem ter sido avisado. E o `ChangeLegionModal` mostra a
-// penalidade mas recebe UMA legião pronta, não serve como seletor.
+// e perderia 25% do XP sem ter sido avisado. Por isso este seletor mostra a
+// penalidade no card e de novo na confirmação.
 export default function ChangeLegionPickerModal({
   visible,
   legions,
