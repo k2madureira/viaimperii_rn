@@ -13,3 +13,6 @@ export { default as MediaGallery } from './MediaGallery';
 export { default as VideoViewerModal } from './VideoViewerModal';
 export { default as MarkdownEditor } from './MarkdownEditor';
 export { default as MentionSuggestions } from './MentionSuggestions';
+export { default as TributeButton } from './TributeButton';
+export { default as TributeModal } from './TributeModal';
+export { default as TributeSummaryRow } from './TributeSummaryRow';

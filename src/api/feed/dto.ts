@@ -1,3 +1,5 @@
+import { TributeSummary } from '../tributes/dto';
+
 // ── Tipos ──────────────────────────────────────────────────────────────────────
 
 // Lente de leitura da timeline (não é a coluna `scope` do evento).
@@ -76,6 +78,10 @@ export interface FeedItem {
   mentions: FeedAuthor[]; // menções resolvidas ao vivo
   media: PostMedia[]; // imagens/vídeos ordenados
   reactions: ReactionSummary;
+  // Resumo de tributos do post (§26). Opcional porque o feed só passou a
+  // devolvê-lo depois — um app apontado para um backend antigo não recebe o
+  // campo e simplesmente não mostra o resumo.
+  tributes?: TributeSummary;
   comments_count: number;
   created_at: string;
 }

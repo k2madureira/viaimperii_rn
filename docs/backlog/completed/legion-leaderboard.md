@@ -6,7 +6,7 @@
 
 - **Slug:** `legion-leaderboard-frontend`
 - **Backlog #:** F8 · **ROI:** 4.4 · **Esforço:** M
-- **Status:** Ready for build
+- **Status:** ✅ Shipado no front (PR #32, merge `7574237`) — 2026-07-23
 - **Autor (PO):** claude · **Data:** 2026-07-20
 
 ---

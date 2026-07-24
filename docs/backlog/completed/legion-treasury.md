@@ -5,7 +5,7 @@
 
 - **Slug:** `legion-treasury-frontend`
 - **Backlog #:** F1 · **ROI:** 4.0 · **Esforço:** M
-- **Status:** Ready for build
+- **Status:** ✅ Shipado no front (PR #31, merge `d4261be`) — 2026-07-23
 - **Autor (PO):** product-owner · **Data:** 2026-07-17
 
 ---
