@@ -87,6 +87,21 @@ export default function NotificationsButton() {
     anchorRef.current?.measureInWindow((x, y, w, h) => setAnchor({ x, y, width: w, height: h }));
   };
 
+  // Busca o post e navega para o detalhe. Compartilhado pelas notificações de
+  // post (comentário/reação/menção) e pelo tributo recebido num post.
+  const openPost = async (notificationId: number, feedEventId: number) => {
+    setOpeningId(notificationId);
+    try {
+      const post = await viaimperiiApi.feed.detail(feedEventId);
+      setAnchor(null);
+      navigation.navigate('PostDetail', { post });
+    } catch (error: any) {
+      Toast.show({ type: 'error', text1: t('toasts.notificationsOpenPostError'), text2: error.message });
+    } finally {
+      setOpeningId(null);
+    }
+  };
+
   const handlePress = async (item: NotificationItem) => {
     if (!item.read) markReadM.mutate(item.id);
 
@@ -115,19 +130,27 @@ export default function NotificationsButton() {
       return;
     }
 
+    // Tributo recebido → abre o alvo que rendeu as moedas: o post (detalhe) ou a
+    // aba de missões. O `target_id` do alvo `feed` é o id do evento, então o
+    // fluxo cai no mesmo caminho de abertura de post logo abaixo.
+    if (item.type === 'coin_tribute') {
+      const p = item.payload ?? {};
+      if (p.target_type === 'mission') {
+        setAnchor(null);
+        // A aba de missões vive no navegador pai (BottomTabs), fora deste stack.
+        (navigation as any).navigate('Missions');
+        return;
+      }
+      if (p.target_type === 'feed' && p.target_id != null) {
+        await openPost(item.id, Number(p.target_id));
+      }
+      return;
+    }
+
     const feedEventId = item.payload?.feed_event_id;
     if (!POST_NOTIFICATION_TYPES.has(item.type) || feedEventId == null) return;
 
-    setOpeningId(item.id);
-    try {
-      const post = await viaimperiiApi.feed.detail(feedEventId);
-      setAnchor(null);
-      navigation.navigate('PostDetail', { post });
-    } catch (error: any) {
-      Toast.show({ type: 'error', text1: t('toasts.notificationsOpenPostError'), text2: error.message });
-    } finally {
-      setOpeningId(null);
-    }
+    await openPost(item.id, feedEventId);
   };
 
   const renderItem = ({ item }: { item: NotificationItem }) => (

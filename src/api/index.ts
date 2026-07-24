@@ -19,6 +19,7 @@ import * as rewardsService from './rewards';
 import * as searchService from './search';
 import * as specialtiesService from './specialties';
 import * as streakService from './streak';
+import * as tributesService from './tributes';
 import * as uploadService from './upload';
 import * as usersService from './users';
 import * as walletService from './wallet';
@@ -144,6 +145,10 @@ export const viaimperiiApi = {
   streak: {
     get: streakService.getStreak,
     buyShield: streakService.buyStreakShield,
+  },
+  tributes: {
+    feed: tributesService.sendFeedTribute,
+    mission: tributesService.sendMissionTribute,
   },
   upload: {
     media: uploadService.uploadMedia,

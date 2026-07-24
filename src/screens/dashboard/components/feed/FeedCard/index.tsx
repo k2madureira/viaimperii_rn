@@ -13,7 +13,12 @@ import FeedHtml from '../FeedHtml';
 import MediaGallery from '../MediaGallery';
 import EditPostModal from '../EditPostModal';
 import ReactorsPopover from '../ReactorsPopover';
+import TributeButton from '../TributeButton';
+import TributeModal from '../TributeModal';
+import TributeSummaryRow from '../TributeSummaryRow';
 import { useDeletePost } from '../../../model/mutations/useDeletePost';
+import { useSendTribute } from '../../../model/mutations/useSendTribute';
+import { useWallet } from '../../../model/queries/useWallet';
 
 interface LegionMini {
   id: number;
@@ -73,9 +78,28 @@ export default function FeedCard({
   const [menuAnchor, setMenuAnchor] = useState<Anchor | null>(null);
   const [reactorsAnchor, setReactorsAnchor] = useState<Anchor | null>(null);
   const [editing, setEditing] = useState(false);
+  const [tributing, setTributing] = useState(false);
 
   const isOwnPost =
     item.source === 'user' && currentUserId != null && author.id === currentUserId;
+
+  // Tributo: só faz sentido em post de gente real que não seja o próprio viewer
+  // (o backend rejeita auto-tributo com 400) — eventos de sistema e posts do
+  // cronista não têm destinatário para receber as moedas.
+  const tributeM = useSendTribute();
+  const canTribute = item.source === 'user' && !!author.id && author.id !== currentUserId;
+  // Fundos restritos (bônus de admin) não são tributáveis — o modal mostra o
+  // saldo gastável para não prometer um valor que o envio recusaria.
+  const { data: wallet } = useWallet(tributing);
+
+  const openTribute = () => {
+    tributeM.reset();
+    setTributing(true);
+  };
+  const closeTribute = () => {
+    setTributing(false);
+    tributeM.reset();
+  };
   const legionName = author.legion_id
     ? legions?.find((l) => l.id === author.legion_id)?.name ?? null
     : null;
@@ -220,6 +244,14 @@ export default function FeedCard({
         </View>
       )}
 
+      {/* Resumo dos tributos recebidos (linha própria: o valor é longo demais
+          para dividir a linha com reações e comentários). */}
+      {(item.tributes?.count ?? 0) > 0 && (
+        <View className="mt-2 px-4">
+          <TributeSummaryRow tributes={item.tributes} />
+        </View>
+      )}
+
       {/* Divisor + barra de ações */}
       <View className="h-px bg-[#f3eeee] mt-2.5" />
       <View className="flex-row mt-1 px-4">
@@ -234,6 +266,7 @@ export default function FeedCard({
           <CommentIcon size={18} color="#666" />
           <Text className="text-[13px] font-bold text-[#666]">{t('feed.comment')}</Text>
         </TouchableOpacity>
+        {canTribute && <TributeButton tributes={item.tributes} onPress={openTribute} />}
       </View>
 
       {/* Popover: mini-perfil do autor */}
@@ -334,6 +367,18 @@ export default function FeedCard({
       />
 
       <EditPostModal item={editing ? item : null} onClose={() => setEditing(false)} />
+
+      <TributeModal
+        visible={tributing}
+        recipientName={author.name}
+        alreadyTributed={(item.tributes?.mine ?? 0) > 0}
+        walletBalance={wallet?.general_balance}
+        pending={tributeM.isPending}
+        error={tributeM.error}
+        result={tributeM.data}
+        onConfirm={(amount) => tributeM.mutate({ eventId: item.id, amount })}
+        onClose={closeTribute}
+      />
     </View>
   );
 }
