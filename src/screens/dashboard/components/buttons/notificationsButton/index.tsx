@@ -6,8 +6,8 @@ import { useNavigation } from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import { BellIcon } from '../../../../../components/icons';
 import { formatRelativeTime } from '../../../../../utils/date';
-import { getFeedEvent } from '../../../../../api/feed/feedApi';
-import { NotificationItem } from '../../../../../api/notifications/notificationsApi';
+import { viaimperiiApi } from '../../../../../api';
+import { NotificationItem } from '../../../../../api/notifications';
 import { HomeNavigationProp } from '../../../../../navigation/HomeStack';
 import AnchoredPopover, { Anchor } from '../../feed/AnchoredPopover';
 import { useNotifications } from '../../../model/queries/useNotifications';
@@ -25,6 +25,8 @@ const SELF_TYPE_EMOJI: Record<string, string> = {
   mission_finalized: '⚔️',
   rank_up: '🎖️',
   medal_earned: '🏅',
+  // `legion_standard_resolved` não tem ator (é da legião, não de alguém)
+  legion_standard_resolved: '🏛️',
 };
 
 function initials(name: string) {
@@ -85,15 +87,12 @@ export default function NotificationsButton() {
     anchorRef.current?.measureInWindow((x, y, w, h) => setAnchor({ x, y, width: w, height: h }));
   };
 
-  const handlePress = async (item: NotificationItem) => {
-    if (!item.read) markReadM.mutate(item.id);
-
-    const feedEventId = item.payload?.feed_event_id;
-    if (!POST_NOTIFICATION_TYPES.has(item.type) || feedEventId == null) return;
-
-    setOpeningId(item.id);
+  // Busca o post e navega para o detalhe. Compartilhado pelas notificações de
+  // post (comentário/reação/menção) e pelo tributo recebido num post.
+  const openPost = async (notificationId: number, feedEventId: number) => {
+    setOpeningId(notificationId);
     try {
-      const post = await getFeedEvent(feedEventId);
+      const post = await viaimperiiApi.feed.detail(feedEventId);
       setAnchor(null);
       navigation.navigate('PostDetail', { post });
     } catch (error: any) {
@@ -101,6 +100,57 @@ export default function NotificationsButton() {
     } finally {
       setOpeningId(null);
     }
+  };
+
+  const handlePress = async (item: NotificationItem) => {
+    if (!item.read) markReadM.mutate(item.id);
+
+    // Prêmio de placar → abre a screen `leaderboards` no escopo/semana do payload.
+    if (item.type === 'leaderboard_prize') {
+      const p = item.payload ?? {};
+      setAnchor(null);
+      navigation.navigate('Leaderboards', {
+        scope: p.scope,
+        scopeId: p.scope_key ?? undefined,
+        isoYear: p.iso_year ?? undefined,
+        isoWeek: p.iso_week ?? undefined,
+      });
+      return;
+    }
+
+    // Votação de estandarte → abre o Quartel General, onde o cofre da legião do
+    // viewer traz o card de votação. Sem esse atalho a proposta morre por
+    // inércia: o deep-link é parte do que faz a mecânica girar.
+    if (
+      item.type === 'legion_standard_proposed' ||
+      item.type === 'legion_standard_resolved'
+    ) {
+      setAnchor(null);
+      navigation.navigate('LegionHQ');
+      return;
+    }
+
+    // Tributo recebido → abre o alvo que rendeu as moedas: o post (detalhe) ou a
+    // aba de missões. O `target_id` do alvo `feed` é o id do evento, então o
+    // fluxo cai no mesmo caminho de abertura de post logo abaixo.
+    if (item.type === 'coin_tribute') {
+      const p = item.payload ?? {};
+      if (p.target_type === 'mission') {
+        setAnchor(null);
+        // A aba de missões vive no navegador pai (BottomTabs), fora deste stack.
+        (navigation as any).navigate('Missions');
+        return;
+      }
+      if (p.target_type === 'feed' && p.target_id != null) {
+        await openPost(item.id, Number(p.target_id));
+      }
+      return;
+    }
+
+    const feedEventId = item.payload?.feed_event_id;
+    if (!POST_NOTIFICATION_TYPES.has(item.type) || feedEventId == null) return;
+
+    await openPost(item.id, feedEventId);
   };
 
   const renderItem = ({ item }: { item: NotificationItem }) => (

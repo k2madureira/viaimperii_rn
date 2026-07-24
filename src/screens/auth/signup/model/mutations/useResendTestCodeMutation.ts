@@ -1,11 +1,11 @@
 import { useMutation } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../../i18n';
-import { resendTestCode } from '../../../../../api/quiz/specialtyQuizApi';
+import { viaimperiiApi } from '../../../../../api';
 
 export function useResendTestCodeMutation(onSuccess?: () => void) {
   return useMutation({
-    mutationFn: (email: string) => resendTestCode(email),
+    mutationFn: (email: string) => viaimperiiApi.quiz.resendCode(email),
     onSuccess: () => {
       Toast.show({
         type: 'success',

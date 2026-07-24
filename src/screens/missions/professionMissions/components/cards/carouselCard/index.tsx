@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { Animated } from 'react-native';
-import { Profession } from '../../../../../../api/professions/professionsApi';
+import { Profession } from '../../../../../../api/professions';
 import ProfessionCard from '../professionCard';
 
 // Card do carrossel com animação de foco: selecionado cresce (escala 1) e fica

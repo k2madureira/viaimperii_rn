@@ -1,11 +1,8 @@
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import {
-  markAllNotificationsRead,
-  NotificationsListResponse,
-  UnreadCountResponse,
-} from '../../../../api/notifications/notificationsApi';
+import { viaimperiiApi } from '../../../../api';
+import { NotificationsListResponse, UnreadCountResponse } from '../../../../api/notifications';
 
 type NotificationsCache = InfiniteData<NotificationsListResponse>;
 
@@ -13,7 +10,7 @@ export function useMarkAllNotificationsRead() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: markAllNotificationsRead,
+    mutationFn: viaimperiiApi.notifications.markAllRead,
 
     onMutate: async () => {
       // Cancela QUALQUER refetch em voo das duas queries. Sem cancelar o

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAvailableMissions, MissionDifficulty } from '../../../../api/missions/missionsApi';
+import { viaimperiiApi } from '../../../../api';
+import { MissionDifficulty } from '../../../../api/missions';
 
 export function useAvailableMissions(
   specialtyId: number | null,
@@ -10,7 +11,7 @@ export function useAvailableMissions(
   return useQuery({
     queryKey: ['missions-available', specialtyId, difficulty, professionId ?? null],
     queryFn: () =>
-      getAvailableMissions(specialtyId ?? undefined, difficulty ?? undefined, 1, 50, professionId ?? undefined),
+      viaimperiiApi.missions.available(specialtyId ?? undefined, difficulty ?? undefined, 1, 50, professionId ?? undefined),
     enabled,
   });
 }

@@ -2,8 +2,8 @@ import React from 'react';
 import { ActivityIndicator, FlatList, RefreshControl, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { FeedItem } from '../../../../../api/feed/feedApi';
-import { Legion } from '../../../../../api/legions/legionsApi';
+import { FeedItem } from '../../../../../api/feed';
+import { Legion } from '../../../../../api/legion/dto';
 import { PrimusPilusEmblem } from '../../../../../components/icons';
 import { useReactFeed } from '../../../model/mutations/useReactFeed';
 import { FeedCard } from '../../feed';
@@ -22,7 +22,7 @@ interface Props {
   bottomInset: number;
   onOpenComments: (item: FeedItem) => void;
 }
-
+ 
 // Timeline social da home. O cabeçalho da tela vai no ListHeaderComponent.
 export default function HomeFeed({
   items,

@@ -1,9 +1,9 @@
 import { useQuery } from '@tanstack/react-query';
-import { getRanking } from '../../../../api/ranking/rankingApi';
+import { viaimperiiApi } from '../../../../api';
 
 export function useRanking() {
   return useQuery({
     queryKey: ['ranking'],
-    queryFn: getRanking,
+    queryFn: viaimperiiApi.ranking.list,
   });
 }

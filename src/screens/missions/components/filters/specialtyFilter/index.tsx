@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { Specialty } from '../../../../../api/specialties/specialtiesApi';
+import { Specialty } from '../../../../../api/specialties';
 
 interface Props {
   specialties: Specialty[];

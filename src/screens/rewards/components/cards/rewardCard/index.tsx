@@ -3,7 +3,7 @@ import { ActivityIndicator, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { CoinAmount } from '../../../../../components/icons';
-import { DailyReward } from '../../../../../api/rewards/dailyRewardsApi';
+import { DailyReward } from '../../../../../api/dailyRewards';
 import { ACTION_EMOJI } from '../../../../../constants/rewards';
 
 interface Props {

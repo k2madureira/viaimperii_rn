@@ -3,7 +3,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React from 'react';
 import MissionsScreen from '../screens/missions';
 import ProfessionMissionsScreen from '../screens/missions/professionMissions';
-import { Profession } from '../api/professions/professionsApi';
+import { Profession } from '../api/professions';
 
 export type MissionsStackParamList = {
   MissionsHome: undefined;

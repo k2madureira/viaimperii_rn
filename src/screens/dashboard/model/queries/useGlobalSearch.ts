@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { globalSearch } from '../../../../api/search/searchApi';
+import { viaimperiiApi } from '../../../../api';
 
 /**
  * Busca global (§19) com debounce. Só dispara para termos com >= 2 chars.
@@ -18,7 +18,7 @@ export function useGlobalSearch(query: string, limit = 10, delay = 300) {
 
   const result = useQuery({
     queryKey: ['global-search', debounced, limit],
-    queryFn: () => globalSearch(debounced, limit),
+    queryFn: () => viaimperiiApi.search.global(debounced, limit),
     enabled,
     placeholderData: keepPreviousData,
     staleTime: 30_000,

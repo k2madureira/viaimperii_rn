@@ -1,11 +1,11 @@
 import { useMutation } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../../i18n';
-import { forgotPasswordRequest } from '../../../../../api/auth/authApi';
+import { viaimperiiApi } from '../../../../../api';
 
 export function useForgotPasswordMutation() {
   return useMutation({
-    mutationFn: forgotPasswordRequest,
+    mutationFn: viaimperiiApi.auth.forgotPassword,
     onSuccess: () => {
       Toast.show({
         type: 'success',

@@ -2,7 +2,7 @@ import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { Mission } from '../../../../../api/missions/missionsApi';
+import { Mission } from '../../../../../api/missions';
 import { ShieldIcon } from '../../../../../components/icons';
 import MissionSkeleton from '../../skeletons/missionSkeleton';
 import ErrorBox from '../../feedback/errorBox';

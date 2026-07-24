@@ -1,4 +1,4 @@
-import { Mission } from '../api/missions/missionsApi';
+import { Mission } from '../api/missions';
 
 // Tamanho de página da lista de missões (quantas aparecem antes do "Buscar mais").
 export const PAGE_SIZE = 5;

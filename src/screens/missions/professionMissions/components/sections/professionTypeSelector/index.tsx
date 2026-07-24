@@ -2,7 +2,7 @@ import React from 'react';
 import { Platform, View } from 'react-native';
 import Text from '../../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { MissionAllowance } from '../../../../../../api/missions/missionsApi';
+import { MissionAllowance } from '../../../../../../api/missions';
 import { ProfessionTheme } from '../../../../../../utils/color';
 import { TypeTab } from '../..';
 

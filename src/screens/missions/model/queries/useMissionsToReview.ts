@@ -1,10 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { getMissionsToReview } from '../../../../api/missions/missionsApi';
+import { viaimperiiApi } from '../../../../api';
 
 export function useMissionsToReview(enabled = true) {
   return useQuery({
     queryKey: ['missions-to-review'],
-    queryFn: getMissionsToReview,
+    queryFn: viaimperiiApi.missions.toReview,
     enabled,
   });
 }

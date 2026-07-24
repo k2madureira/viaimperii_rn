@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { GetUserResponse, UserStats } from '../../../../../api/users/userApi';
+import { GetUserResponse, UserStats } from '../../../../../api/users';
 import SectionLabel from '../../labels/sectionLabel';
 import StatCard from '../../cards/statCard';
 

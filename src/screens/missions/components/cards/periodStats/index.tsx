@@ -2,7 +2,7 @@ import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { UserStats } from '../../../../../api/users/userApi';
+import { UserStats } from '../../../../../api/users';
 
 interface Props {
   stats: UserStats | undefined;

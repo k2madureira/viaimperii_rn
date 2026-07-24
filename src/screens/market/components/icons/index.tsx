@@ -1,6 +1,6 @@
 import React from 'react';
 import Svg, { Path } from 'react-native-svg';
-import { ProductType } from '../../../../api/physical/physicalApi';
+import { ProductType } from '../../../../api/physical';
 
 // Paleta imperial romana — variações que combinam com o tema (não monocromático).
 export const MARKET_COLORS = {

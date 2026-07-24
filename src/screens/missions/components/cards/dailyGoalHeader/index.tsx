@@ -4,8 +4,8 @@ import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import ProgressRing from '../../../../../components/progressRing';
 import { FireIcon } from '../../../../../components/icons';
-import { LoginStreak } from '../../../../../api/auth/authApi';
-import { MissionAllowance } from '../../../../../api/missions/missionsApi';
+import { LoginStreak } from '../../../../../api/auth';
+import { MissionAllowance } from '../../../../../api/missions';
 import { DAILY_MISSION_GOAL, DAILY_MISSION_LIMIT } from '../../../../../constants/game';
 
 interface Props {

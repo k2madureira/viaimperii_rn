@@ -1,9 +1,6 @@
 import { InfiniteData, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
-  markNotificationRead,
-  NotificationsListResponse,
-  UnreadCountResponse,
-} from '../../../../api/notifications/notificationsApi';
+import { viaimperiiApi } from '../../../../api';
+import { NotificationsListResponse, UnreadCountResponse } from '../../../../api/notifications';
 
 type NotificationsCache = InfiniteData<NotificationsListResponse>;
 
@@ -13,7 +10,7 @@ export function useMarkNotificationRead() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (notificationId: number) => markNotificationRead(notificationId),
+    mutationFn: (notificationId: number) => viaimperiiApi.notifications.markRead(notificationId),
 
     onMutate: async (notificationId: number) => {
       await queryClient.cancelQueries({ queryKey: ['notifications'] });

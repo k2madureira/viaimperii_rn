@@ -6,12 +6,8 @@ import { ActivityIndicator, Platform, TouchableOpacity, View } from 'react-nativ
 import Text from '../../../components/text';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import {
-  getQuizQuestions,
-  submitQuizAnswers,
-  QuizAnswer,
-  QuizResult,
-} from '../../../api/quiz/specialtyQuizApi';
+import { viaimperiiApi } from '../../../api';
+import { QuizAnswer, QuizResult } from '../../../api/quiz';
 import { AuthStackParamList, AuthNavigationProp } from '../../../navigation/types';
 
 type QuizRoute = RouteProp<AuthStackParamList, 'SpecialtyQuiz'>;
@@ -35,7 +31,7 @@ export default function SpecialtyQuizScreen() {
 
   const { data: quiz, isError: quizError, isSuccess: quizLoaded } = useQuery({
     queryKey: ['specialty-quiz', testCode],
-    queryFn: () => getQuizQuestions(testCode),
+    queryFn: () => viaimperiiApi.quiz.questions(testCode),
   });
 
   useEffect(() => {
@@ -49,7 +45,7 @@ export default function SpecialtyQuizScreen() {
   }, [quizError]);
 
   const { mutate: submitAnswers } = useMutation({
-    mutationFn: (finalAnswers: QuizAnswer[]) => submitQuizAnswers(testCode, finalAnswers),
+    mutationFn: (finalAnswers: QuizAnswer[]) => viaimperiiApi.quiz.submit(testCode, finalAnswers),
     onSuccess: (quizResult) => {
       // A especialidade já é persistida pelo próprio submit; a troca posterior usa
       // PATCH /users/{id} pós-login (require_self_or_admin).

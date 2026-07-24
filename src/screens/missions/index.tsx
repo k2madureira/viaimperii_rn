@@ -5,15 +5,15 @@ import { useTranslation } from 'react-i18next';
 import * as SecureStore from 'expo-secure-store';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Navbar } from '../../components';
-import { Mission, MissionDifficulty, MissionEvidence, RecommendedMission } from '../../api/missions/missionsApi';
-import { StatsPeriod } from '../../api/users/userApi';
+import { Mission, MissionDifficulty, MissionEvidence, RecommendedMission } from '../../api/missions';
+import { StatsPeriod } from '../../api/users';
 import { useAuth } from '../../contexts/AuthContext';
 import { XP_PER_RANK } from '../../constants/game';
 import { FIRST_TRACK_RANK, PAGE_SIZE, sortByDifficulty } from '../../constants/missions';
 import { useUserProfile } from '../dashboard/model/queries/useUserProfile';
 import { useWallet } from '../dashboard/model/queries/useWallet';
 import { WalletButton } from '../dashboard/components';
-import { buildAutoCompletionText } from '../../utils/missionEvidence';
+import { buildAutoCompletionText, isDuplicateImageError } from '../../utils/missionEvidence';
 import { DailyGoalHeader, LoadMoreButton, MissionItem } from './components';
 import {
   ActiveMissionsCard,
@@ -151,6 +151,8 @@ export default function MissionsScreen() {
   const [recommendedIds, setRecommendedIds] = useState<number[]>([]);
   // Modal de evidência (missões com proof_type != none).
   const [evidenceMission, setEvidenceMission] = useState<Mission | null>(null);
+  // Dedup: backend recusou o print por já ter sido usado antes (422) — aviso inline no modal.
+  const [imageAlreadyUsed, setImageAlreadyUsed] = useState(false);
   // Missão em confirmação de "compartilhar como post" / missão sendo compartilhada.
   const [shareConfirm, setShareConfirm] = useState<Mission | null>(null);
   const [shareMission, setShareMission] = useState<Mission | null>(null);
@@ -245,6 +247,12 @@ export default function MissionsScreen() {
           }
         },
         onError: (err: Error) => {
+          // Dedup de imagem: mantém o modal aberto e sinaliza inline que o print já foi
+          // usado antes (o toast genérico é suprimido em useCompleteMission).
+          if (evidence?.image_key && isDuplicateImageError(err.message)) {
+            setImageAlreadyUsed(true);
+            return;
+          }
           // Recuperação: se o backend exigir prova (proof_type desatualizado no cache
           // da listagem), abre o modal de evidência em vez de só falhar.
           if (!evidence && /eviden|proof|prova|comprov/i.test(err.message)) {
@@ -269,6 +277,7 @@ export default function MissionsScreen() {
         text: buildAutoCompletionText(mission, t('missions.autoCompleteText', { name: mission.name })),
       });
     } else {
+      setImageAlreadyUsed(false);
       setEvidenceMission(mission);
     }
   };
@@ -479,7 +488,12 @@ export default function MissionsScreen() {
         evidence={{
           mission: evidenceMission,
           submitting: completeM.isPending,
-          onClose: () => setEvidenceMission(null),
+          imageAlreadyUsed,
+          onClearImageError: () => setImageAlreadyUsed(false),
+          onClose: () => {
+            setEvidenceMission(null);
+            setImageAlreadyUsed(false);
+          },
           onSubmit: (evidence) => evidenceMission && submitComplete(evidenceMission, evidence),
         }}
         celebration={{

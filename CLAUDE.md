@@ -159,6 +159,58 @@ legions/
 
 ---
 
+## 0.3 Camada de API (Frontend — obrigatório)
+
+Toda API em `src/api/` segue o **mesmo padrão de módulo por domínio** (referência:
+`src/api/legion/`). **Nada de arquivo único `{domínio}Api.ts`** com tipos + todas as funções
+juntos — cada operação é um arquivo.
+
+### Estrutura de pastas por domínio
+
+```
+src/api/{domínio}/
+  dto.ts            # SÓ tipos/interfaces do domínio (Request/Response, entidades)
+  {operação}.ts     # UMA função por arquivo (list, detail, join, complete, …),
+                    #   importando os tipos de './dto'
+  index.ts          # barrel: export * de cada operação + do dto
+```
+
+Exemplo real (`src/api/legion/`): `dto.ts` (tipos), `list.ts` (`getLegions`),
+`detail.ts` (`getLegion`), `join.ts` (`joinLegion`), `index.ts` (barrel).
+
+### Regras
+
+- **Um arquivo por operação**, nome **semântico curto** (verbo/substantivo do caso de uso:
+  `list`, `detail`, `available`, `complete`, `approve`, `join`…), **não** o nome da função
+  (`getLegions`). A função exportada mantém o nome descritivo (`getLegions`).
+- **`dto.ts`** concentra **todos** os tipos do domínio; as operações importam de `./dto`.
+  Tipos compartilhados entre domínios ficam em `src/api/default/dto.ts` (ex.: `IPaginated`).
+- Toda operação usa os helpers de `../config/defaultApi` (`apiFetch`, `readContent`,
+  `readError`) — **nunca** `fetch` cru; erro sempre via `readError(response, fallback)`.
+- **`index.ts`** = barrel (`export * from './{operação}'` + `export * from './dto'`).
+- **Registrar no facade** `src/api/index.ts`: `viaimperiiApi.{domínio}.{operação}`
+  (ex.: `legion: { list, detail, join }`). O facade é a **fonte única** de consumo.
+- **Consumidores (hooks React Query) chamam SEMPRE pelo facade** — `queryFn`/`mutationFn`
+  = `viaimperiiApi.{domínio}.{operação}`; **nunca** importam a função pelo caminho interno.
+  Tipos podem ser importados do barrel do domínio (`from '../api/{domínio}'`).
+
+```ts
+// hook consumidor — padrão obrigatório
+import { useQuery } from '@tanstack/react-query';
+import { viaimperiiApi } from '../../../../api';
+
+export function useLegions(enabled = true) {
+  return useQuery({ queryKey: ['legions'], queryFn: viaimperiiApi.legion.list, enabled });
+}
+```
+
+- **SSE/eventos** (`{domínio}Events.ts`, ex.: `feedEvents`, `missionEvents`) **não** são
+  operações REST — ficam como arquivo próprio no domínio, fora do split de operações.
+- **Ao migrar/mover**: `git mv` para preservar histórico; validar com `npx tsc --noEmit`
+  (exit 0) antes de concluir.
+
+---
+
 ## 1. Arquitetura e Convenções
 
 - **Clean Architecture** em 4 camadas: `domain → application → infrastructure → presentation`.

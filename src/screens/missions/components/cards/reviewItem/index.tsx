@@ -12,7 +12,7 @@ import {
 import Text from '../../../../../components/text';
 import TextInput from '../../../../../components/textInput';
 import { useTranslation } from 'react-i18next';
-import { ToReviewItem } from '../../../../../api/missions/missionsApi';
+import { ToReviewItem } from '../../../../../api/missions';
 import { parseBackendDate } from '../../../../../utils/date';
 import { REJECTION_REASON_MIN_LENGTH } from '../../../../../constants/game';
 

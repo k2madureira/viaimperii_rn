@@ -18,7 +18,7 @@ import Text from '../../../../../components/text';
 import TextInput from '../../../../../components/textInput';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { FeedComment, FeedItem } from '../../../../../api/feed/feedApi';
+import { FeedComment, FeedItem } from '../../../../../api/feed';
 import { parseBackendDate } from '../../../../../utils/date';
 import { useFeedComments } from '../../../model/queries/useFeedComments';
 import { useCreateComment } from '../../../model/mutations/useCreateComment';

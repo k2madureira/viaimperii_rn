@@ -2,7 +2,7 @@ import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { Campaign } from '../../../../../api/campaigns/campaignsApi';
+import { Campaign } from '../../../../../api/campaigns';
 
 interface Props {
   campaigns: Campaign[];

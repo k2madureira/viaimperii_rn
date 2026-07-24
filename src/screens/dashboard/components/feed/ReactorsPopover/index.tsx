@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { Reactor, ReactionType } from '../../../../../api/feed/feedApi';
+import { Reactor, ReactionType } from '../../../../../api/feed';
 import { HomeNavigationProp } from '../../../../../navigation/HomeStack';
 import { useReactors } from '../../../model/queries/useReactors';
 import AnchoredPopover, { Anchor } from '../AnchoredPopover';

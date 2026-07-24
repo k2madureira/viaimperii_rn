@@ -1,13 +1,14 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import { createPost, CreatePostInput } from '../../../../api/feed/feedApi';
+import { viaimperiiApi } from '../../../../api';
+import { CreatePostInput } from '../../../../api/feed';
 
 export function useCreatePost() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (input: CreatePostInput) => createPost(input),
+    mutationFn: (input: CreatePostInput) => viaimperiiApi.feed.createPost(input),
     onSuccess: () => {
       Toast.show({ type: 'success', text1: i18n.t('toasts.feedPostCreated') });
       queryClient.invalidateQueries({ queryKey: ['feed'] });
@@ -17,3 +18,4 @@ export function useCreatePost() {
     },
   });
 }
+ 

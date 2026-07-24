@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import { chooseTrack } from '../../../../api/ranks/ranksApi';
+import { viaimperiiApi } from '../../../../api';
 
 export function useChooseTrack(userId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (trackSlug: string) => chooseTrack(userId as string, trackSlug),
+    mutationFn: (trackSlug: string) => viaimperiiApi.ranks.chooseTrack(userId as string, trackSlug),
     onSuccess: (result) => {
       Toast.show({
         type: 'success',

@@ -2,7 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { getQuizQuestions } from '../../../../../api/quiz/specialtyQuizApi';
+import { viaimperiiApi } from '../../../../../api';
 import { ActivityIndicator, Platform, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import TextInput, { TextInputRef } from '../../../../../components/textInput';
@@ -34,7 +34,7 @@ export default function Step3Token({ email: initialEmail, onBack }: Props) {
     const testCode = token.trim().toUpperCase();
     await queryClient.prefetchQuery({
       queryKey: ['specialty-quiz', testCode],
-      queryFn: () => getQuizQuestions(testCode),
+      queryFn: () => viaimperiiApi.quiz.questions(testCode),
     });
     navigation.navigate('SpecialtyQuiz', { testCode, userId: user_id });
   });

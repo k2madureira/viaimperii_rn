@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
-import { FeedItem, getFeedEvent } from '../../../../api/feed/feedApi';
+import { viaimperiiApi } from '../../../../api';
+import { FeedItem } from '../../../../api/feed';
 
 /**
  * Detalhe de um post do feed. Aceita um `initialData` (ex.: o item vindo da
@@ -9,7 +10,7 @@ import { FeedItem, getFeedEvent } from '../../../../api/feed/feedApi';
 export function useFeedEvent(eventId: number, initialData?: FeedItem) {
   return useQuery({
     queryKey: ['feed-event', eventId],
-    queryFn: () => getFeedEvent(eventId),
+    queryFn: () => viaimperiiApi.feed.detail(eventId),
     initialData,
     // Considera o initialData "velho" para refazer em segundo plano na abertura.
     initialDataUpdatedAt: 0,

@@ -6,7 +6,7 @@ import type { TextInputRef } from '../../components/textInput';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQueryClient } from '@tanstack/react-query';
 import { Navbar } from '../../components';
-import { FeedItem } from '../../api/feed/feedApi';
+import { FeedItem } from '../../api/feed';
 import { HomeStackParamList } from '../../navigation/HomeStack';
 import { useAuth } from '../../contexts/AuthContext';
 import { useFeedEvent } from '../dashboard/model/queries/useFeedEvent';

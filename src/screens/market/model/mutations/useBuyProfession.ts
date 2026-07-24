@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import { buyProfession } from '../../../../api/professions/professionsApi';
+import { viaimperiiApi } from '../../../../api';
 
 export function useBuyProfession() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (professionId: number) => buyProfession(professionId),
+    mutationFn: (professionId: number) => viaimperiiApi.professions.buy(professionId),
     onSuccess: (result) => {
       Toast.show({
         type: 'success',

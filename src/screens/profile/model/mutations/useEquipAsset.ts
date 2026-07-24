@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import { equipAsset } from '../../../../api/assets/assetsApi';
-import { GetUserResponse } from '../../../../api/users/userApi';
+import { viaimperiiApi } from '../../../../api';
+import { GetUserResponse } from '../../../../api/users';
 import { useAuth } from '../../../../contexts/AuthContext';
 
 export function useEquipAsset() {
@@ -11,7 +11,7 @@ export function useEquipAsset() {
   const userId = user?.user_id;
 
   return useMutation({
-    mutationFn: (slug: string) => equipAsset(slug),
+    mutationFn: (slug: string) => viaimperiiApi.assets.equip(slug),
     onSuccess: (result) => {
       Toast.show({
         type: 'success',

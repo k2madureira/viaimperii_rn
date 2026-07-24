@@ -1,7 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { MissionAllowance } from '../../../../../api/missions/missionsApi';
+import { MissionAllowance } from '../../../../../api/missions';
 import { useRewardedVideo } from '../../../model/mutations/useRewardedVideo';
 import TypeTab from '../../buttons/typeTab';
 import AllowanceBar from '../../cards/allowanceBar';

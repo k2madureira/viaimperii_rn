@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import { updatePasswordRequest } from '../../../../api/auth/authApi';
+import { viaimperiiApi } from '../../../../api';
 import { useAuth } from '../../../../contexts/AuthContext';
 
 export function useUpdatePasswordMutation(onSuccess: () => void) {
@@ -9,7 +9,7 @@ export function useUpdatePasswordMutation(onSuccess: () => void) {
 
   return useMutation({
     mutationFn: ({ current_password, new_password }: { current_password: string; new_password: string }) =>
-      updatePasswordRequest(current_password, new_password),
+      viaimperiiApi.auth.updatePassword(current_password, new_password),
     onSuccess: async () => {
       await markPasswordUpdated();
       Toast.show({ type: 'success', text1: i18n.t('toasts.passwordUpdated') });

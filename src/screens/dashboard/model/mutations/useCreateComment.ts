@@ -1,7 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import { createComment } from '../../../../api/feed/feedApi';
+import { viaimperiiApi } from '../../../../api';
 
 interface Vars {
   eventId: number;
@@ -13,7 +13,7 @@ export function useCreateComment() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ eventId, body, parentId }: Vars) => createComment(eventId, body, parentId),
+    mutationFn: ({ eventId, body, parentId }: Vars) => viaimperiiApi.feed.createComment(eventId, body, parentId),
     onSuccess: (_result, { eventId }) => {
       // Recarrega a thread e o feed (comments_count é desnormalizado no evento).
       queryClient.invalidateQueries({ queryKey: ['feed-comments', eventId] });

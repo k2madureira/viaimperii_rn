@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Navbar } from '../../components';
-import { FeedItem } from '../../api/feed/feedApi';
+import { FeedItem } from '../../api/feed';
 import { HomeNavigationProp, HomeStackParamList } from '../../navigation/HomeStack';
 import { useAuth } from '../../contexts/AuthContext';
 import { CommentsModal, FeedCard } from '../dashboard/components/feed';

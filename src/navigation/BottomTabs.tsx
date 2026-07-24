@@ -5,9 +5,8 @@ import Text from '../components/text';
 import { useTranslation } from 'react-i18next';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeIcon from './icons/HomeIcon';
-import AchievementsIcon from './icons/AchievementsIcon';
-import { PlusIcon, PrimusPilusEmblem, ShopIcon } from '../components/icons';
-import AchievementsScreen from '../screens/achievements';
+import { PlusIcon, PrimusPilusEmblem, ShopIcon, TrophyIcon } from '../components/icons';
+import LeaderboardsScreen from '../screens/leaderboards';
 import MarketScreen from '../screens/market';
 import HomeStack from './HomeStack';
 import MissionsStack from './MissionsStack';
@@ -20,7 +19,7 @@ export type BottomTabParamList = {
   Home: undefined;
   Missions: undefined;
   CreatePost: undefined;
-  Achievements: undefined;
+  Leaderboards: undefined;
   Market: undefined;
 };
 
@@ -39,7 +38,10 @@ const TAB_ICON: Partial<Record<keyof BottomTabParamList, IconComponent>> = {
   // Emblema Primus Pilus (mesmo svg do antigo card de missões) — silhueta
   // monocromática para seguir o esquema de cor (cinza inativo / vermelho ativo).
   Missions: ({ size, color }) => <PrimusPilusEmblem size={size} color={color} />,
-  Achievements: AchievementsIcon,
+  // Troféu — aba do Placar da Semana, à esquerda do Mercado.
+  Leaderboards: ({ size, color, strokeWidth }) => (
+    <TrophyIcon size={size} color={color} strokeWidth={strokeWidth} />
+  ),
   // Sacola de compras — aba do Mercado (substituiu o Perfil, agora acessível pelo
   // menu do usuário e pela saudação da Home).
   Market: ({ size, color }) => <ShopIcon size={size} color={color} />,
@@ -70,7 +72,7 @@ export default function BottomTabs() {
     Home: t('nav.home'),
     Missions: t('nav.missions'),
     CreatePost: '',
-    Achievements: t('nav.achievements'),
+    Leaderboards: t('nav.leaderboards'),
     Market: t('nav.market'),
   };
   // Eleva a barra acima da área de gestos do sistema (home indicator / nav bar).
@@ -144,10 +146,10 @@ export default function BottomTabs() {
             },
           })}
         />
-        <Tab.Screen name="Achievements" component={AchievementsScreen} />
+        <Tab.Screen name="Leaderboards" component={LeaderboardsScreen} />
         <Tab.Screen name="Market" component={MarketScreen} />
       </Tab.Navigator>
-
+ 
       <CreatePostModal
         visible={createPostVisible}
         canLegion={canLegion}

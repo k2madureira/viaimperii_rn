@@ -5,7 +5,7 @@ import {
   RewardedAd,
   RewardedAdEventType,
 } from 'react-native-google-mobile-ads';
-import { registerRewardedVideo } from '../../../../api/missions/missionsApi';
+import { viaimperiiApi } from '../../../../api';
 import { REWARDED_AD_UNIT_ID } from '../../../../constants/admob';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
@@ -33,7 +33,7 @@ export function useRewardedVideo() {
 
     const unsubEarned = ad.addAdEventListener(RewardedAdEventType.EARNED_REWARD, async () => {
       try {
-        await registerRewardedVideo();
+        await viaimperiiApi.missions.rewardedVideo();
         await Promise.all([
           queryClient.invalidateQueries({ queryKey: ['missions-available'] }),
           queryClient.invalidateQueries({ queryKey: ['missions'] }),

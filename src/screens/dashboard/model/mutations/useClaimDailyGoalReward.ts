@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { grantReward } from '../../../../api/rewards/rewardsApi';
+import { viaimperiiApi } from '../../../../api';
 import { DAILY_GOAL_REWARD_DENARIUS } from '../../../../constants/game';
 
 /**
@@ -12,7 +12,7 @@ export function useClaimDailyGoalReward() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: () =>
-      grantReward({ type: 'coins', amount: DAILY_GOAL_REWARD_DENARIUS, unit: 'denarius' }),
+      viaimperiiApi.rewards.grant({ type: 'coins', amount: DAILY_GOAL_REWARD_DENARIUS, unit: 'denarius' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['wallet'] });
     },

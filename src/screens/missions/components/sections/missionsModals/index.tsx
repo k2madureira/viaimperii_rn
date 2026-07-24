@@ -3,7 +3,7 @@ import { Modal, Platform, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
 import { LegionSelectModal } from '../../../../../components';
-import { Mission, MissionEvidence } from '../../../../../api/missions/missionsApi';
+import { Mission, MissionEvidence } from '../../../../../api/missions';
 import { CreatePostModal } from '../../../../dashboard/components/feed';
 import { useLegions } from '../../../model/queries/useLegions';
 import { useJoinLegion } from '../../../model/mutations/useJoinLegion';
@@ -23,6 +23,8 @@ interface Props {
   evidence: {
     mission: Mission | null;
     submitting: boolean;
+    imageAlreadyUsed?: boolean;
+    onClearImageError?: () => void;
     onClose: () => void;
     onSubmit: (evidence: MissionEvidence) => void;
   };
@@ -92,6 +94,8 @@ export default function MissionsModals({
       <EvidenceModal
         mission={evidence.mission}
         submitting={evidence.submitting}
+        imageAlreadyUsed={evidence.imageAlreadyUsed}
+        onClearImageError={evidence.onClearImageError}
         onClose={evidence.onClose}
         onSubmit={evidence.onSubmit}
       />

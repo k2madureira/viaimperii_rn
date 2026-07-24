@@ -1,11 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import {
-  buyStreakShield,
-  StreakApiError,
-  StreakResponse,
-} from '../../../../api/streak/streakApi';
+import { viaimperiiApi } from '../../../../api';
+import { StreakApiError, StreakResponse } from '../../../../api/streak';
 
 /**
  * Compra 1 Streak Shield via POST /users/{id}/streak/shield.
@@ -19,7 +16,7 @@ export function useBuyStreakShield(userId: string | undefined) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => buyStreakShield(userId as string),
+    mutationFn: () => viaimperiiApi.streak.buyShield(userId as string),
     onSuccess: (data) => {
       Toast.show({ type: 'success', text1: i18n.t('dashboard.streakShield.success') });
       // Atualiza a contagem exibida NA HORA (o tooltip/modal renderizam a partir

@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query';
-import { getProfessions, getUserProfessions } from '../../../../api/professions/professionsApi';
+import { viaimperiiApi } from '../../../../api';
 
 // Catálogo de profissões do mercado (todas; o filtro por trilha/especialidade é
 // aplicado no cliente para derivar as especialidades disponíveis da trilha).
 export function useProfessions(enabled = true) {
   return useQuery({
     queryKey: ['professions'],
-    queryFn: () => getProfessions({ perPage: 100 }),
+    queryFn: () => viaimperiiApi.professions.catalog({ perPage: 100 }),
     enabled,
   });
 }
@@ -15,7 +15,7 @@ export function useProfessions(enabled = true) {
 export function useUserProfessions(userId: string | undefined, enabled = true) {
   return useQuery({
     queryKey: ['user-professions', userId],
-    queryFn: () => getUserProfessions(userId!),
+    queryFn: () => viaimperiiApi.professions.owned(userId!),
     enabled: enabled && !!userId,
   });
 }

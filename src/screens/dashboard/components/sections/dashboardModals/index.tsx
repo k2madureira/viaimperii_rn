@@ -5,14 +5,15 @@ import {
   ProvinceSetupModal,
   TrackSelectModal,
 } from '../../../../../components';
-import { FeedItem } from '../../../../../api/feed/feedApi';
-import { Legion } from '../../../../../api/legions/legionsApi';
+import { FeedItem } from '../../../../../api/feed';
+
 import { useJoinLegion } from '../../../../missions/model/mutations/useJoinLegion';
 import { useTracks } from '../../../../ranks/model/queries/useTracks';
 import { useUpdateProvince } from '../../../model/mutations/useUpdateProvince';
 import { useChooseTrack } from '../../../model/mutations/useChooseTrack';
 import ChangePasswordModal from '../../modals/changePasswordModal';
 import { CommentsModal } from '../../feed';
+import { Legion } from '../../../../../api/legion/dto';
 
 interface Props {
   userId?: string;
@@ -33,7 +34,7 @@ interface Props {
   };
   comments: { item: FeedItem | null; onClose: () => void };
   search: { visible: boolean; onClose: () => void };
-}
+} 
 
 // Footer da home: modais automáticos (senha → província → trilha → legião),
 // comentários do feed e busca global.

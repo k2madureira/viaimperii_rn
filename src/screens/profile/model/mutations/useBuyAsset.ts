@@ -1,13 +1,13 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
-import { buyAsset } from '../../../../api/assets/assetsApi';
+import { viaimperiiApi } from '../../../../api';
 
 export function useBuyAsset() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (slug: string) => buyAsset(slug),
+    mutationFn: (slug: string) => viaimperiiApi.assets.buy(slug),
     onSuccess: (result) => {
       Toast.show({
         type: 'success',
