@@ -38,6 +38,11 @@ export default function UserMenu({ onChangePassword }: Props) {
     navigation.navigate('Home', { screen: 'Profile', params: {} });
   };
 
+  const goToFriends = () => {
+    close();
+    navigation.navigate('Home', { screen: 'Friends', params: {} });
+  };
+
   return (
     <>
       <TouchableOpacity
@@ -89,6 +94,16 @@ export default function UserMenu({ onChangePassword }: Props) {
                 onPress={goToProfile}>
                 <UserIcon size={18} color="#111" />
                 <Text className="text-[14px] font-medium text-[#111]">{t('userMenu.profile')}</Text>
+              </TouchableOpacity>
+
+              <View className="h-px bg-[#f0f0f0]" />
+
+              <TouchableOpacity
+                className="flex-row items-center gap-3 px-4 py-3"
+                activeOpacity={0.7}
+                onPress={goToFriends}>
+                <UserIcon size={18} color="#111" />
+                <Text className="text-[14px] font-medium text-[#111]">{t('userMenu.friends')}</Text>
               </TouchableOpacity>
 
               <View className="h-px bg-[#f0f0f0]" />

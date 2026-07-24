@@ -14,6 +14,7 @@ import RewardsScreen from '../screens/rewards';
 import HashtagFeedScreen from '../screens/hashtagFeed';
 import LeaderboardsScreen from '../screens/leaderboards';
 import AchievementsScreen from '../screens/achievements';
+import FriendsScreen from '../screens/friends';
 import { FeedItem } from '../api/feed';
 import { LeaderboardScope } from '../api/leaderboards';
 
@@ -31,6 +32,7 @@ export type HomeStackParamList = {
     | { scope?: LeaderboardScope; scopeId?: number; isoYear?: number; isoWeek?: number }
     | undefined;
   Achievements: undefined;
+  Friends: { tab?: 'friends' | 'requests' } | undefined;
 };
 
 export type HomeNavigationProp = NativeStackNavigationProp<HomeStackParamList>;
@@ -50,6 +52,7 @@ export default function HomeStack() {
       <Stack.Screen name="HashtagFeed" component={HashtagFeedScreen} />
       <Stack.Screen name="Leaderboards" component={LeaderboardsScreen} />
       <Stack.Screen name="Achievements" component={AchievementsScreen} />
+      <Stack.Screen name="Friends" component={FriendsScreen} />
     </Stack.Navigator>
   );
 }

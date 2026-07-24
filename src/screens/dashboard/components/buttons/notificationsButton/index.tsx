@@ -147,6 +147,15 @@ export default function NotificationsButton() {
       return;
     }
 
+    // Amigos → abre a tela de Amigos (pedido recebido cai na aba de pedidos).
+    if (item.type === 'friend_request' || item.type === 'friend_accepted') {
+      setAnchor(null);
+      navigation.navigate('Friends', {
+        tab: item.type === 'friend_request' ? 'requests' : 'friends',
+      });
+      return;
+    }
+
     const feedEventId = item.payload?.feed_event_id;
     if (!POST_NOTIFICATION_TYPES.has(item.type) || feedEventId == null) return;
 
