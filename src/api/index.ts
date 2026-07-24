@@ -3,6 +3,7 @@ import * as authService from './auth';
 import * as campaignsService from './campaigns';
 import * as dailyRewardsService from './dailyRewards';
 import * as feedService from './feed';
+import * as friendshipService from './friendship';
 import * as leaderboardsService from './leaderboards';
 import * as legionService from './legion';
 import * as legionLeaderboardService from './legionLeaderboard';
@@ -63,6 +64,16 @@ export const viaimperiiApi = {
     reactors: feedService.getReactors,
     comments: feedService.getFeedComments,
     createComment: feedService.createComment,
+  },
+  friendship: {
+    request: friendshipService.sendFriendRequest,
+    accept: friendshipService.acceptFriendRequest,
+    decline: friendshipService.declineFriendRequest,
+    listFriends: friendshipService.getFriends,
+    listRequests: friendshipService.getFriendRequests,
+    unfriend: friendshipService.unfriend,
+    block: friendshipService.blockUser,
+    unblock: friendshipService.unblockUser,
   },
   leaderboards: {
     board: leaderboardsService.getLeaderboard,

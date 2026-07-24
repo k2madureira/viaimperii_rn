@@ -35,6 +35,10 @@ export function notificationMessage(t: T, item: NotificationItem): string {
       return t('notifications.types.medal_earned', { medal: p.medal ?? '' });
     case 'new_follower':
       return t('notifications.types.new_follower', { from });
+    case 'friend_request':
+      return t('notifications.types.friend_request', { from });
+    case 'friend_accepted':
+      return t('notifications.types.friend_accepted', { from });
     case 'coin_tribute':
       return t('tributes.notifications.coin_tribute', {
         name: from,
