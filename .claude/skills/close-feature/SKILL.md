@@ -29,9 +29,43 @@ aqui** e mostre os erros — não commite/dê push em código que não compila.
 Corrigir os erros é decisão de quem pediu o fechamento; só corrija você mesmo
 se o usuário pedir isso explicitamente.
 
-## 3. Commit (se houver pendências)
+## 3. Fechar a task no backlog do PO
 
-Se o passo 1 mostrou mudanças não commitadas:
+**Antes de commitar**, feche a spec da feature em `docs/backlog/` — este passo
+já foi esquecido três vezes (F1, F8 e F6 ficaram em `tasks/` mesmo depois de
+mergeadas), e o backlog é o que o front lê para saber o que implementar: uma
+task fantasma em `tasks/` faz alguém reimplementar o que já shipou.
+
+Descubra qual task o trabalho fecha (`ls docs/backlog/tasks/` e case com o
+escopo da branch/commits). Se a feature **não** corresponde a nenhuma spec
+(hotfix, refactor, tooling), pule este passo — mas diga ao usuário que pulou
+e por quê.
+
+Quando houver task correspondente:
+
+1. `git mv docs/backlog/tasks/<slug>.md docs/backlog/completed/<slug>.md` —
+   `git mv` preserva o histórico.
+2. No header da spec, troque `- **Status:** Ready for build` por
+   `- **Status:** ✅ Shipado no front (PR #N, merge \`<sha>\`)` + a data. O nº
+   do PR só existe depois do passo 6 — tudo bem preencher com o que já se
+   sabe e completar depois, ou deixar para o commit final.
+3. Em `docs/backlog/backlog.md`:
+   - tire a linha da task da tabela **🔜 tasks/** e acrescente na tabela
+     **✅ completed/**, com os caminhos de código e o PR;
+   - adicione a feature na seção **✅ Feitas — do NOT re-propose**;
+   - atualize o **build order**, o `_Last updated:_` e as notas/contagens que
+     citam a task (ex.: "backend à frente do front em N features");
+   - se a implementação **divergiu da spec**, registre a divergência e o
+     motivo na coluna de notas — é o que impede a próxima pessoa de "corrigir"
+     de volta para algo que não funciona.
+
+Essas mudanças de docs entram **no mesmo commit/PR da feature** (passo 4) —
+não vire um PR separado de docs. Se a feature já foi mergeada sem esse
+fechamento, corrija numa branch `chore/` própria em vez de deixar passar.
+
+## 4. Commit (se houver pendências)
+
+Se o passo 1 (ou o passo 3) deixou mudanças não commitadas:
 
 - `git add` só os arquivos relevantes à feature (nunca `-A` às cegas se
   houver arquivo suspeito — confira a lista do passo 1 primeiro).
@@ -44,11 +78,11 @@ Se o passo 1 mostrou mudanças não commitadas:
 
 Sem mudanças pendentes, pule este passo.
 
-## 4. Push
+## 5. Push
 
 `git push -u origin <branch>` (a branch atual). Sem `--force`.
 
-## 5. Abrir PR para `develop`
+## 6. Abrir PR para `develop`
 
 `gh pr create --base develop --head <branch> --title "<título>" --body
 "..."`.
@@ -64,7 +98,7 @@ Sem mudanças pendentes, pule este passo.
 
 Depois de criar, mostre o link do PR ao usuário.
 
-## 6. Perguntar sobre o merge — sempre, mesmo que já tenha perguntado antes
+## 7. Perguntar sobre o merge — sempre, mesmo que já tenha perguntado antes
 
 Merge em `develop` altera histórico compartilhado, então **pare e pergunte**
 antes de mergear — mesmo que numa conversa anterior o usuário já tenha pedido
@@ -74,9 +108,9 @@ que eu já faça o merge, ou prefere aguardar revisão/aprovação primeiro?"
 
 - Usuário disse pra aguardar → pare aqui. O fechamento via PR está feito; o
   merge fica pendente para depois.
-- Usuário confirmou o merge agora → siga para o passo 7.
+- Usuário confirmou o merge agora → siga para o passo 8.
 
-## 7. Merge e limpeza (só depois de confirmação)
+## 8. Merge e limpeza (só depois de confirmação)
 
 1. `gh pr merge <numero> --merge --delete-branch` — **merge commit normal**
    (não squash, não rebase — é o padrão que este repo já usa; `git log
@@ -90,13 +124,13 @@ que eu já faça o merge, ou prefere aguardar revisão/aprovação primeiro?"
    também, é seguro)
 5. `git pull origin develop`
 
-## 8. Checar se é hora de cortar release
+## 9. Checar se é hora de cortar release
 
 CLAUDE.md: a cada 3 features integradas em `develop`, corta-se uma release
 (merge `develop` → `main`, tag semver, GitHub Release — minor para features,
 patch para hotfix).
 
-Depois do merge do passo 7, conte quantos merges entraram em `develop` desde
+Depois do merge do passo 8, conte quantos merges entraram em `develop` desde
 a última tag:
 
 ```
@@ -119,6 +153,9 @@ afete `main`/tags/releases.
 - [ ] Branch atual é `feature/*`?
 - [ ] `git status`/`git diff` mostrados ao usuário antes de commitar?
 - [ ] Typecheck passou?
+- [ ] Task do backlog movida de `tasks/` para `completed/`, com
+      `backlog.md` atualizado (ou justifiquei ao usuário por que não havia
+      task a fechar)?
 - [ ] Commit em inglês/imperativo, só se havia pendência?
 - [ ] Push feito sem `--force`?
 - [ ] PR aberto pra `develop` (nunca `main`), corpo em bullets com test plan?
