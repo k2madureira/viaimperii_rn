@@ -6,8 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { HomeNavigationProp } from '../../../../../navigation/HomeStack';
 import { FeedItem, ReactionType } from '../../../../../api/feed';
 import { formatPostTime } from '../../../../../utils/date';
-import { CommentIcon, EditIcon, EyeIcon, TrashIcon } from '../../../../../components/icons';
-import FeedReactions, { ReactionCluster } from '../FeedReactions';
+import { CommentIcon, EditIcon, EyeIcon, ShareIcon, TrashIcon } from '../../../../../components/icons';
+import FeedReactions from '../FeedReactions';
 import AnchoredPopover, { Anchor } from '../AnchoredPopover';
 import FeedHtml from '../FeedHtml';
 import MediaGallery from '../MediaGallery';
@@ -16,6 +16,7 @@ import ReactorsPopover from '../ReactorsPopover';
 import TributeButton from '../TributeButton';
 import TributeModal from '../TributeModal';
 import TributeSummaryRow from '../TributeSummaryRow';
+import SharePostModal from '../SharePostModal';
 import { useDeletePost } from '../../../model/mutations/useDeletePost';
 import { useSendTribute } from '../../../model/mutations/useSendTribute';
 import { useWallet } from '../../../model/queries/useWallet';
@@ -79,6 +80,7 @@ export default function FeedCard({
   const [reactorsAnchor, setReactorsAnchor] = useState<Anchor | null>(null);
   const [editing, setEditing] = useState(false);
   const [tributing, setTributing] = useState(false);
+  const [sharing, setSharing] = useState(false);
 
   const isOwnPost =
     item.source === 'user' && currentUserId != null && author.id === currentUserId;
@@ -220,30 +222,6 @@ export default function FeedCard({
         </>
       )}
 
-      {/* Resumo (reações + comentários), estilo LinkedIn */}
-      {(item.reactions.total > 0 || item.comments_count > 0) && (
-        <View className="flex-row items-center justify-between mt-3 px-4">
-          {item.reactions.total > 0 ? (
-            <View ref={reactorsRef} collapsable={false}>
-              <TouchableOpacity onPress={openReactors} activeOpacity={0.7}>
-                <ReactionCluster reactions={item.reactions} />
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <View />
-          )}
-          {item.comments_count > 0 ? (
-            <TouchableOpacity onPress={() => onOpenComments(item)} activeOpacity={0.7}>
-              <Text className="text-[12px] text-[#888]">
-                {t('feed.commentsCount', { count: item.comments_count })}
-              </Text>
-            </TouchableOpacity>
-          ) : (
-            <View />
-          )}
-        </View>
-      )}
-
       {/* Resumo dos tributos recebidos (linha própria: o valor é longo demais
           para dividir a linha com reações e comentários). */}
       {(item.tributes?.count ?? 0) > 0 && (
@@ -252,22 +230,45 @@ export default function FeedCard({
         </View>
       )}
 
-      {/* Divisor + barra de ações */}
+      {/* Divisor + barra de ações (só ícones + contadores) */}
       <View className="h-px bg-[#f3eeee] mt-2.5" />
-      <View className="flex-row mt-1 px-4">
-        <FeedReactions
-          reactions={item.reactions}
-          onReact={(type) => onReact(item.id, type, item.reactions.mine)}
-        />
+      <View className="flex-row items-center mt-1 px-3">
+        <View ref={reactorsRef} collapsable={false}>
+          <FeedReactions
+            reactions={item.reactions}
+            onReact={(type) => onReact(item.id, type, item.reactions.mine)}
+            onShowReactors={openReactors}
+          />
+        </View>
+        <View className="flex-1" />
         <TouchableOpacity
           onPress={() => onOpenComments(item)}
           activeOpacity={0.7}
-          className="flex-1 flex-row items-center justify-center gap-2 py-2 rounded-[10px]">
-          <CommentIcon size={18} color="#666" />
-          <Text className="text-[13px] font-bold text-[#666]">{t('feed.comment')}</Text>
+          accessibilityRole="button"
+          accessibilityLabel={t('feed.comment')}
+          className="flex-row items-center gap-1.5 py-2 px-2">
+          <CommentIcon size={20} color="#666" />
+          {item.comments_count > 0 && (
+            <Text className="text-[13px] font-semibold text-[#666]">{item.comments_count}</Text>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setSharing(true)}
+          activeOpacity={0.7}
+          accessibilityRole="button"
+          accessibilityLabel={t('feed.share')}
+          className="py-2 px-2">
+          <ShareIcon size={20} color="#666" />
         </TouchableOpacity>
         {canTribute && <TributeButton tributes={item.tributes} onPress={openTribute} />}
       </View>
+
+      <SharePostModal
+        visible={sharing}
+        postId={item.id}
+        body={item.body}
+        onClose={() => setSharing(false)}
+      />
 
       {/* Popover: mini-perfil do autor */}
       <AnchoredPopover anchor={userAnchor} onClose={() => setUserAnchor(null)} width={234} align="left">

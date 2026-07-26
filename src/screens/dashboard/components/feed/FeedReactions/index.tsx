@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
-import { useTranslation } from 'react-i18next';
 import { ReactionSummary, ReactionType } from '../../../../../api/feed';
 import { ReactionIcon } from '../../../../../components/icons';
 
@@ -42,16 +41,17 @@ export function ReactionCluster({ reactions }: { reactions: ReactionSummary }) {
 interface Props {
   reactions: ReactionSummary;
   onReact: (type: ReactionType) => void;
+  // Toque no contador → abre "quem reagiu" (o card ancora o popover no botão).
+  onShowReactors?: () => void;
 }
 
 /**
- * Botão de reação no estilo LinkedIn:
- * - toque rápido → curte (ou remove, se já reagiu);
+ * Botão de reação (só ícone + contador, estilo Instagram):
+ * - toque rápido no ícone → curte (ou remove, se já reagiu);
  * - toque longo → abre o "dropup" flutuante com as 4 reações;
- * - selecionar uma reação aplica e fecha o dropup.
+ * - toque no número → abre "quem reagiu".
  */
-export default function FeedReactions({ reactions, onReact }: Props) {
-  const { t } = useTranslation();
+export default function FeedReactions({ reactions, onReact, onShowReactors }: Props) {
   const [open, setOpen] = useState(false);
   const mine = reactions.mine;
 
@@ -73,7 +73,7 @@ export default function FeedReactions({ reactions, onReact }: Props) {
   };
 
   return (
-    <View className="flex-1" style={{ overflow: 'visible' }}>
+    <View className="flex-row items-center" style={{ overflow: 'visible' }}>
       {open && (
         <>
           {/* Backdrop p/ fechar ao tocar fora (dentro do card) */}
@@ -111,12 +111,21 @@ export default function FeedReactions({ reactions, onReact }: Props) {
         onLongPress={() => setOpen(true)}
         delayLongPress={180}
         activeOpacity={0.7}
-        className="flex-row items-center justify-center gap-2 py-2 rounded-[10px]">
-        <ReactionGlyph type={mine} size={16} />
-        <Text className={`text-[13px] font-bold ${mine ? 'text-primary-500' : 'text-[#666]'}`}>
-          {mine ? t(`feed.reactions.${mine}`) : t('feed.react')}
-        </Text>
+        className="py-2 pl-2 pr-1">
+        <ReactionGlyph type={mine} size={20} />
       </TouchableOpacity>
+      {reactions.total > 0 && (
+        <TouchableOpacity
+          onPress={onShowReactors}
+          disabled={!onShowReactors}
+          activeOpacity={0.7}
+          className="py-2 pr-1">
+          <Text
+            className={`text-[13px] font-semibold ${mine ? 'text-primary-500' : 'text-[#666]'}`}>
+            {reactions.total}
+          </Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }

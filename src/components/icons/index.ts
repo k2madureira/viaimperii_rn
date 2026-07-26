@@ -55,6 +55,21 @@ export { default as PlusIcon } from './plus';
 // Lupa — barra de busca global
 export { default as SearchIcon } from './search';
 
+// Balão de conversa — gatilho do chat/mensagens
+export { default as ChatIcon } from './chat';
+
+// Engrenagem — gatilho do menu de configurações do usuário
+export { default as GearIcon } from './gear';
+
+// Carinha — gatilho do seletor de emojis do chat
+export { default as EmojiIcon } from './emoji';
+
+// Compartilhar — avião de papel (card do post, estilo Instagram)
+export { default as ShareIcon } from './share';
+
+// Compartilhar padrão (nós conectados) — botão "Mais" (sheet nativo do OS)
+export { default as ShareNodesIcon } from './shareNodes';
+
 // Ações do menu de post (visualizar / editar / excluir)
 export { default as EyeIcon } from './eye';
 export { default as EditIcon } from './edit';

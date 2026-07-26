@@ -2,19 +2,29 @@ import React from 'react';
 import { Image, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { FeedAuthor } from '../../../../../api/feed';
+import { PresenceStatus } from '../../../../../api/friendship';
+
+// Cor do ponto de presença por status (§Amigos §4). `offline` não acende ponto.
+const PRESENCE_COLOR: Record<Exclude<PresenceStatus, 'offline'>, string> = {
+  available: '#2F7A52', // verde — disponível
+  busy: '#9E1B32', // vermelho — ocupado
+  away: '#D4AF37', // âmbar — ausente
+};
 
 interface Props {
   user: FeedAuthor;
-  // Ponto verde de presença — placeholder até o Chat entregar o stream (§Amigos §4).
-  isOnline?: boolean;
+  // Presença que este viewer enxerga (§Amigos §4). `offline` (ou undefined) = sem ponto.
+  presenceStatus?: PresenceStatus;
   onPress?: () => void;
 }
 
 // Bloco de identidade reutilizado por amigos, pedidos e resultados de busca:
 // avatar + nome + @handle + patente. Resolvido ao vivo pelo backend (nunca congelado).
-export default function UserIdentity({ user, isOnline = false, onPress }: Props) {
+export default function UserIdentity({ user, presenceStatus, onPress }: Props) {
   const avatarUrl = user.active_avatar?.url ?? user.image ?? null;
   const initial = user.name?.trim().charAt(0).toUpperCase() || '?';
+  const dotColor =
+    presenceStatus && presenceStatus !== 'offline' ? PRESENCE_COLOR[presenceStatus] : null;
 
   return (
     <TouchableOpacity
@@ -30,8 +40,11 @@ export default function UserIdentity({ user, isOnline = false, onPress }: Props)
             <Text className="text-[16px] font-bold text-primary-500">{initial}</Text>
           )}
         </View>
-        {isOnline && (
-          <View className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#2F7A52] border-2 border-white" />
+        {dotColor && (
+          <View
+            className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white"
+            style={{ backgroundColor: dotColor }}
+          />
         )}
       </View>
 

@@ -10,13 +10,19 @@ export type FriendshipStatus =
 
 export type RequestDirection = 'incoming' | 'outgoing';
 
-// Um amigo aceito. Presença (`is_online`/`last_seen_at`) é placeholder até o Chat
-// entregar o stream SSE — o backend devolve `false`/`null` por ora (§Amigos §4).
+// Presença que ESTE viewer enxerga (§Amigos §4). O status `invisible` do amigo
+// nunca vaza — colapsa em `offline` e esconde o `last_seen_at`. Portanto os únicos
+// valores possíveis aqui são os quatro abaixo.
+export type PresenceStatus = 'available' | 'busy' | 'away' | 'offline';
+
+// Um amigo aceito. `is_online` = visto na janela de presença; `presence_status` =
+// visibilidade real do amigo enquanto online (available/busy/away) ou `offline`.
 export interface FriendItem {
   friendship_id: number;
   user: FeedAuthor;
   friends_since: string | null;
   is_online: boolean;
+  presence_status: PresenceStatus;
   last_seen_at: string | null;
 }
 
