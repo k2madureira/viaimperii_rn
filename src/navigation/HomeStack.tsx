@@ -15,8 +15,10 @@ import HashtagFeedScreen from '../screens/hashtagFeed';
 import LeaderboardsScreen from '../screens/leaderboards';
 import AchievementsScreen from '../screens/achievements';
 import FriendsScreen from '../screens/friends';
+import DmConversationScreen from '../screens/dmConversation';
 import { FeedItem } from '../api/feed';
 import { LeaderboardScope } from '../api/leaderboards';
+import { PresenceStatus } from '../api/friendship';
 
 export type HomeStackParamList = {
   Dashboard: undefined;
@@ -25,14 +27,22 @@ export type HomeStackParamList = {
   LegionHQ: undefined;
   WarRoom: undefined;
   Profile: { userId?: string } | undefined;
-  PostDetail: { post: FeedItem };
+  // `post` para navegação interna (render instantâneo); `postId` para o deep-link
+  // (viaimperii://post/:postId) — chega como string na URL, a tela faz Number().
+  PostDetail: { post?: FeedItem; postId?: number | string };
   Rewards: undefined;
   HashtagFeed: { tag: string };
   Leaderboards:
     | { scope?: LeaderboardScope; scopeId?: number; isoYear?: number; isoWeek?: number }
     | undefined;
   Achievements: undefined;
-  Friends: { tab?: 'friends' | 'requests' } | undefined;
+  Friends: { tab?: 'chat' | 'amigos' | 'requests' } | undefined;
+  DmConversation: {
+    userId: string;
+    name: string;
+    avatarUrl?: string | null;
+    presenceStatus?: PresenceStatus;
+  };
 };
 
 export type HomeNavigationProp = NativeStackNavigationProp<HomeStackParamList>;
@@ -53,6 +63,7 @@ export default function HomeStack() {
       <Stack.Screen name="Leaderboards" component={LeaderboardsScreen} />
       <Stack.Screen name="Achievements" component={AchievementsScreen} />
       <Stack.Screen name="Friends" component={FriendsScreen} />
+      <Stack.Screen name="DmConversation" component={DmConversationScreen} />
     </Stack.Navigator>
   );
 }

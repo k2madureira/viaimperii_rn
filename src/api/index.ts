@@ -1,6 +1,7 @@
 import * as assetsService from './assets';
 import * as authService from './auth';
 import * as campaignsService from './campaigns';
+import * as chatService from './chat';
 import * as dailyRewardsService from './dailyRewards';
 import * as feedService from './feed';
 import * as friendshipService from './friendship';
@@ -11,6 +12,7 @@ import * as legionTreasuryService from './legionTreasury';
 import * as missionsService from './missions';
 import * as notificationsService from './notifications';
 import * as physicalService from './physical';
+import * as presenceService from './presence';
 import * as professionsService from './professions';
 import * as provincesService from './provinces';
 import * as quizService from './quiz';
@@ -45,6 +47,15 @@ export const viaimperiiApi = {
   },
   campaigns: {
     list: campaignsService.getCampaigns,
+  },
+  chat: {
+    conversations: chatService.getConversations,
+    openDm: chatService.openDm,
+    messages: chatService.getMessages,
+    sendMessage: chatService.sendMessage,
+    markRead: chatService.markRead,
+    deleteMessage: chatService.deleteMessage,
+    reportMessage: chatService.reportMessage,
   },
   dailyRewards: {
     list: dailyRewardsService.getDailyRewards,
@@ -120,6 +131,10 @@ export const viaimperiiApi = {
   physical: {
     catalog: physicalService.getProducts,
     redeem: physicalService.redeemProduct,
+  },
+  presence: {
+    get: presenceService.getMyPresence,
+    set: presenceService.setMyPresence,
   },
   professions: {
     catalog: professionsService.getProfessions,

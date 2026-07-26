@@ -63,6 +63,11 @@ Essas mudanças de docs entram **no mesmo commit/PR da feature** (passo 4) —
 não vire um PR separado de docs. Se a feature já foi mergeada sem esse
 fechamento, corrija numa branch `chore/` própria em vez de deixar passar.
 
+**Atualize também o índice de telas** se a feature criou/moveu tela, section,
+query/mutation, hook ou domínio de API: `docs/architecture/screen-index.md` é o
+lookup que o `ft` usa para localizar código sem fan-out — uma linha desatualizada
+manda o front para o arquivo errado. Entra no mesmo commit da feature.
+
 ## 4. Commit (se houver pendências)
 
 Se o passo 1 (ou o passo 3) deixou mudanças não commitadas:
@@ -156,6 +161,7 @@ afete `main`/tags/releases.
 - [ ] Task do backlog movida de `tasks/` para `completed/`, com
       `backlog.md` atualizado (ou justifiquei ao usuário por que não havia
       task a fechar)?
+- [ ] `screen-index.md` atualizado se a estrutura de telas/API mudou?
 - [ ] Commit em inglês/imperativo, só se havia pendência?
 - [ ] Push feito sem `--force`?
 - [ ] PR aberto pra `develop` (nunca `main`), corpo em bullets com test plan?

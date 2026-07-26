@@ -28,9 +28,19 @@ não reivindique "pronto" sem rodar `npx tsc --noEmit`.
    pelo PO** (tabela de `tasks/`). Não pule itens sem ordem explícita do humano.
 3. **Leia o `CLAUDE.md` deste repo** — as regras de UI (§0.1) e organização de telas (§0.2)
    são **obrigatórias e sobrepõem** qualquer default seu.
-4. **Leia o código real + 1–2 telas irmãs** já implementadas (ex.: `src/screens/legions/`,
-   `src/screens/missions/`) e copie o padrão. Nunca invente convenção que o repo já resolve.
-5. Se algo na spec conflita com o backend real, **sinalize** (ver §6) — não adivinhe.
+4. **Localize os arquivos pelo índice, não por Glob/Grep**: leia
+   [docs/architecture/screen-index.md](docs/architecture/screen-index.md) — mapa
+   enxuto tela→arquivos (dir, sections, domínio de API, hooks, prefixo i18n). É o
+   **primeiro lookup**; só caia para Glob/Grep se o índice não cobrir o alvo (e então
+   atualize o índice depois). O comportamento detalhado de cada tela vive nos
+   `docs/architecture/0X-*.md`.
+5. **Leia o alvo cirurgicamente, não telas inteiras**: com o índice em mãos, abra
+   **só** o átomo/section/hook que vai tocar + **um** irmão equivalente como molde
+   (ex.: para uma nova mutation, leia uma mutation existente do mesmo padrão — não a
+   screen toda). Ler `index.tsx` inteiros de telas irmãs é o gasto de token a evitar.
+6. **Antes de explorar amplamente**, considere a skill `reduce-token-usage` deste repo
+   (passo a passo para minimizar leitura/contexto em explorações grandes).
+7. Se algo na spec conflita com o backend real, **sinalize** (ver §6) — não adivinhe.
 
 ## 1. Stack e arquitetura (o que este repo É)
 
@@ -136,6 +146,8 @@ src/screens/{screen}/
   nativo). Acessibilidade e os assets que a spec listar.
 - **Verificação**: rodar `npx tsc --noEmit` (exit 0) antes de concluir. Não há suíte de testes
   nem ESLint neste repo — o gate é o TypeScript. Se possível, valide o fluxo no app.
+- **Manter o índice**: se criou/moveu tela, section, query/mutation, hook ou domínio de API,
+  atualize a linha em [docs/architecture/screen-index.md](docs/architecture/screen-index.md).
 
 ## 7. Divergências de contrato
 

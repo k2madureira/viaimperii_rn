@@ -1,66 +1,44 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
-import { useTranslation } from 'react-i18next';
 import { FriendItem } from '../../../../../api/friendship';
 import UserIdentity from '../userIdentity';
 
 interface Props {
   item: FriendItem;
-  onOpenProfile: (userId: string) => void;
-  onUnfriend: (item: FriendItem) => void;
-  onBlock: (item: FriendItem) => void;
+  onPress: () => void;
+  unreadCount?: number;
+  lastPreview?: string | null;
 }
 
-// Linha de um amigo: identidade + menu de ações (desfazer / bloquear).
-export default function FriendCard({ item, onOpenProfile, onUnfriend, onBlock }: Props) {
-  const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-
+// Linha da aba Chat (inbox): tocar abre a tela dedicada da conversa (estilo
+// Instagram). Mostra preview da última mensagem e contador de não-lidas.
+export default function FriendCard({ item, onPress, unreadCount = 0, lastPreview }: Props) {
   return (
-    <View className="bg-white rounded-[16px] border border-[#f0eded] px-4 py-3">
+    <TouchableOpacity
+      onPress={onPress}
+      activeOpacity={0.7}
+      className="bg-white rounded-[16px] border border-[#f0eded] px-4 py-3">
       <View className="flex-row items-center">
-        <UserIdentity
-          user={item.user}
-          isOnline={item.is_online}
-          onPress={() => onOpenProfile(item.user.id)}
-        />
-        <TouchableOpacity
-          onPress={() => setOpen((v) => !v)}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          accessibilityRole="button"
-          accessibilityLabel={t('friends.actions.menu')}
-          className="w-9 h-9 items-center justify-center">
-          <Text className="text-[20px] text-[#888] leading-none">⋯</Text>
-        </TouchableOpacity>
+        <UserIdentity user={item.user} presenceStatus={item.presence_status} />
+
+        {unreadCount > 0 && (
+          <View className="min-w-[20px] h-5 px-1.5 rounded-full bg-primary-500 items-center justify-center ml-1">
+            <Text className="text-[11px] font-bold text-white" maxFontSizeMultiplier={0}>
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </Text>
+          </View>
+        )}
       </View>
 
-      {open && (
-        <View className="flex-row gap-2 mt-3 pt-3 border-t border-[#f5f0f0]">
-          <TouchableOpacity
-            onPress={() => {
-              setOpen(false);
-              onUnfriend(item);
-            }}
-            activeOpacity={0.8}
-            className="flex-1 items-center py-2.5 rounded-[12px] bg-[#f4eaea]">
-            <Text className="text-[13px] font-bold text-primary-500">
-              {t('friends.actions.unfriend')}
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setOpen(false);
-              onBlock(item);
-            }}
-            activeOpacity={0.8}
-            className="flex-1 items-center py-2.5 rounded-[12px] bg-[#fbeaea]">
-            <Text className="text-[13px] font-bold text-red-500">
-              {t('friends.actions.block')}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </View>
+      {lastPreview ? (
+        <Text
+          className="text-[12px] text-[#9a8f8f] mt-1 ml-14"
+          numberOfLines={1}
+          maxFontSizeMultiplier={0}>
+          {lastPreview}
+        </Text>
+      ) : null}
+    </TouchableOpacity>
   );
 }

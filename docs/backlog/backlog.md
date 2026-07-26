@@ -19,6 +19,9 @@ release `v1.3.0` — e movida para `completed/`, junto com o fechamento atrasado
 front passa a ser **F5 → F7 → F3**, com **F5 Legion Weekly Objective** como próxima
 task. O passo de fechar a task nas docs virou parte do skill `/close-feature`.)_
 
+_2026-07-26: adicionada a ideia **#12 Chat Stickers (figurinhas)** ao backlog priorizado —
+**prioridade baixa** (ROI 1.5), Open (backend), depende do Chat + catálogo de stickers._
+
 ---
 
 ## ✅ Feitas — do NOT re-propose
@@ -101,6 +104,8 @@ Backend já shipou #1, #2, #5 e #9 — a fila de valor agora está **no front** 
 | 9 | **Profession Mastery Tiers** | M | 2.0 | ✅ Backend shipped (0069) — **UI = F7** |
 | 10 | **Wallet / Extrato (UI)** — consumir `GET /wallet/transactions` (hoje `src/api/wallet/` só tem `balance`): histórico com filtros `referenceType` (tribute, profession_tier_up, legion_objective_bonus, rank_up…). | S | 3.0 | **Novo (2026-07-20)** — gap de front sobre backend já pago; agora que F6 shipou, é o complemento natural: sem extrato o usuário não vê o histórico de tributos enviados/recebidos |
 | 11 | **Province Conquest Season** — províncias como território sazonal disputado. | L | 2.0 | Open (backend) — compõe sobre leaderboards + treasury; por último |
+| 12 | **Chat Stickers (figurinhas)** — catálogo curado de figurinhas no chat: reusar `assets` com `type='sticker'` (ou tabela própria), mensagem `kind='image'`; painel de stickers no composer (abas por pack + grid) e render da imagem no balão. Stickers pré-aprovados (pula moderação por mensagem). | M | 1.5 | **Prioridade baixa** · Open (backend) — depende do **Chat** (Fase 1 DM, shipado no back) + endpoints novos: `GET /chat/stickers` e envio com `kind='image'`/`sticker_id`. Sticker enviado pelo usuário (imagem própria via presign privado + Rekognition) = fase futura. |
+| 13 | **Share de post — deep-link routing + Universal Links** — (a) **roteamento in-app** do link para o post exato (React Navigation `linking` → `PostDetail`): já existe em `src/navigation/linking.ts` mas está **PARQUEADO/desligado** no `NavigationContainer` porque causava **ANR** (a base https nos `prefixes` fazia o RN reprocessar URL a cada navegação) — reativar com **só o scheme** `viaimperii://` e **testar em device**; (b) **associação nativa de domínio** p/ o link https abrir o app direto: `associatedDomains` (iOS/AASA) + `intentFilters`/assetlinks (Android) no `app.json` + arquivos no domínio; (c) opcional: **embed rico do post no DM** (`kind='post'`). | S/M | 2.0 | Open (config nativa/web) — **card + share já funcionam** sem isto: backend serve `GET /post/{id}` (OG + og:image=logo), o front compartilha a **URL https** (`SHARE_BASE_URL/post/{id}`) que unfurla o card e, no browser, tem botão "Abrir no app". Falta o **tocar→cair no post exato** (a, hoje parqueado por ANR) e o app-open direto (b). |
 
 **Notas p/ o próximo run do PO:** o backend está **à frente do front em 2 features**
 (F5/F7). Não abrir novas ideias de backend antes de fechar essa dívida de UI —

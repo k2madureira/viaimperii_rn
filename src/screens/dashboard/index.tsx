@@ -6,7 +6,7 @@ import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Navbar, SearchBar } from '../../components';
 import { useAuth } from '../../contexts/AuthContext';
-import { DailyMissionsHero, WalletButton } from './components';
+import { DailyMissionsHero } from './components';
 import { FeedItem } from '../../api/feed';
 import { useLegions } from '../missions/model/queries/useLegions';
 import { useDailyBriefing } from '../missions/model/queries/useDailyBriefing';
@@ -22,6 +22,7 @@ import {
   DashboardHeader,
   DashboardModals,
   HomeFeed,
+  HomeNavActions,
 } from './components/sections';
 
 export default function DashboardScreen() {
@@ -94,8 +95,9 @@ export default function DashboardScreen() {
   }, [isTemporary, legionDismissed, needsProvince, needsTrack, hasLegion, completedCount]);
 
   // ── Dados derivados ────────────────────────────────────────────────────────
-  const firstName = user?.name?.split(' ')[0] ?? t('dashboard.defaultName');
+  const displayName = user?.name ?? t('dashboard.defaultName');
   const rankName = profile?.rank ?? user?.rank ?? '—';
+  const avatarUrl = data?.active_avatar?.thumb_url ?? data?.active_avatar?.url ?? null;
 
   const completedIds = new Set(profile?.completed_missions?.map((c) => c.mission_id) ?? []);
   const completedCampaigns = new Set(profile?.completed_campaigns ?? []);
@@ -105,11 +107,11 @@ export default function DashboardScreen() {
   const ListHeader = (
     <View style={{ gap: 18 }}>
       <DashboardHeader
-        firstName={firstName}
+        name={displayName}
         rankName={rankName}
-        legionName={legion?.name ?? null}
-        streak={user?.streak ?? null}
+        avatarUrl={avatarUrl}
         onOpenProfile={() => navigation.navigate('Profile')}
+        onOpenChat={() => navigation.navigate('Friends')}
       />
 
       {/* 2 — HERO: MISSÕES DO DIA (progresso da meta, acima do feed) */}
@@ -135,7 +137,13 @@ export default function DashboardScreen() {
   return (
     <ScreenContainer>
       <Navbar
-        rightExtra={walletQuery.data ? <WalletButton balance={walletQuery.data.balance} /> : null}
+        menuVariant="gear"
+        rightExtra={
+          <HomeNavActions
+            streak={user?.streak ?? null}
+            walletBalance={walletQuery.data?.balance ?? null}
+          />
+        }
       />
 
       <HomeFeed
