@@ -34,6 +34,7 @@ import { useSpecialties } from './model/queries/useSpecialties';
 import { useUserStats } from './model/queries/useUserStats';
 import { useUserSummary } from './model/queries/useUserSummary';
 import { useTracks } from '../ranks/model/queries/useTracks';
+import { useRanks } from '../ranks/model/queries/useRanks';
 import { useMissionEvents } from './model/hooks/useMissionEvents';
 
 type ViewMode = 'missions' | 'progress' | 'review';
@@ -52,6 +53,10 @@ export default function MissionsScreen() {
   const userTrack = profileQuery.data?.track ?? null;
   const walletQuery = useWallet(!!user);
   const tracksQuery = useTracks();
+  // Ladder da TRILHA do usuário (patentes da trilha + compartilhadas). O `ranks`
+  // do perfil traz as DUAS trilhas (níveis repetidos), então usamos este ladder
+  // filtrado para não misturar as trilhas ao resolver nome/imagem da patente.
+  const ranksQuery = useRanks(userTrack?.id ?? null);
 
   const [viewMode, setViewMode] = useState<ViewMode>('missions');
   const [period, setPeriod] = useState<StatsPeriod>('monthly');
@@ -159,10 +164,10 @@ export default function MissionsScreen() {
   // Promoção de patente ao concluir (nomes das patentes anterior/nova).
   const [rankUp, setRankUp] = useState<{ previous: string; current: string } | null>(null);
 
-  // Imagem de uma patente pelo nome (do ladder do perfil — estático por trilha).
+  // Imagem de uma patente pelo nome (ladder da trilha do usuário — não mistura trilhas).
   const rankImageByName = (name?: string): string | null => {
     if (!name) return null;
-    const r = profileQuery.data?.ranks?.find((x) => x.name === name);
+    const r = ranksQuery.data?.find((x) => x.name === name);
     return r?.image_url ?? r?.thumb_url ?? null;
   };
 
@@ -176,7 +181,7 @@ export default function MissionsScreen() {
     const level = cr.level;
     const prev = lastRankLevelRef.current;
     if (prev != null && level > prev) {
-      const previousName = profileQuery.data?.ranks?.find((r) => r.level === prev)?.name ?? '';
+      const previousName = ranksQuery.data?.find((r) => r.level === prev)?.name ?? '';
       setRankUp({ previous: previousName, current: cr.name });
     }
     lastRankLevelRef.current = level;
