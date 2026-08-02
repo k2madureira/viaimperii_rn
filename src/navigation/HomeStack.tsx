@@ -9,6 +9,8 @@ import RanksScreen from '../screens/ranks';
 import LegionHQScreen from '../screens/legions/HQ';
 import WarRoomScreen from '../screens/legions';
 import ProfileScreen from '../screens/profile';
+import ClanScreen from '../screens/clan';
+import ClanDirectoryScreen from '../screens/clanDirectory';
 import PostDetailScreen from '../screens/postDetail';
 import RewardsScreen from '../screens/rewards';
 import HashtagFeedScreen from '../screens/hashtagFeed';
@@ -27,6 +29,10 @@ export type HomeStackParamList = {
   LegionHQ: undefined;
   WarRoom: undefined;
   Profile: { userId?: string } | undefined;
+  // Sem clanId → clã do usuário logado (entrada pelo card do Perfil); com clanId →
+  // detalhe de um clã do diretório.
+  Clan: { clanId?: number } | undefined;
+  ClanDirectory: undefined;
   // `post` para navegação interna (render instantâneo); `postId` para o deep-link
   // (viaimperii://post/:postId) — chega como string na URL, a tela faz Number().
   PostDetail: { post?: FeedItem; postId?: number | string };
@@ -57,6 +63,8 @@ export default function HomeStack() {
       <Stack.Screen name="LegionHQ" component={LegionHQScreen} />
       <Stack.Screen name="WarRoom" component={WarRoomScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen name="Clan" component={ClanScreen} />
+      <Stack.Screen name="ClanDirectory" component={ClanDirectoryScreen} />
       <Stack.Screen name="PostDetail" component={PostDetailScreen} />
       <Stack.Screen name="Rewards" component={RewardsScreen} />
       <Stack.Screen name="HashtagFeed" component={HashtagFeedScreen} />

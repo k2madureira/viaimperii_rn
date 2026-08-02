@@ -19,7 +19,8 @@ leitura/escrita e o prefixo de i18n.
 | Navegação (stacks, ParamList) | `src/navigation/` (`RootNavigator`, `AuthStack`, `BottomTabs`, `HomeStack`, `MissionsStack`) |
 | Auth / sessão | `src/contexts/AuthContext.tsx`, `src/api/config/` (`defaultApi`, `tokenManager`, `authBridge`) |
 | Facade de API (fonte única) | `src/api/index.ts` → `viaimperiiApi.<domínio>.<operação>` |
-| Componentes globais | `src/components/` (`navbar`, `screenContainer`, `text`, `textInput`, `userMenu`, `legionSelectModal`, `icons/`) |
+| Componentes globais | `src/components/` (`navbar`, `screenContainer`, `text`, `textInput`, `userMenu`, `legionSelectModal`, `createMenu`, `icons/`) |
+| Menu do botão (+) da tab bar | `src/components/createMenu/` (aberto pelo `BottomTabs`; hoje só "Criar post") |
 | Feed social (submódulo, usado por 4 telas) | `src/screens/dashboard/components/feed/` |
 | i18n | `src/i18n/locales/pt.ts` + `en.ts` (pt-BR default) |
 | Constantes | `src/constants/<contexto>.ts` (`missions`, `chat`, `layout`, …) |
@@ -37,6 +38,22 @@ hooks em `model/{queries,mutations,hooks}/`.
 - **Sections**: `achievementsHeader`, `achievementsList`
 - **API**: dados vêm do detalhe do usuário (`users`) — sem query dedicada
 - **Hooks**: —
+
+### clan
+- **Dir**: `clan` · **i18n**: `clan.*`, `clanCard.*`
+- **Sections**: `clanHeader`, `clanMembers`, `clanJoinAction`, `clanRequestQueue`
+- **API**: `clan`, `upload` (emblema)
+- **Queries**: `useUserClan`, `useClanDetail`, `useMyJoinRequests`, `useClanJoinRequests`
+- **Mutations**: `useLeaveClan`, `useSetClanEmblem`, `useRequestJoin`, `useCancelJoinRequest`, `useRespondJoinRequest`
+- **Notas**: sem `clanId` no param → clã do logado (entrada pelo `ClanCard` do Perfil); com `clanId` → detalhe do diretório. Emblema editável só pelo marechal (pick+crop+WEBP em `src/utils/clanEmblem.ts`). `ClanCard` mora em `dashboard/components/cards/clanCard`.
+
+### clanDirectory
+- **Dir**: `clanDirectory` · **i18n**: `clan.directory.*`, `clan.create.*`, `clan.emblem.*`
+- **Sections**: — (busca + `FlatList` de `ClanRow`; modal `createClanModal`)
+- **API**: `clan`, `upload`, `users` (nível de patente p/ gate)
+- **Queries**: `useClans`, `useUserProfile`
+- **Mutations**: `useCreateClan`
+- **Notas**: modal de fundação é rank-gated (≥ Centurion I / Praetor I = `level 21`); abaixo disso mostra só requisitos/taxa/capacidade. Emblema opcional na fundação (`emblem_key`).
 
 ### dashboard (Home)
 - **Dir**: `dashboard` · **i18n**: `dashboard.*`, `feed.*`, `search.*`, `notifications.*`, `changePassword.*`, `tributes.*`

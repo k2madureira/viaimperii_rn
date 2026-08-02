@@ -2,6 +2,7 @@ import * as assetsService from './assets';
 import * as authService from './auth';
 import * as campaignsService from './campaigns';
 import * as chatService from './chat';
+import * as clanService from './clan';
 import * as dailyRewardsService from './dailyRewards';
 import * as feedService from './feed';
 import * as friendshipService from './friendship';
@@ -56,6 +57,29 @@ export const viaimperiiApi = {
     markRead: chatService.markRead,
     deleteMessage: chatService.deleteMessage,
     reportMessage: chatService.reportMessage,
+  },
+  clan: {
+    list: clanService.getClans,
+    detail: clanService.getClan,
+    userClan: clanService.getUserClan,
+    create: clanService.createClan,
+    invite: clanService.inviteToClan,
+    myInvites: clanService.getMyClanInvites,
+    acceptInvite: clanService.acceptClanInvite,
+    declineInvite: clanService.declineClanInvite,
+    promote: clanService.promoteMember,
+    demote: clanService.demoteMember,
+    kick: clanService.kickMember,
+    leave: clanService.leaveClan,
+    transfer: clanService.transferClan,
+    upgrade: clanService.upgradeClan,
+    setEmblem: clanService.setClanEmblem,
+    requestJoin: clanService.requestJoinClan,
+    myJoinRequests: clanService.getMyJoinRequests,
+    clanJoinRequests: clanService.getClanJoinRequests,
+    acceptJoinRequest: clanService.acceptJoinRequest,
+    declineJoinRequest: clanService.declineJoinRequest,
+    cancelJoinRequest: clanService.cancelJoinRequest,
   },
   dailyRewards: {
     list: dailyRewardsService.getDailyRewards,
