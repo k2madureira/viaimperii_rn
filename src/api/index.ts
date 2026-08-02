@@ -44,7 +44,7 @@ export const viaimperiiApi = {
     verifyToken: authService.verifyTokenRequest,
     forgotPassword: authService.forgotPasswordRequest,
     resetPassword: authService.resetPasswordRequest,
-    oauth: authService.oauthRequest,
+    oauthExchange: authService.oauthExchange,
   },
   campaigns: {
     list: campaignsService.getCampaigns,
