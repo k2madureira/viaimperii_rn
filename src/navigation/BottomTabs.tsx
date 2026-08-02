@@ -14,6 +14,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useAvailableMissions } from '../screens/missions/model/queries/useAvailableMissions';
 import { useUserProfile } from '../screens/dashboard/model/queries/useUserProfile';
 import { CreatePostModal } from '../screens/dashboard/components/feed';
+import CreateMenu from '../components/createMenu';
 
 export type BottomTabParamList = {
   Home: undefined;
@@ -58,6 +59,7 @@ export default function BottomTabs() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [createPostVisible, setCreatePostVisible] = useState(false);
+  const [createMenuVisible, setCreateMenuVisible] = useState(false);
 
   // Badge do ícone de Missões: total de missões disponíveis agora.
   const availableQuery = useAvailableMissions(null, null, !!user);
@@ -142,7 +144,7 @@ export default function BottomTabs() {
           listeners={() => ({
             tabPress: (e) => {
               e.preventDefault();
-              setCreatePostVisible(true);
+              setCreateMenuVisible(true);
             },
           })}
         />
@@ -150,6 +152,12 @@ export default function BottomTabs() {
         <Tab.Screen name="Market" component={MarketScreen} />
       </Tab.Navigator>
  
+      <CreateMenu
+        visible={createMenuVisible}
+        onClose={() => setCreateMenuVisible(false)}
+        onCreatePost={() => setCreatePostVisible(true)}
+      />
+
       <CreatePostModal
         visible={createPostVisible}
         canLegion={canLegion}

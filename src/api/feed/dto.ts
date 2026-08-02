@@ -37,6 +37,8 @@ export interface FeedActiveAvatar {
 export interface FeedAuthor {
   id: string; // uuid do usuário
   name: string;
+  // Identificador público único @handle (§Amigos). Pode vir null até o backfill.
+  handle?: string | null;
   image: string | null; // foto enviada / OAuth
   active_avatar: FeedActiveAvatar | null;
   rank: FeedRankMini | null;

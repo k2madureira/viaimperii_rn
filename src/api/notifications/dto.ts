@@ -10,6 +10,9 @@ export type NotificationType =
   | 'rank_up'
   | 'medal_earned'
   | 'new_follower'
+  // Amigos (§Amigos §5): pedido recebido e pedido enviado que foi aceito.
+  | 'friend_request'
+  | 'friend_accepted'
   // Votação de estandarte: proposta aberta (para todos menos o proponente) e
   // encerrada (qualquer desfecho). Sem o aviso ninguém vota e a proposta
   // expiraria por inércia — o deep-link faz parte da mecânica.

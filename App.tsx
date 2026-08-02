@@ -12,6 +12,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
 import { AuthProvider } from './src/contexts/AuthContext';
 import RootNavigator from './src/navigation/RootNavigator';
+// NOTE: deep-link routing (`linking`) parqueado — causava ANR. Reativar na task #13
+// (só o scheme `viaimperii://`, com teste em device). `postShareUrl` segue em uso.
 import SplashScreen from './src/screens/defaults/splash';
 
 const queryClient = new QueryClient();

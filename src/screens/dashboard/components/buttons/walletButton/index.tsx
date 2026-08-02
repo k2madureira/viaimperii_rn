@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { AsCoin, CoinAmount, DiamondIcon, WalletIcon } from '../../../../../components/icons';
+import { AsCoin, CoinAmount, CoinPurseIcon, WalletIcon } from '../../../../../components/icons';
 import AnchoredPopover, { Anchor } from '../../feed/AnchoredPopover';
 import { splitCoins } from '../../../../../utils/coins';
 
@@ -11,7 +11,7 @@ interface Props {
 }
 
 // Botão de carteira no topo direito da tela: fica oculta por padrão, toque
-// abre um popover com o saldo (ícone de diamante no lugar da moeda).
+// abre um popover com o saldo (ícone de bolsa de moedas).
 export default function WalletButton({ balance }: Props) {
   const { t } = useTranslation();
   const anchorRef = useRef<View>(null);
@@ -40,7 +40,7 @@ export default function WalletButton({ balance }: Props) {
         <View className="bg-[#6B1221] rounded-[16px] px-4 py-3.5">
           <View className="flex-row items-center">
             <View className="w-11 h-11 rounded-full bg-accent-500/20 items-center justify-center mr-3">
-              <DiamondIcon size={24} color="#E8C36B" />
+              <CoinPurseIcon size={24} color="#E8C36B" />
             </View>
             <View className="flex-1" style={{ minWidth: 0 }}>
               <Text className="text-[10px] font-bold text-white/50 tracking-[2px] uppercase">

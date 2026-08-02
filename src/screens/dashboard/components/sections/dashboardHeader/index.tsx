@@ -1,50 +1,66 @@
 import React from 'react';
-import { Platform, TouchableOpacity, View } from 'react-native';
+import { Image, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { LoginStreak } from '../../../../../api/auth';
+import { ChatIcon } from '../../../../../components/icons';
 import NotificationsButton from '../../buttons/notificationsButton';
-import RewardsButton from '../../buttons/rewardsButton';
-import StreakButton from '../../buttons/streakButton';
 
 interface Props {
-  firstName: string;
+  name: string;
   rankName: string;
-  legionName: string | null;
-  streak: LoginStreak | null;
+  avatarUrl: string | null;
   onOpenProfile: () => void;
+  onOpenChat: () => void;
 }
 
-// 1 — HEADER: saudação (abre o perfil) + atalhos de recompensas/ofensiva/notificações.
+// 1 — HEADER: banner vermelho imperial com avatar + nome + patente (abre o perfil)
+// à esquerda; à direita o atalho do chat seguido do sino de notificações.
 export default function DashboardHeader({
-  firstName,
+  name,
   rankName,
-  legionName,
-  streak,
+  avatarUrl,
   onOpenProfile,
+  onOpenChat,
 }: Props) {
   const { t } = useTranslation();
+  const initial = name?.trim().charAt(0).toUpperCase() || '?';
+
   return (
-    <View className="flex-row items-center justify-between">
+    <View className="flex-row items-center justify-between bg-primary-500 rounded-[18px] px-4 py-3">
       <TouchableOpacity
-        className="flex-1"
+        className="flex-row items-center flex-1 gap-3"
         activeOpacity={0.7}
         accessibilityRole="button"
         onPress={onOpenProfile}>
-        <Text
-          className="text-[26px] font-extrabold text-charcoal"
-          style={{ fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif' }}>
-          {t('dashboard.greeting', { name: firstName })}
-        </Text>
-        <Text className="text-[13px] text-[#777] mt-0.5" numberOfLines={1}>
-          {rankName}
-          {legionName ? ` • ${legionName}` : ''}
-        </Text>
+        <View className="w-12 h-12 rounded-full bg-white items-center justify-center overflow-hidden">
+          {avatarUrl ? (
+            <Image source={{ uri: avatarUrl }} style={{ width: 48, height: 48 }} resizeMode="cover" />
+          ) : (
+            <Text className="text-[18px] font-bold text-primary-500">{initial}</Text>
+          )}
+        </View>
+        <View className="flex-1" style={{ minWidth: 0 }}>
+          <Text className="text-[17px] font-extrabold text-white" numberOfLines={1}>
+            {name}
+          </Text>
+          <Text className="text-[13px] text-white/80 mt-0.5" numberOfLines={1}>
+            {rankName}
+          </Text>
+        </View>
       </TouchableOpacity>
-      <View className="flex-row items-center gap-3">
-        <RewardsButton />
-        {streak && streak.current_streak > 0 && <StreakButton streak={streak} />}
-        <NotificationsButton />
+
+      <View className="flex-row items-center ml-2">
+        <TouchableOpacity
+          onPress={onOpenChat}
+          activeOpacity={0.75}
+          accessibilityRole="button"
+          accessibilityLabel={t('chat.title')}
+          className="w-9 h-9 items-center justify-center">
+          <ChatIcon size={28} color="#fff" />
+        </TouchableOpacity>
+
+        {/* Sino de notificações imediatamente à direita do chat (§ajuste 1) */}
+        <NotificationsButton onDark />
       </View>
     </View>
   );

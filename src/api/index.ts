@@ -1,8 +1,11 @@
 import * as assetsService from './assets';
 import * as authService from './auth';
 import * as campaignsService from './campaigns';
+import * as chatService from './chat';
+import * as clanService from './clan';
 import * as dailyRewardsService from './dailyRewards';
 import * as feedService from './feed';
+import * as friendshipService from './friendship';
 import * as leaderboardsService from './leaderboards';
 import * as legionService from './legion';
 import * as legionLeaderboardService from './legionLeaderboard';
@@ -10,6 +13,7 @@ import * as legionTreasuryService from './legionTreasury';
 import * as missionsService from './missions';
 import * as notificationsService from './notifications';
 import * as physicalService from './physical';
+import * as presenceService from './presence';
 import * as professionsService from './professions';
 import * as provincesService from './provinces';
 import * as quizService from './quiz';
@@ -40,10 +44,42 @@ export const viaimperiiApi = {
     verifyToken: authService.verifyTokenRequest,
     forgotPassword: authService.forgotPasswordRequest,
     resetPassword: authService.resetPasswordRequest,
-    oauth: authService.oauthRequest,
+    oauthPoll: authService.oauthPoll,
   },
   campaigns: {
     list: campaignsService.getCampaigns,
+  },
+  chat: {
+    conversations: chatService.getConversations,
+    openDm: chatService.openDm,
+    messages: chatService.getMessages,
+    sendMessage: chatService.sendMessage,
+    markRead: chatService.markRead,
+    deleteMessage: chatService.deleteMessage,
+    reportMessage: chatService.reportMessage,
+  },
+  clan: {
+    list: clanService.getClans,
+    detail: clanService.getClan,
+    userClan: clanService.getUserClan,
+    create: clanService.createClan,
+    invite: clanService.inviteToClan,
+    myInvites: clanService.getMyClanInvites,
+    acceptInvite: clanService.acceptClanInvite,
+    declineInvite: clanService.declineClanInvite,
+    promote: clanService.promoteMember,
+    demote: clanService.demoteMember,
+    kick: clanService.kickMember,
+    leave: clanService.leaveClan,
+    transfer: clanService.transferClan,
+    upgrade: clanService.upgradeClan,
+    setEmblem: clanService.setClanEmblem,
+    requestJoin: clanService.requestJoinClan,
+    myJoinRequests: clanService.getMyJoinRequests,
+    clanJoinRequests: clanService.getClanJoinRequests,
+    acceptJoinRequest: clanService.acceptJoinRequest,
+    declineJoinRequest: clanService.declineJoinRequest,
+    cancelJoinRequest: clanService.cancelJoinRequest,
   },
   dailyRewards: {
     list: dailyRewardsService.getDailyRewards,
@@ -63,6 +99,16 @@ export const viaimperiiApi = {
     reactors: feedService.getReactors,
     comments: feedService.getFeedComments,
     createComment: feedService.createComment,
+  },
+  friendship: {
+    request: friendshipService.sendFriendRequest,
+    accept: friendshipService.acceptFriendRequest,
+    decline: friendshipService.declineFriendRequest,
+    listFriends: friendshipService.getFriends,
+    listRequests: friendshipService.getFriendRequests,
+    unfriend: friendshipService.unfriend,
+    block: friendshipService.blockUser,
+    unblock: friendshipService.unblockUser,
   },
   leaderboards: {
     board: leaderboardsService.getLeaderboard,
@@ -109,6 +155,10 @@ export const viaimperiiApi = {
   physical: {
     catalog: physicalService.getProducts,
     redeem: physicalService.redeemProduct,
+  },
+  presence: {
+    get: presenceService.getMyPresence,
+    set: presenceService.setMyPresence,
   },
   professions: {
     catalog: professionsService.getProfessions,

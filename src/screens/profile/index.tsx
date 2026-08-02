@@ -113,7 +113,13 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          <ProfileCards data={data} rankName={rankName} totalXp={totalXp} />
+          <ProfileCards
+            data={data}
+            rankName={rankName}
+            totalXp={totalXp}
+            userId={targetId}
+            isOwnProfile={isOwnProfile}
+          />
 
           <ProfileStats data={data} stats={stats} loading={statsQuery.isLoading} />
 

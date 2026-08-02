@@ -64,7 +64,13 @@ function NotificationAvatar({ item }: { item: NotificationItem }) {
 // Sino de notificações no topo da tela: badge com a contagem de não lidas
 // (mesmo padrão do ícone de Missões na tab bar) e dropdown com o histórico.
 // Sem notificação não lida, o sino fica desabilitado (nada para mostrar).
-export default function NotificationsButton() {
+interface NotificationsButtonProps {
+  // Renderiza sino branco + badge invertido (fundo branco / texto vermelho) para
+  // legibilidade sobre o header vermelho imperial do Dashboard.
+  onDark?: boolean;
+}
+
+export default function NotificationsButton({ onDark = false }: NotificationsButtonProps = {}) {
   const { t } = useTranslation();
   const navigation = useNavigation<HomeNavigationProp>();
   const anchorRef = useRef<View>(null);
@@ -147,6 +153,15 @@ export default function NotificationsButton() {
       return;
     }
 
+    // Amigos → abre a tela de Amigos (pedido recebido cai na aba de pedidos).
+    if (item.type === 'friend_request' || item.type === 'friend_accepted') {
+      setAnchor(null);
+      navigation.navigate('Friends', {
+        tab: item.type === 'friend_request' ? 'requests' : 'amigos',
+      });
+      return;
+    }
+
     const feedEventId = item.payload?.feed_event_id;
     if (!POST_NOTIFICATION_TYPES.has(item.type) || feedEventId == null) return;
 
@@ -187,12 +202,20 @@ export default function NotificationsButton() {
           accessibilityState={{ disabled }}
           accessibilityLabel={t('notifications.title')}
           className={`w-9 h-9 items-center justify-center ${disabled ? 'opacity-35' : ''}`}>
-          <BellIcon size={22} color={disabled ? '#b8b0b0' : '#111'} />
+          <BellIcon
+            size={22}
+            color={disabled ? (onDark ? 'rgba(255,255,255,0.5)' : '#b8b0b0') : onDark ? '#fff' : '#111'}
+          />
           {unreadCount > 0 && (
             <View
-              className="absolute top-0.5 right-0.5 min-w-[16px] h-4 rounded-full bg-primary-500 items-center justify-center px-1"
-              style={{ borderWidth: 1.5, borderColor: '#fff' }}>
-              <Text className="text-[9px] font-extrabold text-white leading-none">
+              className={`absolute top-0.5 right-0.5 min-w-[16px] h-4 rounded-full items-center justify-center px-1 ${
+                onDark ? 'bg-white' : 'bg-primary-500'
+              }`}
+              style={{ borderWidth: 1.5, borderColor: onDark ? '#9E1B32' : '#fff' }}>
+              <Text
+                className={`text-[9px] font-extrabold leading-none ${
+                  onDark ? 'text-primary-500' : 'text-white'
+                }`}>
                 {unreadCount > 99 ? '99+' : unreadCount}
               </Text>
             </View>

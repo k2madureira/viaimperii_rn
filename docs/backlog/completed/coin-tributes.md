@@ -7,7 +7,7 @@
 
 - **Slug:** `coin-tributes`
 - **Backlog #:** F6 · **ROI:** 4.3 · **Esforço:** M
-- **Status:** Ready for build
+- **Status:** ✅ Shipado no front (PR #33, merge `4b7d417`, release `v1.3.0`) — 2026-07-23
 - **Autor (PO):** product-owner · **Data:** 2026-07-20
 
 ---
