@@ -882,6 +882,7 @@ export default {
       missionCount: '{{n}} missions',
       owned: 'Owned',
       ownedShort: 'Owned',
+      ownedSection: 'Acquired',
       free: 'Free',
       buy: 'Buy',
       confirmTitle: 'Confirm purchase',

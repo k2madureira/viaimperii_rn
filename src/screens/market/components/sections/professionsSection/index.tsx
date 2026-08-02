@@ -6,6 +6,7 @@ import { Profession } from '../../../../../api/professions';
 import { LockIcon } from '../../../../../components/icons';
 import SpecialtyFilter, { SpecialtyOption } from '../../filters/specialtyFilter';
 import ProfessionCard from '../../cards/professionCard';
+import ProfessionOwnedCard from '../../cards/professionOwnedCard';
 import SectionBody from '../../feedback/sectionBody';
 
 interface Props {
@@ -61,14 +62,19 @@ export default function ProfessionsSection({
     }
   }, [specialtyOptions, specialtyId, onChangeSpecialty]);
 
-  const shown =
+  const filtered =
     specialtyId == null ? professions : professions.filter((p) => p.specialty_id === specialtyId);
+
+  // Disponíveis para compra primeiro; adquiridas (card reduzido) no fim da lista.
+  const available = filtered.filter((p) => !ownedIds.has(p.id));
+  const owned = filtered.filter((p) => ownedIds.has(p.id));
+  const isEmpty = available.length === 0 && owned.length === 0;
 
   return (
     <SectionBody
       isLoading={isLoading}
       isError={isError}
-      isEmpty={shown.length === 0}
+      isEmpty={isEmpty}
       errorText={t('market.professions.loadError')}
       emptyText={t('market.professions.empty')}
       onRetry={onRetry}>
@@ -89,17 +95,30 @@ export default function ProfessionsSection({
         {/* Filtro por especialidade — segue a trilha do usuário */}
         <SpecialtyFilter options={specialtyOptions} value={specialtyId} onChange={onChangeSpecialty} />
 
-        {shown.map((p) => (
+        {/* Disponíveis para compra — card completo, no topo */}
+        {available.map((p) => (
           <ProfessionCard
             key={p.id}
             profession={p}
-            owned={ownedIds.has(p.id)}
+            owned={false}
             balance={balance}
             locked={!hasTrack}
             buying={buyingId === p.id}
             onBuy={() => onBuy(p)}
           />
         ))}
+
+        {/* Adquiridas — card reduzido, no fim da lista */}
+        {owned.length > 0 && (
+          <View className="gap-2 mt-1">
+            <Text className="text-[12px] font-bold text-[#999] uppercase tracking-wide">
+              {t('market.professions.ownedSection')}
+            </Text>
+            {owned.map((p) => (
+              <ProfessionOwnedCard key={p.id} profession={p} />
+            ))}
+          </View>
+        )}
       </View>
     </SectionBody>
   );
