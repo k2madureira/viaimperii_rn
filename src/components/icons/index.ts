@@ -45,8 +45,8 @@ export { default as BellIcon } from './bell';
 // Seta para cima (bônus/ganho, ex.: bônus de XP por sequência)
 export { default as ArrowUpIcon } from './arrowUp';
 
-// Diamante (carteira) e ícone de gatilho da carteira
-export { default as DiamondIcon } from './diamond';
+// Bolsa de moedas (dropdown da carteira) e ícone de gatilho da carteira
+export { default as CoinPurseIcon } from './coinPurse';
 export { default as WalletIcon } from './wallet';
 
 // Cruz (+) — botão de criar post na bottom tab bar

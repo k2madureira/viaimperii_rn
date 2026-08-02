@@ -6,6 +6,7 @@ export { default as SectionTab } from './buttons/sectionTab';
 // cards
 export { default as ProductCard } from './cards/productCard';
 export { default as ProfessionCard } from './cards/professionCard';
+export { default as ProfessionOwnedCard } from './cards/professionOwnedCard';
 export { default as ProductPlaceholder } from './cards/productPlaceholder';
 
 // filters
