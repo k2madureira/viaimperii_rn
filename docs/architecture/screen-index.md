@@ -65,11 +65,11 @@ hooks em `model/{queries,mutations,hooks}/`.
 
 ### friends
 - **Dir**: `friends` · **i18n**: `friends.*`, `chat.*`, `presence.*`
-- **Sections**: `friendsListSection`, `requestsListSection`, `addFriendSection`, `amigosSection`, `chatThread`
-- **API**: `friendship`, `chat`, `presence`
-- **Queries**: `useFriends`, `useFriendRequests`, `useConversations`, `useDmConversation`, `useMessages`
+- **Sections**: `chatInbox` (sub-abas DM/Clã/Legião), `friendsListSection`, `groupChatSection`, `chatThread`, `chatThreadView` (núcleo do histórico: divisor de não-lidas + "ir ao fim"), `requestsListSection`, `addFriendSection`, `amigosSection`
+- **API**: `friendship`, `chat` (DM + salas `legion`/`clan`: `openDm`/`openLegion`/`openClan`), `presence`
+- **Queries**: `useFriends`, `useFriendRequests`, `useConversations`, `useDmConversation`, `useGroupConversation`, `useMessages`
 - **Mutations**: `useSendFriendRequest`, `useRespondFriendRequest`, `useUnfriend`, `useBlockUser`, `useSendMessage`, `useMarkRead`
-- **Hooks (SSE)**: `useChatEvents`
+- **Hooks (SSE)**: `useChatEvents` — conectado **globalmente** em `navigation/BottomTabs` (sessão autenticada inteira, não por tela); fechado no logout via `AuthContext.signOut`
 
 ### hashtagFeed
 - **Dir**: `hashtagFeed` · **i18n**: `hashtagFeed.*`

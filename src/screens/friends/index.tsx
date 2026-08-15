@@ -8,9 +8,8 @@ import { Navbar } from '../../components';
 import { useAuth } from '../../contexts/AuthContext';
 import { HomeNavigationProp, HomeStackParamList } from '../../navigation/HomeStack';
 import { FriendsTab } from './components';
-import { AmigosSection, FriendsListSection, RequestsListSection } from './components/sections';
+import { AmigosSection, ChatInboxSection, RequestsListSection } from './components/sections';
 import { useFriendRequests } from './model/queries/useFriendRequests';
-import { useChatEvents } from './model/hooks/useChatEvents';
 
 type Tab = 'chat' | 'amigos' | 'requests';
 
@@ -25,8 +24,8 @@ export default function FriendsScreen() {
   const route = useRoute<RouteProp<HomeStackParamList, 'Friends'>>();
   const [tab, setTab] = useState<Tab>(route.params?.tab ?? 'chat');
 
-  // Stream em tempo real do chat enquanto a tela está aberta (§Chat SSE).
-  useChatEvents();
+  // Nota: o SSE de chat é conectado globalmente em BottomTabs (sessão inteira),
+  // não mais por esta tela — evita stream duplicado.
 
   // Pedidos recebidos/enviados — a aba "Pedidos" só existe se houver algum.
   const incomingQuery = useFriendRequests('incoming');
@@ -70,7 +69,7 @@ export default function FriendsScreen() {
       </View>
 
       <View className="flex-1">
-        {tab === 'chat' && <FriendsListSection bottomInset={insets.bottom} />}
+        {tab === 'chat' && <ChatInboxSection bottomInset={insets.bottom} />}
         {tab === 'amigos' && (
           <AmigosSection
             bottomInset={insets.bottom}

@@ -52,6 +52,8 @@ export const viaimperiiApi = {
   chat: {
     conversations: chatService.getConversations,
     openDm: chatService.openDm,
+    openLegion: chatService.openLegionChat,
+    openClan: chatService.openClanChat,
     messages: chatService.getMessages,
     sendMessage: chatService.sendMessage,
     markRead: chatService.markRead,

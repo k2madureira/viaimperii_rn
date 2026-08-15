@@ -6,8 +6,20 @@ export type MessageKind = 'text' | 'image';
 // Estado de moderação da mensagem (§Chat §4.6).
 export type MessageStatus = 'visible' | 'flagged' | 'removed';
 
-// Tipo de conversa. Fase 1 = `dm`; `legion`/`clan` são fases futuras do backend.
+// Tipo de conversa: DM 1:1, sala da legião ou sala do clã (§Chat, Fases 1–3).
 export type ConversationType = 'dm' | 'legion' | 'clan';
+
+// Tipo de grupo (canal coletivo) — usado no header da sala.
+export type GroupKind = 'legion' | 'clan';
+
+// Identidade de uma conversa de grupo (legião/clã): nome/brasão para o header.
+// Presente só em conversas de grupo; `null` numa DM (que usa `peer`).
+export interface ConversationGroup {
+  id: number;
+  kind: GroupKind;
+  name: string;
+  image: string | null;
+}
 
 // Uma mensagem. `sender` é resolvido AO VIVO (§18) — pode ser null se o autor sumiu.
 // `is_mine` diz se foi o usuário logado que enviou (alinhamento da bolha).
@@ -22,11 +34,13 @@ export interface MessageItem {
   created_at: string;
 }
 
-// Uma conversa do inbox. Numa DM, `peer` é o outro participante; em grupos, null.
+// Uma conversa do inbox. Numa DM, `peer` é o outro participante e `group` é null;
+// numa sala de legião/clã, `group` traz nome/brasão e `peer` é null.
 export interface ConversationItem {
   id: number;
   type: ConversationType;
   peer: FeedAuthor | null;
+  group: ConversationGroup | null;
   last_message: MessageItem | null;
   unread_count: number;
   last_message_at: string | null;

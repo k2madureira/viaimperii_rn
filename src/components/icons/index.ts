@@ -49,6 +49,10 @@ export { default as ArrowUpIcon } from './arrowUp';
 export { default as CoinPurseIcon } from './coinPurse';
 export { default as WalletIcon } from './wallet';
 
+// Grupo de usuários (aba Amigos) e bandeira (aba Clã) do chat
+export { default as UsersIcon } from './users';
+export { default as FlagIcon } from './flag';
+
 // Cruz (+) — botão de criar post na bottom tab bar
 export { default as PlusIcon } from './plus';
 
