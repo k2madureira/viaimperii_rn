@@ -88,6 +88,12 @@ export default {
     yourRank: 'Your rank',
     walletTitle: 'Wallet',
     walletAsLabel: 'Asses available',
+    walletHelp: {
+      title: 'How the coins work',
+      aureus: '1 aureus = 1,000 denarii = 100,000 asses',
+      denarius: '1 denarius = 100 asses',
+      as: 'Smallest unit (bronze)',
+    },
     viewRequirements: 'View Requirements',
     chooseTrackToAdvance: 'Choose a track to advance in rank',
     chooseTrackCta: '⚔️ Choose my track now',
@@ -753,6 +759,25 @@ export default {
     title: 'Chats',
     comingSoon: 'Chat coming soon',
     messageRemoved: 'Message removed',
+    tabs: {
+      friends: 'Friends',
+      clan: 'Clan',
+      legion: 'Legion',
+    },
+    group: {
+      legion: {
+        title: 'Legion room',
+        subtitle: 'Your legion channel',
+        emptyTitle: 'You have no legion yet',
+        emptySubtitle: 'Join a legion to chat with its members.',
+      },
+      clan: {
+        title: 'Clan room',
+        subtitle: 'Your clan channel',
+        emptyTitle: 'You have no clan yet',
+        emptySubtitle: 'Join or create a clan to chat with its members.',
+      },
+    },
     thread: {
       placeholder: 'Write a message...',
       send: 'Send',
@@ -760,10 +785,14 @@ export default {
       empty: 'Say hi to start the conversation.',
       loadOlder: 'See earlier messages',
       loadingOlder: 'Loading...',
+      newMessages: 'New messages',
+      jumpRecent: 'Jump to latest',
     },
     errors: {
       loadConversations: 'Error loading conversations',
       openDm: 'Could not open the conversation',
+      openLegion: 'Could not open the legion room',
+      openClan: 'Could not open the clan room',
       loadMessages: 'Error loading messages',
       sendMessage: 'Could not send the message',
       markRead: 'Error marking as read',

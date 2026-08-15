@@ -5,6 +5,7 @@ import { closeMissionEvents } from '../api/missions/missionEvents';
 import { closeFeedEvents } from '../api/feed/feedEvents';
 import { closeNotificationEvents } from '../api/notifications/notificationEvents';
 import { closeLegionEvents } from '../api/legionTreasury/legionEvents';
+import { closeChatEvents } from '../api/chat/chatEvents';
 import { LoginStreak } from '../api/auth';
 
 const ACCESS_KEY = 'access_token';
@@ -102,6 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       closeFeedEvents(),
       closeNotificationEvents(),
       closeLegionEvents(),
+      closeChatEvents(),
     ]).catch(() => {});
     await Promise.race([
       closeStreams,

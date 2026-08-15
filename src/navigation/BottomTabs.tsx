@@ -11,6 +11,7 @@ import MarketScreen from '../screens/market';
 import HomeStack from './HomeStack';
 import MissionsStack from './MissionsStack';
 import { useAuth } from '../contexts/AuthContext';
+import { useChatEvents } from '../screens/friends/model/hooks/useChatEvents';
 import { useAvailableMissions } from '../screens/missions/model/queries/useAvailableMissions';
 import { useUserProfile } from '../screens/dashboard/model/queries/useUserProfile';
 import { CreatePostModal } from '../screens/dashboard/components/feed';
@@ -60,6 +61,11 @@ export default function BottomTabs() {
   const { user } = useAuth();
   const [createPostVisible, setCreatePostVisible] = useState(false);
   const [createMenuVisible, setCreateMenuVisible] = useState(false);
+
+  // SSE de chat conectado durante TODA a sessão autenticada (BottomTabs só monta
+  // com token). Empurra mensagens/read receipts e mantém o inbox (badges) em
+  // qualquer aba — não só na tela de Chat. Pausa em background, fecha no logout.
+  useChatEvents();
 
   // Badge do ícone de Missões: total de missões disponíveis agora.
   const availableQuery = useAvailableMissions(null, null, !!user);

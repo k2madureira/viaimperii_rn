@@ -88,6 +88,12 @@ export default {
     yourRank: 'Sua patente',
     walletTitle: 'Carteira',
     walletAsLabel: 'Asses disponíveis',
+    walletHelp: {
+      title: 'Como funcionam as moedas',
+      aureus: '1 aureus = 1.000 denários = 100.000 asses',
+      denarius: '1 denário = 100 asses',
+      as: 'Menor unidade (bronze)',
+    },
     viewRequirements: 'Ver Requisitos',
     chooseTrackToAdvance: 'Escolha uma trilha para avançar de patente',
     chooseTrackCta: '⚔️ Escolher minha trilha agora',
@@ -753,6 +759,25 @@ export default {
     title: 'Conversas',
     comingSoon: 'Chat em breve',
     messageRemoved: 'Mensagem removida',
+    tabs: {
+      friends: 'Amigos',
+      clan: 'Clã',
+      legion: 'Legião',
+    },
+    group: {
+      legion: {
+        title: 'Sala da Legião',
+        subtitle: 'Canal da sua legião',
+        emptyTitle: 'Você ainda não tem legião',
+        emptySubtitle: 'Entre em uma legião para conversar com os membros.',
+      },
+      clan: {
+        title: 'Sala do Clã',
+        subtitle: 'Canal do seu clã',
+        emptyTitle: 'Você ainda não tem clã',
+        emptySubtitle: 'Entre ou crie um clã para conversar com os membros.',
+      },
+    },
     thread: {
       placeholder: 'Escreva uma mensagem...',
       send: 'Enviar',
@@ -760,10 +785,14 @@ export default {
       empty: 'Diga oi para começar a conversa.',
       loadOlder: 'Ver mensagens anteriores',
       loadingOlder: 'Carregando...',
+      newMessages: 'Novas mensagens',
+      jumpRecent: 'Ir para as mais recentes',
     },
     errors: {
       loadConversations: 'Erro ao carregar as conversas',
       openDm: 'Não foi possível abrir a conversa',
+      openLegion: 'Não foi possível abrir a sala da legião',
+      openClan: 'Não foi possível abrir a sala do clã',
       loadMessages: 'Erro ao carregar as mensagens',
       sendMessage: 'Não foi possível enviar a mensagem',
       markRead: 'Erro ao marcar como lido',
