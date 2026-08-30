@@ -2,7 +2,11 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import Toast from 'react-native-toast-message';
 import i18n from '../../../../i18n';
 import { viaimperiiApi } from '../../../../api';
-import { LegionTreasuryApiError } from '../../../../api/legionTreasury';
+import {
+  LegionTreasury,
+  LegionTreasuryApiError,
+  ProposeStandardResult,
+} from '../../../../api/legionTreasury';
 
 /**
  * Abre a votação de compra de um estandarte (POST /legions/{id}/standard/{slug}).
@@ -25,7 +29,7 @@ export function useProposeStandard(legionId: number | undefined, onForbidden?: (
   return useMutation({
     mutationFn: (slug: string) =>
       viaimperiiApi.legionTreasury.proposeStandard({ legionId: legionId as number, slug }),
-    onSuccess: (result) => {
+    onSuccess: (result: ProposeStandardResult) => {
       // Resolveu já na abertura (legião pequena): o estandarte subiu de fato.
       if (result.standard) {
         Toast.show({
@@ -46,8 +50,36 @@ export function useProposeStandard(legionId: number | undefined, onForbidden?: (
           }),
         });
       }
-      queryClient.invalidateQueries({ queryKey: ['legion-treasury', legionId] });
-      queryClient.invalidateQueries({ queryKey: ['legion-standard-proposals', legionId] });
+      // Sem refetch do cofre (payload pesado): escreve o cache pela resposta, que
+      // já traz saldo/available novos e a proposta. `reserved = balance − available`
+      // (a reserva sem escrow de uma votação aberta).
+      const p = result.proposal;
+      queryClient.setQueryData<LegionTreasury>(['legion-treasury', legionId], (data) => {
+        if (!data) return data;
+        const others = (data.open_proposals ?? []).filter((op) => op.id !== p.id);
+        return {
+          ...data,
+          balance: result.balance,
+          balance_display: result.balance_display,
+          available: result.available,
+          available_display: result.available_display,
+          reserved: result.balance - result.available,
+          // Aberta → entra na lista (uma por kind: descarta outra do mesmo kind).
+          // Resolvida na abertura → NÃO é aberta, fica de fora; o estandarte sobe.
+          open_proposals:
+            p.status === 'open' ? [...others.filter((op) => op.kind !== p.kind), p] : others,
+          open_proposal:
+            p.status === 'open' ? data.open_proposal ?? p : data.open_proposal,
+          active_standard: result.standard ?? data.active_standard,
+        };
+      });
+
+      // Histórico de votações é on-demand (só carrega com a aba aberta). Só precisa
+      // relê-lo quando a proposta JÁ resolveu na abertura (vira item de histórico);
+      // uma votação aberta é filtrada do histórico, então não custa nada.
+      if (p.status !== 'open') {
+        queryClient.invalidateQueries({ queryKey: ['legion-standard-proposals', legionId] });
+      }
     },
     onError: (error: unknown) => {
       const status = error instanceof LegionTreasuryApiError ? error.status : undefined;
