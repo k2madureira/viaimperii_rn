@@ -27,6 +27,7 @@ import {
   ProfessionTypeSelector,
 } from './components/sections';
 import { useAbandonMission, useCompleteMission, useStartMission } from '../model/mutations/useMissionMutations';
+import { useToggleFavorite } from '../model/mutations/useToggleFavorite';
 import { useAvailableMissions } from '../model/queries/useAvailableMissions';
 import { useMissions } from '../model/queries/useMissions';
 
@@ -84,6 +85,7 @@ export default function ProfessionMissionsScreen() {
   const startM = useStartMission();
   const completeM = useCompleteMission();
   const abandonM = useAbandonMission();
+  const toggleFavM = useToggleFavorite();
 
   // Modais (mesmo fluxo da tela de Missões, sem o "compartilhar como post").
   const [celebration, setCelebration] = useState<{ xp: number; coins?: number } | null>(null);
@@ -162,6 +164,7 @@ export default function ProfessionMissionsScreen() {
       ? completeM.variables?.slug
       : null;
   const abandonPendingSlug = abandonM.isPending ? abandonM.variables : null;
+  const favoritePendingSlug = toggleFavM.isPending ? toggleFavM.variables?.slug ?? null : null;
 
   const availableMissions = sortByDifficulty(
     (availableQuery.data?.items ?? []).filter((m) => m.type === missionType),
@@ -206,6 +209,10 @@ export default function ProfessionMissionsScreen() {
       trackLabel={tracksQuery.data?.find((tr) => tr.id === m.track_id)?.name}
       pending={pendingSlug === m.slug}
       abandonPending={abandonPendingSlug === m.slug}
+      onToggleFavorite={(mission) =>
+        toggleFavM.mutate({ slug: mission.slug, isFavorite: mission.is_favorite })
+      }
+      favoritePending={favoritePendingSlug === m.slug}
     />
   );
 

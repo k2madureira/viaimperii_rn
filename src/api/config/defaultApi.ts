@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 import { isTokenExpired } from './jwt';
-import { ACCESS_KEY, refreshAccessToken } from './tokenManager';
+import { ACCESS_KEY, clearSession, refreshAccessToken } from './tokenManager';
 
 const API_HOST = process.env.EXPO_PUBLIC_API_HOST;
 // 60s cobre o cold start do backend em produção (Railway hiberna quando ocioso; o
@@ -48,6 +48,17 @@ async function requestWithAuth(
       }
     }
 
+    // 401 com token AINDA válido pode ser sessão revogada no servidor (logout em
+    // outro dispositivo, reuse de refresh) → o backend responde "Token revoked.".
+    // Nesse caso a sessão acabou: limpa tudo e volta ao login. Demais 401 com
+    // token válido são erros de regra de negócio e passam direto.
+    if (response.status === 401 && allowRefresh && accessToken && !isTokenExpired(accessToken)) {
+      const detail = await peekDetail(response);
+      if (detail && /revok/i.test(detail)) {
+        await clearSession();
+      }
+    }
+
     return response;
   } catch (error: any) {
     if (error?.name === 'AbortError') {
@@ -72,7 +83,39 @@ export async function readContent<T>(response: Response): Promise<T> {
 
 /** Extrai a mensagem de erro de dentro do envelope { time, content: { detail } }. */
 export async function readError(response: Response, fallback: string): Promise<string> {
+  // 429 rate limit: mensagem amigável com o tempo do Retry-After (o corpo do
+  // backend costuma ser técnico demais para o usuário final).
+  if (response.status === 429) {
+    const secs = retryAfterSeconds(response);
+    return secs
+      ? `Muitas tentativas. Tente novamente em ${secs}s.`
+      : 'Muitas tentativas. Aguarde um momento e tente novamente.';
+  }
   const json = await response.json().catch(() => ({} as any));
   const body = json?.content ?? json;
   return body?.detail ?? body?.message ?? fallback;
+}
+
+/** Segundos do header Retry-After (aceita segundos ou data HTTP); null se ausente. */
+export function retryAfterSeconds(response: Response): number | null {
+  const raw = response.headers.get('Retry-After');
+  if (!raw) return null;
+  const secs = Number(raw);
+  if (Number.isFinite(secs)) return Math.max(0, Math.round(secs));
+  const date = Date.parse(raw);
+  return Number.isFinite(date) ? Math.max(0, Math.ceil((date - Date.now()) / 1000)) : null;
+}
+
+/**
+ * Lê o `detail`/`message` de um 401 SEM consumir o corpo original (usa clone),
+ * para que o chamador ainda possa ler a resposta depois. Retorna '' se falhar.
+ */
+async function peekDetail(response: Response): Promise<string> {
+  try {
+    const json = await response.clone().json();
+    const body = json?.content ?? json;
+    return (body?.detail ?? body?.message ?? '') as string;
+  } catch {
+    return '';
+  }
 }

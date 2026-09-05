@@ -1,7 +1,5 @@
-import * as SecureStore from 'expo-secure-store';
-import { ACCESS_KEY, refreshAccessToken } from '../config/tokenManager';
-import { isTokenExpired } from '../config/jwt';
 import { apiFetch } from '../config/defaultApi';
+import { getSseTicket } from '../auth/sseTicket';
 
 const API_HOST = process.env.EXPO_PUBLIC_API_HOST;
 
@@ -42,12 +40,14 @@ export interface MissionEvent {
 type Disconnect = () => void;
 
 /**
- * Connects to the SSE endpoint GET /missions/events?token=<access_token>.
+ * Connects to the SSE endpoint GET /missions/events?ticket=<sse_ticket>.
  *
+ * Each connection (and reconnection) first requests a fresh single-use ticket
+ * (~60s) via POST /auth/sse-ticket — the legacy `?token=<jwt>` is deprecated.
  * Uses XMLHttpRequest (available in React Native) to read the streaming
  * text/event-stream response. Reconnects automatically on disconnect or error
  * with a 3–5 s backoff. Returns a disconnect function to close the connection.
- */ 
+ */
 export function connectMissionEvents(
   onEvent: (event: MissionEvent) => void,
   onError?: (error: Error) => void,
@@ -59,21 +59,22 @@ export function connectMissionEvents(
   async function connect() {
     if (closed) return;
 
-    let token = await SecureStore.getItemAsync(ACCESS_KEY);
- 
-  
-
-    // Proactive refresh if token is expired before opening the stream.
-    if (token && isTokenExpired(token)) {
-      token = await refreshAccessToken();
+    // Single-use ticket (~60s): a new one per connection/reconnection. apiFetch
+    // handles the Authorization header / token refresh when fetching the ticket.
+    let ticket: string;
+    try {
+      ({ ticket } = await getSseTicket());
+    } catch {
+      if (!closed) reconnectTimer = setTimeout(connect, 5000);
+      return;
     }
 
-    if (!token || closed) return;
+    if (closed) return;
 
     xhr = new XMLHttpRequest();
     xhr.open(
       'GET',
-      `${API_HOST}/missions/events?token=${encodeURIComponent(token)}`,
+      `${API_HOST}/missions/events?ticket=${encodeURIComponent(ticket)}`,
       true,
     );
     xhr.setRequestHeader('Accept', 'text/event-stream');

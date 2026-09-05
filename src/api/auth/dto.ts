@@ -51,3 +51,10 @@ export interface CreateUserResponse {
 export interface VerifyTokenResponse {
   user_id: string;
 }
+
+// Ticket efêmero (single-use, ~60s) para abrir UM stream SSE. Gerar um novo por
+// conexão e a cada reconexão. Substitui o `?token=<jwt>` legado (deprecado).
+export interface SseTicketResponse {
+  ticket: string;
+  expires_in: number;
+}

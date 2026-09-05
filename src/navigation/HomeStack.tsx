@@ -8,6 +8,7 @@ import RanksScreen from '../screens/ranks';
 // fica atrás de uma compra (regras ainda não implementadas no backend).
 import LegionHQScreen from '../screens/legions/HQ';
 import WarRoomScreen from '../screens/legions';
+import LegionDonationsScreen from '../screens/legions/donations';
 import ProfileScreen from '../screens/profile';
 import ClanScreen from '../screens/clan';
 import ClanDirectoryScreen from '../screens/clanDirectory';
@@ -28,6 +29,8 @@ export type HomeStackParamList = {
   // O QG deriva a legião do perfil do usuário — não recebe param.
   LegionHQ: undefined;
   WarRoom: undefined;
+  // Movimentações do cofre (doações + gastos) — tela dedicada; o QG só leva até ela.
+  LegionDonations: { legionId: number; legionName?: string; color?: string };
   Profile: { userId?: string } | undefined;
   // Sem clanId → clã do usuário logado (entrada pelo card do Perfil); com clanId →
   // detalhe de um clã do diretório.
@@ -62,6 +65,7 @@ export default function HomeStack() {
       <Stack.Screen name="Ranks" component={RanksScreen} />
       <Stack.Screen name="LegionHQ" component={LegionHQScreen} />
       <Stack.Screen name="WarRoom" component={WarRoomScreen} />
+      <Stack.Screen name="LegionDonations" component={LegionDonationsScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
       <Stack.Screen name="Clan" component={ClanScreen} />
       <Stack.Screen name="ClanDirectory" component={ClanDirectoryScreen} />

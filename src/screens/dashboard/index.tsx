@@ -6,7 +6,7 @@ import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Navbar, SearchBar } from '../../components';
 import { useAuth } from '../../contexts/AuthContext';
-import { DailyMissionsHero } from './components';
+import { DailyMissionsHero, FavoriteRoutineCard } from './components';
 import { FeedItem } from '../../api/feed';
 import { useLegions } from '../missions/model/queries/useLegions';
 import { useDailyBriefing } from '../missions/model/queries/useDailyBriefing';
@@ -117,6 +117,12 @@ export default function DashboardScreen() {
       {/* 2 — HERO: MISSÕES DO DIA (progresso da meta, acima do feed) */}
       <DailyMissionsHero
         allowance={briefingQuery.data?.goal}
+        onSeeAll={() => navigation.navigate('Missions')}
+      />
+
+      {/* 2.1 — ROTINA DO DIA: atalho às missões favoritadas (some se vazio) */}
+      <FavoriteRoutineCard
+        missions={briefingQuery.data?.favorite_missions}
         onSeeAll={() => navigation.navigate('Missions')}
       />
 

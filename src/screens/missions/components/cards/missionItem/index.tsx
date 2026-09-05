@@ -8,7 +8,7 @@ import { Mission } from '../../../../../api/missions';
 import { formatBackendDateTime } from '../../../../../utils/date';
 import { useMissionStatus } from '../../../model/queries/useMissionStatus';
 import { useAuth } from '../../../../../contexts/AuthContext';
-import { ArrowUpIcon, CoinAmount, MASTERY_ICONS, PaperclipIcon, ShieldIcon } from '../../../../../components/icons';
+import { ArrowUpIcon, CoinAmount, MASTERY_ICONS, PaperclipIcon, ShieldIcon, StarIcon } from '../../../../../components/icons';
 
 interface Props {
   mission: Mission;
@@ -27,6 +27,9 @@ interface Props {
   accentColor?: string;
   pending: boolean;
   abandonPending: boolean;
+  // Favoritos: toca a estrela p/ favoritar/desfavoritar. Ausente = estrela oculta.
+  onToggleFavorite?: (mission: Mission) => void;
+  favoritePending?: boolean;
 }
 
 const DIFFICULTY_COLOR: Record<string, string> = {
@@ -99,6 +102,9 @@ function ReviewPanel({ mission, onCompleted }: { mission: Mission; onCompleted?:
     queryClient.invalidateQueries({ queryKey: ['missions-available'], ...opts });
     queryClient.invalidateQueries({ queryKey: ['missions-recommended'], ...opts });
     queryClient.invalidateQueries({ queryKey: ['daily-briefing'], ...opts });
+    // "Rotina do dia" (favoritas) também mostra o status do dia — sem isso o card
+    // favoritado ficava preso em "em revisão" após finalizar por tempo/aprovação.
+    queryClient.invalidateQueries({ queryKey: ['missions-favorites'], ...opts });
     queryClient.invalidateQueries({ queryKey: ['user-stats'], ...opts });
     queryClient.invalidateQueries({ queryKey: ['user-profile'], ...opts });
 
@@ -190,13 +196,16 @@ function ReviewPanel({ mission, onCompleted }: { mission: Mission; onCompleted?:
   );
 }
 
-export default function MissionItem({ mission, onStart, onComplete, onAbandon, onCompleted, reasons, trackLabel, accentColor, pending, abandonPending }: Props) {
+export default function MissionItem({ mission, onStart, onComplete, onAbandon, onCompleted, reasons, trackLabel, accentColor, pending, abandonPending, onToggleFavorite, favoritePending }: Props) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const isCompleted = mission.status === 'completed';
   const isInProgress = mission.status === 'in_progress';
   const isPendingReview = mission.status === 'pending_review';
-  const isAvailable = !isCompleted && !isInProgress && !isPendingReview;
+  // Evidência em análise assíncrona (moderação). No servidor a missão segue
+  // in_progress; aqui é um estado transitório mostrado após enviar a evidência.
+  const isModerating = mission.status === 'moderating';
+  const isAvailable = !isCompleted && !isInProgress && !isPendingReview && !isModerating;
   // Só medium/hard passam por aprovação de pares (§7); fáceis são só um timer.
   const needsApproval = mission.approvals_required > 0;
 
@@ -230,7 +239,7 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
   // "Ativas" (em andamento / em revisão): o fundo e a borda usam um tom sutil da
   // própria cor da dificuldade — harmoniza com a faixa lateral (antes brigava com
   // os pastéis rosa/amarelo). O status fica a cargo do chip abaixo do cabeçalho.
-  const isActive = isInProgress || isPendingReview;
+  const isActive = isInProgress || isPendingReview || isModerating;
   const cardStyle: {
     borderLeftWidth: number;
     borderLeftColor: string;
@@ -331,8 +340,27 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
           )}
         </View>
 
-        {/* Recompensa em destaque */}
+        {/* Recompensa em destaque (+ estrela de favorito acima) */}
         <View className="items-end ml-1">
+          {onToggleFavorite && (
+            <TouchableOpacity
+              disabled={favoritePending}
+              onPress={() => onToggleFavorite(mission)}
+              activeOpacity={0.7}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityState={{ selected: mission.is_favorite }}
+              accessibilityLabel={
+                mission.is_favorite ? t('missionItem.unfavorite') : t('missionItem.favorite')
+              }
+              className="mb-1.5 p-0.5">
+              {favoritePending ? (
+                <ActivityIndicator size="small" color="#D4AF37" />
+              ) : (
+                <StarIcon size={20} filled={mission.is_favorite} color="#D4AF37" />
+              )}
+            </TouchableOpacity>
+          )}
           <View className="bg-accent-500/10 rounded-[10px] px-2.5 py-1.5 items-center">
             <Text className="text-[16px] font-extrabold text-accent-500 leading-none">
               +{mission.xp_reward}
@@ -359,7 +387,7 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
       </View>
 
       {/* Chip de status (abaixo do cabeçalho) */}
-      {(isCompleted || isInProgress || isPendingReview) && (
+      {(isCompleted || isInProgress || isPendingReview || isModerating) && (
         <View className="flex-row mt-2.5">
           {isCompleted && (
             <View className="bg-laurel/15 rounded-full px-2.5 py-0.5">
@@ -369,6 +397,11 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
           {isInProgress && (
             <View className="bg-primary-500/10 rounded-full px-2.5 py-0.5">
               <Text className="text-[10px] font-bold text-primary-500">{t('missionItem.inProgress')}</Text>
+            </View>
+          )}
+          {isModerating && (
+            <View className="bg-accent-500/20 rounded-full px-2.5 py-0.5">
+              <Text className="text-[10px] font-bold text-[#9a7b1f]">{t('missionItem.moderating')}</Text>
             </View>
           )}
           {isPendingReview && (
@@ -400,6 +433,37 @@ export default function MissionItem({ mission, onStart, onComplete, onAbandon, o
       {isPendingReview && (
         <>
           <ReviewPanel mission={mission} onCompleted={onCompleted} />
+          <View className="mt-2">
+            <TouchableOpacity
+              disabled={busy}
+              activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel={t('missionItem.abandonMission')}
+              onPress={confirmAbandon}
+              className="rounded-[10px] py-2 items-center border border-[#e0e0e0]">
+              {abandonPending ? (
+                <ActivityIndicator color="#888" size="small" />
+              ) : (
+                <Text className="text-[12px] font-bold text-[#888]">{t('missionItem.abandonMission')}</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
+
+      {isModerating && (
+        <>
+          <View className="mt-3 bg-accent-500/10 border border-accent-500/30 rounded-[12px] p-3 flex-row items-center gap-2">
+            <ActivityIndicator size="small" color="#9a7b1f" />
+            <View className="flex-1">
+              <Text className="text-[12px] font-bold text-[#9a7b1f]">
+                {t('missionItem.moderatingTitle')}
+              </Text>
+              <Text className="text-[11px] text-[#9a7b1f] leading-[15px] mt-0.5">
+                {t('missionItem.moderatingBody')}
+              </Text>
+            </View>
+          </View>
           <View className="mt-2">
             <TouchableOpacity
               disabled={busy}

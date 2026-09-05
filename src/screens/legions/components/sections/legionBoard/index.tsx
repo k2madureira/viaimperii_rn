@@ -9,10 +9,12 @@ import { legionColorById } from '../../../../../utils/legionColors';
 import { useLegionLeaderboard } from '../../../model/queries/useLegionLeaderboard';
 import { useLegionTreasury } from '../../../model/queries/useLegionTreasury';
 import { useProposeWarRoom } from '../../../model/mutations/useProposeWarRoom';
+import { useVoteProposal } from '../../../model/mutations/useVoteProposal';
 import { useLegionVoteEvents } from '../../../model/hooks/useLegionVoteEvents';
 import { formatCountdown } from '../../../model/hooks/useStandardCountdown';
 import LegionBoardRow from '../../cards/legionBoardRow';
 import LockedBoardRows from '../../cards/lockedBoardRows';
+import ProposalCard from '../../cards/proposalCard';
 import ScopeTab, { ScopeOption } from '../../buttons/scopeTab';
 import BoardSortChips from '../../filters/boardSortChips';
 import BoardSkeleton from '../../skeletons/boardSkeleton';
@@ -93,10 +95,14 @@ export default function LegionBoardSection({
   // QG, então não custa requisição extra.
   const treasuryQuery = useLegionTreasury(viewerLegionId ?? undefined, viewerLegionId != null);
   const warRoom = treasuryQuery.data?.war_room ?? null;
-  const warRoomVoteOpen = (treasuryQuery.data?.open_proposals ?? []).some(
-    (p) => p.kind === 'war_room',
-  );
+  // A votação de Sala aberta (qualquer membro vota — §14.2, 60% do efetivo ativo;
+  // o Praefectus só PROPÕE). Trazida para cá para que o voto aconteça na mesma
+  // tela onde a Sala é proposta/prévia, e não só no Quartel General.
+  const warRoomProposal =
+    (treasuryQuery.data?.open_proposals ?? []).find((p) => p.kind === 'war_room') ?? null;
+  const warRoomVoteOpen = warRoomProposal != null;
   const proposeWarRoom = useProposeWarRoom(viewerLegionId ?? undefined);
+  const vote = useVoteProposal(viewerLegionId ?? undefined);
 
   // A War Room é a tela onde a votação de acesso mais importa: quando ela
   // resolve, o board sai de `preview` para `full` — o hook invalida o
@@ -173,6 +179,18 @@ export default function LegionBoardSection({
           proposing={proposeWarRoom.isPending}
           onPropose={() => proposeWarRoom.mutate()}
           color={color}
+        />
+      )}
+
+      {/* Votação da Sala de Guerra — qualquer membro vota aqui mesmo (não só no
+          QG). Aparece na prévia (desbloquear) e também numa extensão já com
+          acesso ativo. */}
+      {warRoomProposal && (
+        <ProposalCard
+          proposal={warRoomProposal}
+          color={color}
+          pending={vote.isPending}
+          onVote={(approve) => vote.mutate({ proposalId: warRoomProposal.id, approve })}
         />
       )}
 

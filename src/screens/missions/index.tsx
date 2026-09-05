@@ -18,6 +18,7 @@ import { DailyGoalHeader, LoadMoreButton, MissionItem } from './components';
 import {
   ActiveMissionsCard,
   AvailableMissionsBox,
+  FavoritesSection,
   MissionsHeader,
   MissionsModals,
   MissionTypeSelector,
@@ -26,7 +27,9 @@ import {
   ReviewSection,
 } from './components/sections';
 import { useAbandonMission, useCompleteMission, useStartMission } from './model/mutations/useMissionMutations';
+import { useToggleFavorite } from './model/mutations/useToggleFavorite';
 import { useAvailableMissions } from './model/queries/useAvailableMissions';
+import { useFavoriteMissions } from './model/queries/useFavoriteMissions';
 import { useRecommendedMissions } from './model/queries/useRecommendedMissions';
 import { useMissions } from './model/queries/useMissions';
 import { useMissionsToReview } from './model/queries/useMissionsToReview';
@@ -37,7 +40,7 @@ import { useTracks } from '../ranks/model/queries/useTracks';
 import { useRanks } from '../ranks/model/queries/useRanks';
 import { useMissionEvents } from './model/hooks/useMissionEvents';
 
-type ViewMode = 'missions' | 'progress' | 'review';
+type ViewMode = 'missions' | 'progress' | 'review' | 'favorites';
 
 export default function MissionsScreen() {
   const insets = useSafeAreaInsets();
@@ -80,8 +83,9 @@ export default function MissionsScreen() {
   const [onboardingSeen, setOnboardingSeen] = useState<boolean | null>(null);
   const isReview = viewMode === 'review';
   const isProgress = viewMode === 'progress';
-  // Modo "Missões" (não Progresso/Revisão) — mantém as ativas vivas p/ o badge de contagem.
-  const inMissionsMode = !isReview && !isProgress;
+  const isFavorites = viewMode === 'favorites';
+  // Modo "Missões" (não Progresso/Revisão/Favoritos) — mantém as ativas vivas p/ o badge.
+  const inMissionsMode = !isReview && !isProgress && !isFavorites;
 
   // Abaixo de Recruta IV (nível 4 → 1500 XP), só missões de nível fácil.
   const isBelowRecruitIV = (user?.total_xp ?? 0) < XP_PER_RANK * 3;
@@ -147,9 +151,13 @@ export default function MissionsScreen() {
   // invalida esta chave, então a contagem fica atualizada.
   const toReviewQuery = useMissionsToReview(!isProgress);
 
+  // Favoritas ("rotina do dia"). Vivas também no modo Missões para o badge da pílula.
+  const favoritesQuery = useFavoriteMissions(inMissionsMode || isFavorites);
+
   const startM = useStartMission();
   const completeM = useCompleteMission();
   const abandonM = useAbandonMission();
+  const toggleFavM = useToggleFavorite();
 
   // Modal de escolha de legião (abre após a 1ª missão concluída sem legião).
   const [legionModalVisible, setLegionModalVisible] = useState(false);
@@ -216,6 +224,12 @@ export default function MissionsScreen() {
           setEvidenceMission(null);
           // Feedback tátil ao enviar a conclusão.
           Vibration.vibrate(20);
+
+          // Moderação assíncrona: nada foi concluído ainda (evidência em análise).
+          // O toast "em análise" vem do useCompleteMission; aqui não há celebração,
+          // escolha de legião nem compartilhar — o verdict chega depois por SSE.
+          if (result.status === 'moderating') return;
+
           // Se subiu de patente na conclusão imediata, o modal de promoção vem do
           // watch de perfil (single source) — aqui só evitamos ruído (celebração/
           // compartilhar) sobre esse momento maior.
@@ -293,6 +307,7 @@ export default function MissionsScreen() {
       ? completeM.variables?.slug
       : null;
   const abandonPendingSlug = abandonM.isPending ? abandonM.variables : null;
+  const favoritePendingSlug = toggleFavM.isPending ? toggleFavM.variables?.slug ?? null : null;
 
   const allAvailable = availableQuery.data?.items ?? [];
   const availableMissions = sortByDifficulty(allAvailable.filter((m) => m.type === missionType));
@@ -337,6 +352,8 @@ export default function MissionsScreen() {
 
   if (isReview) {
     refreshing = toReviewQuery.isRefetching;
+  } else if (isFavorites) {
+    refreshing = favoritesQuery.isRefetching;
   } else if (isProgress) {
     refreshing =
       statsQuery.isRefetching || summaryQuery.isRefetching || completedQuery.isRefetching;
@@ -351,6 +368,10 @@ export default function MissionsScreen() {
   const onRefresh = () => {
     if (isReview) {
       toReviewQuery.refetch();
+      return;
+    }
+    if (isFavorites) {
+      favoritesQuery.refetch();
       return;
     }
     if (isProgress) {
@@ -380,6 +401,10 @@ export default function MissionsScreen() {
       trackLabel={tracksQuery.data?.find((tr) => tr.id === m.track_id)?.name}
       pending={pendingSlug === m.slug}
       abandonPending={abandonPendingSlug === m.slug}
+      onToggleFavorite={(mission) =>
+        toggleFavM.mutate({ slug: mission.slug, isFavorite: mission.is_favorite })
+      }
+      favoritePending={favoritePendingSlug === m.slug}
     />
   );
 
@@ -413,15 +438,20 @@ export default function MissionsScreen() {
         <MissionsHeader
           inMissionsMode={inMissionsMode}
           isReview={isReview}
+          isFavorites={isFavorites}
           reviewBadge={toReviewQuery.data?.length}
+          favoritesBadge={favoritesQuery.data?.items.length}
           onReopenOnboarding={() => setOnboardingSeen(false)}
           onOpenProgress={() => setViewMode('progress')}
           onOpenReview={() => setViewMode('review')}
+          onOpenFavorites={() => setViewMode('favorites')}
           onBackToMissions={() => setViewMode('missions')}
         />
 
         {isReview ? (
           <ReviewSection query={toReviewQuery} />
+        ) : isFavorites ? (
+          <FavoritesSection query={favoritesQuery} renderList={renderList} />
         ) : isProgress ? (
           <ProgressSection
             period={period}

@@ -37,6 +37,7 @@ export function useMissionEvents(enabled = true) {
         queryClient.invalidateQueries({ queryKey: ['missions-available'] });
         queryClient.invalidateQueries({ queryKey: ['missions-recommended'] });
         queryClient.invalidateQueries({ queryKey: ['daily-briefing'] });
+        queryClient.invalidateQueries({ queryKey: ['missions-favorites'] });
         queryClient.invalidateQueries({ queryKey: ['missions-to-review'] });
         queryClient.invalidateQueries({ queryKey: ['user-profile'] });
         queryClient.invalidateQueries({ queryKey: ['user-stats'] });

@@ -58,6 +58,7 @@ hooks em `model/{queries,mutations,hooks}/`.
 ### dashboard (Home)
 - **Dir**: `dashboard` · **i18n**: `dashboard.*`, `feed.*`, `search.*`, `notifications.*`, `changePassword.*`, `tributes.*`
 - **Sections**: `dashboardHeader`, `homeNavActions`, `homeFeed`, `currentCampaign`, `dashboardModals`
+- **Cards**: `favoriteRoutineCard` (rotina diária de missões favoritas; consome `useFavoriteMissions`)
 - **API**: `feed`, `notifications`, `users`, `wallet`, `ranking`, `provinces`, `campaigns`, `tributes`, `streak`, `search`, `config`
 - **Queries**: `useFeed`, `useFeedComments`, `useFeedEvent`, `useReactors`, `useNotifications`, `useUnreadNotificationsCount`, `useUserProfile`, `useWallet`, `useRanking`, `useProvinces`, `useCampaigns`, `useLegionDetail`, `useGlobalSearch`, `useStreak`
 - **Mutations**: `useCreatePost`, `useUpdatePost`, `useDeletePost`, `useReactFeed`, `useCreateComment`, `useMarkNotificationRead`, `useMarkAllNotificationsRead`, `useChooseTrack`, `useUpdateProvince`, `useUpdatePasswordMutation`, `useClaimDailyGoalReward`, `useBuyStreakShield`, `useSendTribute`
@@ -88,6 +89,7 @@ hooks em `model/{queries,mutations,hooks}/`.
 - **Queries**: `useLegionLeader`, `useLegionLeaderboard`, `useLegionTreasury`, `useStandardProposals`
 - **Mutations**: `useDonateToTreasury`, `useProposeStandard`, `useProposeWarRoom`, `useVoteProposal`
 - **Hooks**: `useLegionVoteEvents` (SSE), `useStandardCountdown`
+- **Sub-tela**: `donations/` (histórico/fluxo de doações ao tesouro; rota `LegionDonations` no `HomeStack`)
 
 ### market
 - **Dir**: `market` · **i18n**: `market.*`
@@ -98,10 +100,10 @@ hooks em `model/{queries,mutations,hooks}/`.
 
 ### missions (+ professionMissions, Revisão)
 - **Dir**: `missions` · **i18n**: `missions.*`, `missionsTabs.*`, `missionItem.*`, `reviewItem.*`, `evidenceModal.*`, `missionsSummary.*`, `professionMissions.*`, `statsFilter.*`, `periodStats.*`, `specialtyFilter.*`, `difficultyFilter.*`
-- **Sections**: `missionsHeader`, `missionTypeSelector`, `progressSection`, `activeMissionsCard`, `availableMissionsBox`, `reviewSection`, `professionHero`, `missionsModals`
+- **Sections**: `missionsHeader`, `missionTypeSelector`, `progressSection`, `activeMissionsCard`, `availableMissionsBox`, `favoritesSection`, `reviewSection`, `professionHero`, `missionsModals`
 - **API**: `missions`, `legion`, `specialties`, `tributes`
-- **Queries**: `useMissions`, `useAvailableMissions`, `useRecommendedMissions`, `useMissionsToReview`, `useMissionStatus`, `useDailyBriefing`, `useUserStats`, `useUserSummary`, `useSpecialties`, `useLegions`
-- **Mutations**: `useMissionMutations`, `useApproveMission`, `useRejectMission`, `useJoinLegion`, `useRewardedVideo`, `useSendMissionTribute`
+- **Queries**: `useMissions`, `useAvailableMissions`, `useFavoriteMissions`, `useRecommendedMissions`, `useMissionsToReview`, `useMissionStatus`, `useDailyBriefing`, `useUserStats`, `useUserSummary`, `useSpecialties`, `useLegions`
+- **Mutations**: `useMissionMutations`, `useToggleFavorite`, `useApproveMission`, `useRejectMission`, `useJoinLegion`, `useRewardedVideo`, `useSendMissionTribute`
 - **Hooks (SSE)**: `useMissionEvents`
 
 ### postDetail

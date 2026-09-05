@@ -17,6 +17,9 @@ export function useStartMission() {
       // isso a missão iniciada continuava aparecendo na lista.
       queryClient.invalidateQueries({ queryKey: ['missions-recommended'] });
       queryClient.invalidateQueries({ queryKey: ['daily-briefing'] });
+      // "Rotina do dia" (favoritas): sem isso o card ficava em "Iniciar" mesmo
+      // depois de iniciada. A lista tem status por-usuário, então precisa relê.
+      queryClient.invalidateQueries({ queryKey: ['missions-favorites'] });
     },
     onError: (error: Error) => {
       Toast.show({ type: 'error', text1: i18n.t('toasts.startMissionError'), text2: error.message });
@@ -31,10 +34,13 @@ export function useCompleteMission() {
     mutationFn: (vars: { slug: string; evidence?: MissionEvidence }) =>
       viaimperiiApi.missions.complete(vars.slug, vars.evidence),
     onSuccess: (result, vars) => {
-      // Reflete o novo status IMEDIATAMENTE nas listas em cache (['missions', ...]),
-      // sem depender do refetch: o card em "Ativas" troca na hora para o painel de
-      // revisão (pending_review) ou some (completed). O invalidate abaixo reconcilia.
-      queryClient.setQueriesData<PaginatedMissions>({ queryKey: ['missions'] }, (old) => {
+      // Reflete o novo status IMEDIATAMENTE nas listas em cache, sem depender do
+      // refetch: o card em "Ativas" troca na hora para o painel de revisão
+      // (pending_review) ou some (completed). Aplica-se tanto às listas normais
+      // (['missions', ...]) quanto à "Rotina do dia" (['missions-favorites']), que
+      // tem o MESMO shape (PaginatedMissions) e deve mostrar o status do dia. O
+      // invalidate abaixo reconcilia com o servidor.
+      const patchList = (old: PaginatedMissions | undefined) => {
         if (!old?.items) return old;
         return {
           ...old,
@@ -53,7 +59,25 @@ export function useCompleteMission() {
               : m,
           ),
         };
-      });
+      };
+      queryClient.setQueriesData<PaginatedMissions>({ queryKey: ['missions'] }, patchList);
+      queryClient.setQueriesData<PaginatedMissions>({ queryKey: ['missions-favorites'] }, patchList);
+
+      // Moderação assíncrona (flag MISSION_MODERATION_ASYNC): a evidência foi
+      // parkeada e está em análise; a missão SEGUE in_progress no servidor e nenhum
+      // XP é concedido ainda. Feedback próprio (sem celebração/legião/compartilhar,
+      // tratados no chamador) e NÃO invalidamos as listas — o refetch traria
+      // in_progress e apagaria o card "em análise" que o patch acima acabou de pôr.
+      // O verdict (aprovado → pending_review/completed; reprovado → in_progress +
+      // notificação) chega pelo SSE de missões, que então reconcilia as listas.
+      if (result.status === 'moderating') {
+        Toast.show({
+          type: 'info',
+          text1: i18n.t('toasts.moderatingTitle'),
+          text2: i18n.t('toasts.moderatingBody'),
+        });
+        return;
+      }
 
       // M6 — feedback ÚNICO de "XP creditado": no caso `completed` a tela exibe a
       // celebração (confete) — ou o modal de promoção, quando sobe de patente —, então
@@ -77,6 +101,7 @@ export function useCompleteMission() {
       // missão recém-concluída continua aparecendo na lista.
       queryClient.invalidateQueries({ queryKey: ['missions-recommended'] });
       queryClient.invalidateQueries({ queryKey: ['daily-briefing'] });
+      queryClient.invalidateQueries({ queryKey: ['missions-favorites'] });
       queryClient.invalidateQueries({ queryKey: ['user-profile'] });
       queryClient.invalidateQueries({ queryKey: ['ranking'] });
       queryClient.invalidateQueries({ queryKey: ['user-stats'] });
@@ -103,6 +128,7 @@ export function useAbandonMission() {
       queryClient.invalidateQueries({ queryKey: ['missions-available'] });
       queryClient.invalidateQueries({ queryKey: ['missions-recommended'] });
       queryClient.invalidateQueries({ queryKey: ['daily-briefing'] });
+      queryClient.invalidateQueries({ queryKey: ['missions-favorites'] });
     },
     onError: (error: Error) => {
       Toast.show({ type: 'error', text1: i18n.t('toasts.abandonError'), text2: error.message });
