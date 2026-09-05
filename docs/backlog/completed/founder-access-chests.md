@@ -52,7 +52,9 @@ Nenhuma mudança de persistência. Campos novos consumidos:
 - **chests/chestDetail** — seletor de abertura por slot em **carrossel (§0.1)**:
   setas ‹ ›, dots, confirmação temática (sem Alert), estado "recompensas concedidas".
   - **Avatar**: filtro de raridade + grid de miniaturas.
-  - **Profissão** (slot de missão): grid de cards por profissão + nota de que abrir
+  - **Profissão** (slot de missão): **card estilo mercado** (imagem do livro/`icon_url`
+    + título + descrição), **1 card por profissão** (missão escolhida aleatoriamente por
+    profissão como `reward_ref`; casa com o catálogo `['professions']`) + nota de que abrir
     **ativa a profissão inteira** (todas as missões dela entram no pool, 1.5×).
 - **components/founderBadge** (global) + **components/icons/chest** (SVG).
 

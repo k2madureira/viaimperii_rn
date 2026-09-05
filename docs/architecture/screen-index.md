@@ -42,7 +42,7 @@ hooks em `model/{queries,mutations,hooks}/`.
 ### chests (+ chestDetail)
 - **Dir**: `chests` · **i18n**: `chests.*`
 - **Sub-tela**: `chestDetail/` (seletor de abertura; rota `ChestDetail`)
-- **Cards**: `chestCard` · **Selectors**: `chestDetail/.../slotSelector` (carrossel §0.1; avatar = miniaturas, profissão = grid de cards)
+- **Cards**: `chestCard` · **Selectors**: `chestDetail/.../slotSelector` despacha → `avatarSlot` (miniaturas + filtro raridade) ou `professionSlot` (card estilo mercado: livro/`icon_url` + título + descrição, 1 por profissão, missão aleatória; casa com catálogo `['professions']`)
 - **API**: `chests`
 - **Queries**: `useChests`, `useChestDetail` · **Mutations**: `useOpenChest`
 - **Notas**: entrada pelo `UserMenu` (Baús). Baú abre 1×; `options` some depois de aberto (`selections` fixo). Slot de missão = **escolha de PROFISSÃO** (abrir ativa a profissão inteira, todas as missões dela entram no pool).
