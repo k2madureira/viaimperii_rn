@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import Text from '../../../../../components/text';
 import TextInput from '../../../../../components/textInput';
+import FounderBadge from '../../../../../components/founderBadge';
 import { useTranslation } from 'react-i18next';
 import { ToReviewItem } from '../../../../../api/missions';
 import { parseBackendDate } from '../../../../../utils/date';
@@ -101,10 +102,13 @@ export default function ReviewItem({ item, onApprove, onReject, pending }: Props
                   </Text>
                 </View>
               )}
-              <Text className="text-[11px] text-[#999]">
-                {item.executor.name}
-                {item.executor.rank ? ` · ${item.executor.rank.name}` : ''}
-              </Text>
+              <View className="flex-row items-center gap-1.5">
+                <Text className="text-[11px] text-[#999]" numberOfLines={1}>
+                  {item.executor.name}
+                  {item.executor.rank ? ` · ${item.executor.rank.name}` : ''}
+                </Text>
+                {item.executor.is_founder && <FounderBadge size="sm" />}
+              </View>
             </View>
           </View>
         </View>
