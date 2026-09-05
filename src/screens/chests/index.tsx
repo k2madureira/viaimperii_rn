@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { ActivityIndicator, RefreshControl, ScrollView, TouchableOpacity, View } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
@@ -9,14 +9,12 @@ import { ChestIcon } from '../../components/icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { HomeNavigationProp } from '../../navigation/HomeStack';
 import { useChests } from './model/queries/useChests';
-import { ChestCard, CodeRedeemModal } from './components';
+import { ChestCard } from './components';
 
 export default function ChestsScreen() {
   const { t } = useTranslation();
   const navigation = useNavigation<HomeNavigationProp>();
   const { user } = useAuth();
-
-  const [redeemOpen, setRedeemOpen] = useState(false);
 
   const chestsQuery = useChests(!!user);
   const data = chestsQuery.data;
@@ -41,7 +39,7 @@ export default function ChestsScreen() {
           <Text className="text-[16px] font-bold text-[#111] ml-2">{t('chests.title')}</Text>
         </View>
         <TouchableOpacity
-          onPress={() => setRedeemOpen(true)}
+          onPress={() => navigation.navigate('RedeemCode')}
           activeOpacity={0.8}
           className="bg-[#f4eaea] rounded-full px-3 py-1.5">
           <Text className="text-[12px] font-semibold text-primary-500">
@@ -105,19 +103,8 @@ export default function ChestsScreen() {
               />
             ))
           )}
-
-          <TouchableOpacity
-            onPress={() => navigation.navigate('FounderRedeem')}
-            activeOpacity={0.7}
-            className="items-center py-4 mt-1">
-            <Text className="text-[13px] text-primary-500 font-semibold">
-              {t('founder.haveCodeCta')}
-            </Text>
-          </TouchableOpacity>
         </ScrollView>
       )}
-
-      <CodeRedeemModal visible={redeemOpen} onClose={() => setRedeemOpen(false)} />
     </ScreenContainer>
   );
 }

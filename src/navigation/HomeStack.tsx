@@ -21,7 +21,7 @@ import FriendsScreen from '../screens/friends';
 import DmConversationScreen from '../screens/dmConversation';
 import ChestsScreen from '../screens/chests';
 import ChestDetailScreen from '../screens/chests/chestDetail';
-import FounderRedeemScreen from '../screens/founder';
+import RedeemCodeScreen from '../screens/redeemCode';
 import { FeedItem } from '../api/feed';
 import { LeaderboardScope } from '../api/leaderboards';
 import { PresenceStatus } from '../api/friendship';
@@ -55,10 +55,11 @@ export type HomeStackParamList = {
     avatarUrl?: string | null;
     presenceStatus?: PresenceStatus;
   };
-  // Baús de Riquezas (§35): lista, detalhe/abertura. Founder redeem (§34).
+  // Baús de Riquezas (§35): lista, detalhe/abertura. Resgate unificado de código
+  // (§35 endpoint unificado): promo ou fundador (§34), detectado no backend.
   Chests: undefined;
   ChestDetail: { userChestId: number };
-  FounderRedeem: undefined;
+  RedeemCode: undefined;
 };
 
 export type HomeNavigationProp = NativeStackNavigationProp<HomeStackParamList>;
@@ -85,7 +86,7 @@ export default function HomeStack() {
       <Stack.Screen name="DmConversation" component={DmConversationScreen} />
       <Stack.Screen name="Chests" component={ChestsScreen} />
       <Stack.Screen name="ChestDetail" component={ChestDetailScreen} />
-      <Stack.Screen name="FounderRedeem" component={FounderRedeemScreen} />
+      <Stack.Screen name="RedeemCode" component={RedeemCodeScreen} />
     </Stack.Navigator>
   );
 }

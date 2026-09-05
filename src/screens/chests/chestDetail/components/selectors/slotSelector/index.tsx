@@ -11,16 +11,19 @@ interface Props {
   onSelect: (rewardRef: string) => void;
 }
 
-// Rótulo do slot conforme o tipo de recompensa.
-function slotLabelKey(slot: ChestSlot): string {
-  return slot.reward_kind === 'cosmetic_asset' ? 'chests.slotAvatar' : 'chests.slotMission';
+// Nome da(s) profissão(ões) que a missão ativa (o slot de missão é, na prática,
+// um seletor de PROFISSÃO — escolher a missão ativa a profissão inteira dela).
+function professionLabel(option: ChestSlotOption): string {
+  const names = option.professions?.map((p) => p.name).filter(Boolean) ?? [];
+  return names.length ? names.join(' + ') : (option.mission?.name ?? '');
 }
 
 /**
  * Seletor de UMA recompensa de um slot do baú (§35). Reusa o padrão do
  * LegionSelectModal: carrossel com setas ‹ ›, preview central, indicadores (dots)
- * e — auxílios permitidos (§0.1) — filtro de raridade (avatares) e grid de
- * miniaturas para saltar. A opção centralizada É a seleção do slot.
+ * e — auxílios permitidos (§0.1) — filtro de raridade (avatares) e **grid de
+ * seleção** (avatares E profissões, como no mercado/seletor de avatar). A opção
+ * centralizada É a seleção do slot; tocar num item do grid centraliza/seleciona.
  */
 export default function SlotSelector({ slot, selectedRef, onSelect }: Props) {
   const { t } = useTranslation();
@@ -65,11 +68,12 @@ export default function SlotSelector({ slot, selectedRef, onSelect }: Props) {
 
   const total = options.length;
   const go = (dir: -1 | 1) => setIndex((i) => (i + dir + total) % total);
+  const slotLabel = isAvatar ? t('chests.slotAvatar') : t('chests.slotProfession');
 
   return (
     <View className="bg-white rounded-[16px] p-5 border border-[#eee]">
       <Text className="text-[11px] font-bold text-[#999] tracking-[2px] uppercase text-center">
-        {t(slotLabelKey(slot))}
+        {slotLabel}
       </Text>
       <Text className="text-[13px] text-[#888] text-center mt-1">{t('chests.chooseForSlot')}</Text>
 
@@ -119,23 +123,29 @@ export default function SlotSelector({ slot, selectedRef, onSelect }: Props) {
               ) : null}
             </View>
           ) : (
+            // Missão = escolha de PROFISSÃO: profissão em destaque, missão como origem.
             <View className="w-full items-center">
-              <Text className="text-[16px] font-extrabold text-[#111] text-center" numberOfLines={2}>
-                {current.mission?.name}
+              <Text className="text-[17px] font-extrabold text-[#111] text-center" numberOfLines={2}>
+                {professionLabel(current)}
               </Text>
               {current.mission ? (
-                <View className="flex-row gap-1.5 mt-1.5">
-                  <View className="bg-[#f2f2f2] rounded-full px-2 py-0.5">
-                    <Text className="text-[10px] font-semibold text-[#777] capitalize">
-                      {current.mission.difficulty}
-                    </Text>
+                <>
+                  <Text className="text-[11px] text-[#999] text-center mt-1" numberOfLines={1}>
+                    {current.mission.name}
+                  </Text>
+                  <View className="flex-row gap-1.5 mt-1.5">
+                    <View className="bg-[#f2f2f2] rounded-full px-2 py-0.5">
+                      <Text className="text-[10px] font-semibold text-[#777] capitalize">
+                        {current.mission.difficulty}
+                      </Text>
+                    </View>
+                    <View className="bg-[#f2f2f2] rounded-full px-2 py-0.5">
+                      <Text className="text-[10px] font-semibold text-[#777] capitalize">
+                        {current.mission.type}
+                      </Text>
+                    </View>
                   </View>
-                  <View className="bg-[#f2f2f2] rounded-full px-2 py-0.5">
-                    <Text className="text-[10px] font-semibold text-[#777] capitalize">
-                      {current.mission.type}
-                    </Text>
-                  </View>
-                </View>
+                </>
               ) : null}
             </View>
           )}
@@ -150,7 +160,7 @@ export default function SlotSelector({ slot, selectedRef, onSelect }: Props) {
         </TouchableOpacity>
       </View>
 
-      {/* Nome/raridade (avatar) ou profissões ativadas (missão) */}
+      {/* Nome/raridade (avatar) ou nota de ativação (profissão) */}
       {isAvatar && current.asset ? (
         <View className="items-center mt-3">
           <Text className="text-[15px] font-bold text-[#111]">{current.asset.name}</Text>
@@ -159,11 +169,9 @@ export default function SlotSelector({ slot, selectedRef, onSelect }: Props) {
           </Text>
         </View>
       ) : null}
-      {!isAvatar && current.professions?.length ? (
-        <Text className="text-[12px] text-[#8B1A2B] text-center mt-3">
-          {t('chests.professionsUnlocked', {
-            names: current.professions.map((p) => p.name).join(', '),
-          })}
+      {!isAvatar ? (
+        <Text className="text-[11px] text-[#8B1A2B] text-center mt-3 leading-[16px]">
+          {t('chests.missionActivatesProfession')}
         </Text>
       ) : null}
 
@@ -179,26 +187,46 @@ export default function SlotSelector({ slot, selectedRef, onSelect }: Props) {
         </View>
       ) : null}
 
-      {/* Grid de miniaturas (avatares) — auxílio, clicar seleciona */}
-      {isAvatar && total > 1 ? (
-        <View className="flex-row flex-wrap justify-center gap-2 mt-4">
-          {options.map((o, i) => (
-            <TouchableOpacity
-              key={o.reward_ref}
-              onPress={() => setIndex(i)}
-              className={`w-12 h-12 rounded-[10px] items-center justify-center overflow-hidden border-2 ${
-                i === index ? 'border-primary-500' : 'border-[#eee]'
-              }`}>
-              {o.asset ? (
-                <Image
-                  source={{ uri: o.asset.thumb_url ?? o.asset.url }}
-                  style={{ width: 40, height: 40 }}
-                  resizeMode="contain"
-                />
-              ) : null}
-            </TouchableOpacity>
-          ))}
-        </View>
+      {/* Grid de seleção — auxílio (§0.1): clicar seleciona. Avatares = miniaturas;
+          profissões = cards com o nome da profissão (como no mercado). */}
+      {total > 1 ? (
+        isAvatar ? (
+          <View className="flex-row flex-wrap justify-center gap-2 mt-4">
+            {options.map((o, i) => (
+              <TouchableOpacity
+                key={o.reward_ref}
+                onPress={() => setIndex(i)}
+                className={`w-12 h-12 rounded-[10px] items-center justify-center overflow-hidden border-2 ${
+                  i === index ? 'border-primary-500' : 'border-[#eee]'
+                }`}>
+                {o.asset ? (
+                  <Image
+                    source={{ uri: o.asset.thumb_url ?? o.asset.url }}
+                    style={{ width: 40, height: 40 }}
+                    resizeMode="contain"
+                  />
+                ) : null}
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : (
+          <View className="flex-row flex-wrap justify-center gap-2 mt-4">
+            {options.map((o, i) => (
+              <TouchableOpacity
+                key={o.reward_ref}
+                onPress={() => setIndex(i)}
+                className={`rounded-[10px] px-3 py-2 border-2 ${
+                  i === index ? 'border-primary-500 bg-[#f6f1e7]' : 'border-[#eee] bg-white'
+                }`}>
+                <Text
+                  className={`text-[12px] font-semibold ${i === index ? 'text-[#8B1A2B]' : 'text-[#555]'}`}
+                  numberOfLines={1}>
+                  {professionLabel(o)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )
       ) : null}
     </View>
   );

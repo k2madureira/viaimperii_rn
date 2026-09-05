@@ -34,20 +34,26 @@ Nenhuma mudança de persistência. Campos novos consumidos:
 - `FeedAuthor`, `ToReviewExecutor`, `RankingItem`: `is_founder`, `founder_number` (opcionais, best-effort).
 
 ## 4. Camada de API (§0.3)
-- `src/api/founder/` — `preRegister`, `availability`, `redeem` (`/users/me/founder`).
+- `src/api/founder/` — `preRegister`, `availability`, `redeem` (`/users/me/founder`, mantido p/ compat, não usado na UI).
 - `src/api/chests/` — `list`, `detail`, `open`.
-- `src/api/codes/` — `redeem`.
+- `src/api/codes/` — `redeem` **unificado**: `POST /codes/redeem` roteia pelo hash do
+  código → `kind:"founder"` (fluxo de fundador + Baú do Fundador) ou `kind:"promo"` (baú);
+  404 se não achar em nenhuma tabela. Resposta traz `kind` + `founder{...}` (só fundador).
 - `src/api/config/defaultApi.ts` — `ApiError` (carrega `status` HTTP) + `throwApiError`,
   para mapear 404/410/409/403/422 em copy localizada.
 - Facade `viaimperiiApi.{founder,chests,codes}`.
 
 ## 5. Telas / componentes
 - **auth/founderPreRegister** — landing pública (vagas restantes + form), link no Login.
-- **founder** — resgate autenticado; sucesso → `Ranks` (escolha de trilha).
-- **chests** — lista + summary + resgate de código (modal); entrada no `UserMenu`.
+- **redeemCode** — **resgate unificado** (promo + fundador); ramifica pelo `kind` da
+  resposta. `kind:founder` → sucesso Recruit IV/founder_number → `Ranks` (trilha); ambos
+  → baú em `Chests`. Entrada em **TODOS** os dropdowns do `UserMenu` + botão da tela Baús.
+- **chests** — lista + summary; entrada no `UserMenu`.
 - **chests/chestDetail** — seletor de abertura por slot em **carrossel (§0.1)**:
-  setas ‹ ›, dots, filtro de raridade (avatares), grid de miniaturas, confirmação
-  temática (sem Alert), estado "recompensas concedidas".
+  setas ‹ ›, dots, confirmação temática (sem Alert), estado "recompensas concedidas".
+  - **Avatar**: filtro de raridade + grid de miniaturas.
+  - **Profissão** (slot de missão): grid de cards por profissão + nota de que abrir
+    **ativa a profissão inteira** (todas as missões dela entram no pool, 1.5×).
 - **components/founderBadge** (global) + **components/icons/chest** (SVG).
 
 ## 6. Wiring da insígnia (`FounderBadge`)

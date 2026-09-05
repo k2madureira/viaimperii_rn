@@ -13,7 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../contexts/AuthContext';
 import { LogoutIcon, UserIcon } from '../../navigation/icons/MenuIcons';
-import { GearIcon, ChestIcon } from '../icons';
+import { GearIcon, ChestIcon, GiftIcon } from '../icons';
 import { useUserProfile } from '../../screens/dashboard/model/queries/useUserProfile';
 import { viaimperiiApi } from '../../api';
 import { SettableStatus, SETTABLE_STATUSES } from '../../api/presence';
@@ -81,6 +81,11 @@ export default function UserMenu({ variant = 'default' }: Props) {
   const goToChests = () => {
     close();
     navigation.navigate('Home', { screen: 'Chests' });
+  };
+
+  const goToRedeem = () => {
+    close();
+    navigation.navigate('Home', { screen: 'RedeemCode' });
   };
 
   return (
@@ -213,6 +218,17 @@ export default function UserMenu({ variant = 'default' }: Props) {
                   <View className="h-px bg-[#f0f0f0]" />
                 </>
               )}
+
+              {/* Resgatar código: presente em TODAS as variantes do menu. */}
+              <TouchableOpacity
+                className="flex-row items-center gap-3 px-4 py-3"
+                activeOpacity={0.7}
+                onPress={goToRedeem}>
+                <GiftIcon size={18} />
+                <Text className="text-[14px] font-medium text-[#111]">{t('codeRedeem.title')}</Text>
+              </TouchableOpacity>
+
+              <View className="h-px bg-[#f0f0f0]" />
 
               <TouchableOpacity
                 className="flex-row items-center gap-3 px-4 py-3"

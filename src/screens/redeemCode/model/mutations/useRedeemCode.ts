@@ -5,18 +5,22 @@ import { viaimperiiApi } from '../../../../api';
 import { ApiError } from '../../../../api/config/defaultApi';
 import { RedeemCodeResponse } from '../../../../api/codes';
 
-// Erro → toast localizado por status (404 inexistente · 410 expirado · 409 esgotado/já resgatado).
+// Erro → toast por status (404 inexistente · 410 expirado · 409 esgotado / já
+// resgatado / coorte cheia / já é fundador · 403 e-mail da conta ≠ código).
 function errorKey(err: unknown): string {
   const status = err instanceof ApiError ? err.status : 0;
   if (status === 404) return 'toasts.codeNotFound';
   if (status === 410) return 'toasts.codeExpired';
   if (status === 409) return 'toasts.codeExhausted';
+  if (status === 403) return 'toasts.founderEmailMismatch';
   return 'toasts.codeRedeemError';
 }
 
 /**
- * Resgata um código promocional (§35) → concede um baú fechado. onSuccess invalida
- * a lista de baús; o baú resultante é aberto depois via useOpenChest.
+ * Resgate unificado de código (§35 endpoint unificado). O backend detecta se é
+ * de fundador (`kind:"founder"` → vira Recruit IV + Baú do Fundador) ou promo
+ * (`kind:"promo"` → baú). onSuccess invalida os baús e, quando fundador, o perfil
+ * (patente/founder). O baú concedido é aberto depois via useOpenChest.
  */
 export function useRedeemCode(onSuccess?: (data: RedeemCodeResponse) => void) {
   const queryClient = useQueryClient();
@@ -26,6 +30,9 @@ export function useRedeemCode(onSuccess?: (data: RedeemCodeResponse) => void) {
 
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['chests'] });
+      if (data.kind === 'founder') {
+        queryClient.invalidateQueries({ queryKey: ['user-profile'] });
+      }
       onSuccess?.(data);
     },
 

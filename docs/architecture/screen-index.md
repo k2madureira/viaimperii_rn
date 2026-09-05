@@ -40,19 +40,23 @@ hooks em `model/{queries,mutations,hooks}/`.
 - **Hooks**: —
 
 ### chests (+ chestDetail)
-- **Dir**: `chests` · **i18n**: `chests.*`, `codeRedeem.*`
+- **Dir**: `chests` · **i18n**: `chests.*`
 - **Sub-tela**: `chestDetail/` (seletor de abertura; rota `ChestDetail`)
-- **Cards**: `chestCard` · **Modals**: `codeRedeemModal` · **Selectors**: `chestDetail/.../slotSelector` (carrossel §0.1)
-- **API**: `chests`, `codes`
-- **Queries**: `useChests`, `useChestDetail`
-- **Mutations**: `useOpenChest`, `useRedeemCode`
-- **Notas**: entrada pelo `UserMenu` (Baús); resgate de fundador via link → `FounderRedeem`. Baú abre 1×; `options` some depois de aberto (`selections` fixo).
+- **Cards**: `chestCard` · **Selectors**: `chestDetail/.../slotSelector` (carrossel §0.1; avatar = miniaturas, profissão = grid de cards)
+- **API**: `chests`
+- **Queries**: `useChests`, `useChestDetail` · **Mutations**: `useOpenChest`
+- **Notas**: entrada pelo `UserMenu` (Baús). Baú abre 1×; `options` some depois de aberto (`selections` fixo). Slot de missão = **escolha de PROFISSÃO** (abrir ativa a profissão inteira, todas as missões dela entram no pool).
 
-### founder (+ auth/founderPreRegister)
-- **Dir**: `founder` (resgate, autenticado) · `auth/founderPreRegister` (pré-inscrição pública) · **i18n**: `founder.*`
-- **API**: `founder`
-- **Queries**: `useFounderAvailability` · **Mutations**: `usePreRegisterFounder`, `useRedeemFounder`
-- **Notas**: pré-inscrição no `AuthStack` (link no Login). Resgate → vira Recruit IV + `must_choose_track` → leva a `Ranks` + concede Baú do Fundador. Selo `FounderBadge` (global) onde autor é renderizado.
+### redeemCode (resgate unificado)
+- **Dir**: `redeemCode` · **i18n**: `codeRedeem.*`, `founder.*` (sucesso de fundador)
+- **API**: `codes` · **Mutations**: `useRedeemCode`
+- **Notas**: **um único** resgate para promo e fundador — `POST /codes/redeem` roteia pelo hash e devolve `kind` (`founder`|`promo`) + `founder{...}`. Entrada em **TODOS** os dropdowns do `UserMenu` (default + gear) e no botão da tela Baús. `kind:founder` → Recruit IV + `must_choose_track` → leva a `Ranks`; ambos concedem baú → abrir em `Chests`.
+
+### founder — auth/founderPreRegister
+- **Dir**: `auth/founderPreRegister` (pré-inscrição pública) · **i18n**: `founder.*`
+- **API**: `founder` (preRegister/availability; `redeem` via `/users/me/founder` mantido p/ compat, não usado na UI)
+- **Queries**: `useFounderAvailability` · **Mutations**: `usePreRegisterFounder`
+- **Notas**: pré-inscrição no `AuthStack` (link no Login). Resgate do código é feito na tela `redeemCode`. Selo `FounderBadge` (global) onde autor é renderizado (feed, comentários, fila de revisão).
 
 ### clan
 - **Dir**: `clan` · **i18n**: `clan.*`, `clanCard.*`
