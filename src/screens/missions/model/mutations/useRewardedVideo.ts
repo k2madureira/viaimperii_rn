@@ -41,6 +41,9 @@ export function useRewardedVideo() {
           // sem invalidar, as vagas extras do vídeo não apareciam.
           queryClient.invalidateQueries({ queryKey: ['missions-recommended'] }),
           queryClient.invalidateQueries({ queryKey: ['daily-briefing'] }),
+          // "Rotina do dia" (favoritas) carrega o mesmo resumo de vagas — sem isso
+          // as vagas extras do vídeo não apareciam ali.
+          queryClient.invalidateQueries({ queryKey: ['missions-favorites'] }),
           // O vídeo premiado credita moedas no ledger — atualiza a carteira.
           queryClient.invalidateQueries({ queryKey: ['wallet'] }),
         ]);

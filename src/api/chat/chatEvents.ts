@@ -1,7 +1,5 @@
-import * as SecureStore from 'expo-secure-store';
-import { ACCESS_KEY, refreshAccessToken } from '../config/tokenManager';
-import { isTokenExpired } from '../config/jwt';
 import { apiFetch } from '../config/defaultApi';
+import { getSseTicket } from '../auth/sseTicket';
 import { FeedAuthor } from '../feed';
 import { MessageKind } from './dto';
 
@@ -46,7 +44,8 @@ export type ChatSSEEvent =
 type Disconnect = () => void;
 
 /**
- * Conecta ao SSE GET /chat/events?token=<access_token>.
+ * Conecta ao SSE GET /chat/events?ticket=<sse_ticket> (ticket single-use ~60s via
+ * POST /auth/sse-ticket; o `?token=<jwt>` legado está deprecado).
  *
  * Push instantâneo (`chat_message`) quando chega mensagem numa conversa do usuário,
  * e `chat_read` para read receipts. A tabela `messages` é a fonte de verdade — este
@@ -64,16 +63,20 @@ export function connectChatEvents(
   async function connect() {
     if (closed) return;
 
-    let token = await SecureStore.getItemAsync(ACCESS_KEY);
-
-    if (token && isTokenExpired(token)) {
-      token = await refreshAccessToken();
+    // Ticket single-use (~60s): um novo por conexão/reconexão. O apiFetch cuida
+    // do header Authorization / refresh ao pedir o ticket.
+    let ticket: string;
+    try {
+      ({ ticket } = await getSseTicket());
+    } catch {
+      if (!closed) reconnectTimer = setTimeout(connect, 5000);
+      return;
     }
 
-    if (!token || closed) return;
+    if (closed) return;
 
     xhr = new XMLHttpRequest();
-    xhr.open('GET', `${API_HOST}/chat/events?token=${encodeURIComponent(token)}`, true);
+    xhr.open('GET', `${API_HOST}/chat/events?ticket=${encodeURIComponent(ticket)}`, true);
     xhr.setRequestHeader('Accept', 'text/event-stream');
     xhr.setRequestHeader('Cache-Control', 'no-cache');
 

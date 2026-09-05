@@ -5,4 +5,6 @@ export * from './verifyToken';
 export * from './forgotPassword';
 export * from './resetPassword';
 export * from './oauth';
+export * from './sseTicket';
+export * from './logout';
 export * from './dto';

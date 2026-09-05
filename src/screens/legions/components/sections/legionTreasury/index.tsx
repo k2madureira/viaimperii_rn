@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useNavigation } from '@react-navigation/native';
 import Text from '../../../../../components/text';
+import { HomeNavigationProp } from '../../../../../navigation/HomeStack';
 import { useLegionTreasury } from '../../../model/queries/useLegionTreasury';
 import { useStandardProposals } from '../../../model/queries/useStandardProposals';
 import { useDonateToTreasury } from '../../../model/mutations/useDonateToTreasury';
@@ -10,7 +12,6 @@ import { useVoteProposal } from '../../../model/mutations/useVoteProposal';
 import { useLegionVoteEvents } from '../../../model/hooks/useLegionVoteEvents';
 import { useWallet } from '../../../../dashboard/model/queries/useWallet';
 import TreasuryCard from '../../cards/treasuryCard';
-import TreasuryTxRow from '../../cards/treasuryTxRow';
 import CenturionCard from '../../cards/centurionCard';
 import ProposalCard from '../../cards/proposalCard';
 import ProposalHistoryRow from '../../cards/proposalHistoryRow';
@@ -37,6 +38,7 @@ interface Props {
 // como um bloco entre o `TreasuryCard` e as ações, consumindo a mesma query.
 export default function LegionTreasurySection({ legionId, legionName, color }: Props) {
   const { t } = useTranslation();
+  const navigation = useNavigation<HomeNavigationProp>();
 
   const treasuryQuery = useLegionTreasury(legionId);
   const walletQuery = useWallet();
@@ -125,20 +127,27 @@ export default function LegionTreasurySection({ legionId, legionName, color }: P
         )}
       </View>
 
-      {/* Histórico de movimentações */}
-      <View className="gap-2">
-        <Text className="text-[11px] font-bold text-[#999] tracking-[1.5px] uppercase">
-          {t('legions.treasury.history')}
-        </Text>
-
-        {transactions.length === 0 ? (
-          <EmptyBox text={t('legions.treasury.empty')} />
-        ) : (
-          transactions.map((tx, i) => (
-            <TreasuryTxRow key={`${tx.created_at}-${i}`} transaction={tx} />
-          ))
-        )}
-      </View>
+      {/* Movimentações do cofre — agora em tela dedicada (a lista completa tomava
+          espaço demais aqui). O QG leva até ela. */}
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate('LegionDonations', { legionId, legionName, color })
+        }
+        activeOpacity={0.7}
+        accessibilityRole="button"
+        className="flex-row items-center justify-between rounded-[12px] border border-[#f0eded] bg-[#faf7f7] px-3.5 py-3">
+        <View>
+          <Text className="text-[13px] font-bold text-[#333]">
+            {t('legions.treasury.history')}
+          </Text>
+          <Text className="text-[11px] text-[#999] mt-0.5">
+            {transactions.length === 0
+              ? t('legions.treasury.empty')
+              : t('legions.donations.count', { count: transactions.length })}
+          </Text>
+        </View>
+        <Text className="text-[16px] text-[#bbb]">›</Text>
+      </TouchableOpacity>
 
       {/* Histórico de votações — colapsado por padrão */}
       <View className="gap-2">

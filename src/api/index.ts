@@ -45,6 +45,8 @@ export const viaimperiiApi = {
     forgotPassword: authService.forgotPasswordRequest,
     resetPassword: authService.resetPasswordRequest,
     oauthPoll: authService.oauthPoll,
+    sseTicket: authService.getSseTicket,
+    logout: authService.logoutRequest,
   },
   campaigns: {
     list: campaignsService.getCampaigns,
@@ -147,6 +149,9 @@ export const viaimperiiApi = {
     toReview: missionsService.getMissionsToReview,
     approve: missionsService.approveMission,
     reject: missionsService.rejectMission,
+    favorite: missionsService.favoriteMission,
+    unfavorite: missionsService.unfavoriteMission,
+    favorites: missionsService.getFavoriteMissions,
   },
   notifications: {
     list: notificationsService.getNotifications,

@@ -9,6 +9,7 @@ export { default as WalletButton } from './buttons/walletButton';
 
 // cards
 export { default as DailyMissionsHero } from './cards/dailyMissionsHero';
+export { default as FavoriteRoutineCard } from './cards/favoriteRoutineCard';
 export { default as ClanCard } from './cards/clanCard';
 export { default as LegionCard } from './cards/legionCard';
 export { default as RankCard } from './cards/rankCard';

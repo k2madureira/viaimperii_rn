@@ -5,4 +5,5 @@ export { default as ActiveMissionsCard } from './activeMissionsCard';
 export { default as AvailableMissionsBox } from './availableMissionsBox';
 export { default as ProgressSection } from './progressSection';
 export { default as ReviewSection } from './reviewSection';
+export { default as FavoritesSection } from './favoritesSection';
 export { default as MissionsModals } from './missionsModals';

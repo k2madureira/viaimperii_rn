@@ -1,7 +1,5 @@
-import * as SecureStore from 'expo-secure-store';
-import { ACCESS_KEY, refreshAccessToken } from '../config/tokenManager';
-import { isTokenExpired } from '../config/jwt';
 import { apiFetch } from '../config/defaultApi';
+import { getSseTicket } from '../auth/sseTicket';
 
 const API_HOST = process.env.EXPO_PUBLIC_API_HOST;
 
@@ -35,9 +33,11 @@ export interface FeedEvent {
 type Disconnect = () => void;
 
 /**
- * Conecta ao SSE GET /feed/events?token=<access_token>.
+ * Conecta ao SSE GET /feed/events?ticket=<sse_ticket>.
  *
- * Usa XMLHttpRequest (disponível no React Native) para ler o stream
+ * Cada conexão (e reconexão) pega antes um ticket single-use (~60s) via
+ * POST /auth/sse-ticket — o `?token=<jwt>` legado está deprecado. Usa
+ * XMLHttpRequest (disponível no React Native) para ler o stream
  * text/event-stream. Reconecta automaticamente em queda/erro com backoff de
  * 3–5 s. Retorna uma função para encerrar a conexão.
  */
@@ -52,17 +52,20 @@ export function connectFeedEvents(
   async function connect() {
     if (closed) return;
 
-    let token = await SecureStore.getItemAsync(ACCESS_KEY);
-
-    // Refresh proativo se o token expirou antes de abrir o stream.
-    if (token && isTokenExpired(token)) {
-      token = await refreshAccessToken();
+    // Ticket single-use (~60s): um novo por conexão/reconexão. O apiFetch cuida
+    // do header Authorization / refresh ao pedir o ticket.
+    let ticket: string;
+    try {
+      ({ ticket } = await getSseTicket());
+    } catch {
+      if (!closed) reconnectTimer = setTimeout(connect, 5000);
+      return;
     }
 
-    if (!token || closed) return;
+    if (closed) return;
 
     xhr = new XMLHttpRequest();
-    xhr.open('GET', `${API_HOST}/feed/events?token=${encodeURIComponent(token)}`, true);
+    xhr.open('GET', `${API_HOST}/feed/events?ticket=${encodeURIComponent(ticket)}`, true);
     xhr.setRequestHeader('Accept', 'text/event-stream');
     xhr.setRequestHeader('Cache-Control', 'no-cache');
 

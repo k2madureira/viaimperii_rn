@@ -6,6 +6,7 @@ import { closeFeedEvents } from '../api/feed/feedEvents';
 import { closeNotificationEvents } from '../api/notifications/notificationEvents';
 import { closeLegionEvents } from '../api/legionTreasury/legionEvents';
 import { closeChatEvents } from '../api/chat/chatEvents';
+import { logoutRequest } from '../api/auth/logout';
 import { LoginStreak } from '../api/auth';
 
 const ACCESS_KEY = 'access_token';
@@ -93,12 +94,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signOut = useCallback(async () => {
-    // Encerra a sessão SSE no servidor ANTES de apagar o token (o DELETE precisa
-    // do header de auth). Best-effort e com TETO DE TEMPO: o apiFetch tem timeout
-    // de 60s, então sem esse race o logout ficaria preso enquanto o backend não
-    // respondesse. Damos ~2s para o DELETE sair com o token válido e seguimos —
-    // a request pendente é abortada sozinha depois, sem efeito colateral.
+    // Revoga a sessão no servidor (POST /auth/logout) e encerra os streams SSE
+    // (DELETE /events) ANTES de apagar os tokens — tudo precisa do header de auth.
+    // Best-effort e com TETO DE TEMPO: o apiFetch tem timeout de 60s, então sem
+    // esse race o logout ficaria preso enquanto o backend não respondesse. Damos
+    // ~2s para as requests saírem com o token válido e seguimos — as pendentes são
+    // abortadas sozinhas depois, sem efeito colateral.
     const closeStreams = Promise.all([
+      logoutRequest(),
       closeMissionEvents(),
       closeFeedEvents(),
       closeNotificationEvents(),

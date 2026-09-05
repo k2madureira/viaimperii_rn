@@ -37,12 +37,20 @@ async function doRefresh(): Promise<string | null> {
   }
 
   try {
-    const res = await fetch(`${API_HOST}/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refresh_token: refreshToken }),
-    });
+    let res = await postRefresh(refreshToken);
 
+    // 429 rate-limited: NÃO desloga (a sessão continua válida) — respeita o
+    // Retry-After e tenta UMA vez. Se ainda falhar, deixa a request original
+    // falhar e a sessão intacta para o próximo refresh.
+    if (res.status === 429) {
+      const waitMs = retryAfterMs(res);
+      if (waitMs > 0) await sleep(waitMs);
+      res = await postRefresh(refreshToken);
+      if (res.status === 429) return null;
+    }
+
+    // Qualquer outra falha (401 reuse detectado / expirado / inválido) → a sessão
+    // foi revogada no servidor: limpa tudo e volta ao login.
     if (!res.ok) {
       await expireSession();
       return null;
@@ -68,6 +76,30 @@ async function doRefresh(): Promise<string | null> {
   }
 }
 
+function postRefresh(refreshToken: string): Promise<Response> {
+  return fetch(`${API_HOST}/auth/refresh`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+}
+
+/** Lê o header Retry-After (segundos ou data HTTP) em ms; 0 se ausente/inválido. */
+function retryAfterMs(res: Response): number {
+  const raw = res.headers.get('Retry-After');
+  if (!raw) return 0;
+  const secs = Number(raw);
+  if (Number.isFinite(secs)) return Math.max(0, secs * 1000);
+  const date = Date.parse(raw);
+  return Number.isFinite(date) ? Math.max(0, date - Date.now()) : 0;
+}
+
+function sleep(ms: number): Promise<void> {
+  // Teto de 10s: o apiFetch tem timeout de 60s, então uma espera curta cabe sem
+  // estourar a request original.
+  return new Promise((resolve) => setTimeout(resolve, Math.min(ms, 10000)));
+}
+
 /** Limpa a sessão e avisa o contexto (logout automático → volta ao login). */
 async function expireSession(): Promise<void> {
   await Promise.all([
@@ -76,4 +108,13 @@ async function expireSession(): Promise<void> {
     SecureStore.deleteItemAsync(USER_KEY),
   ]);
   notifySessionExpired();
+}
+
+/**
+ * Encerra a sessão local e volta ao login. Usado quando o servidor sinaliza que
+ * a sessão foi revogada (401 "Token revoked." após logout em outro dispositivo,
+ * ou reuse de refresh detectado) mesmo com o access token ainda não expirado.
+ */
+export function clearSession(): Promise<void> {
+  return expireSession();
 }

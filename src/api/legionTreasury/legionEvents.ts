@@ -1,7 +1,5 @@
-import * as SecureStore from 'expo-secure-store';
-import { ACCESS_KEY, refreshAccessToken } from '../config/tokenManager';
-import { isTokenExpired } from '../config/jwt';
 import { apiFetch } from '../config/defaultApi';
+import { getSseTicket } from '../auth/sseTicket';
 import { ProposalKind, ProposalStatus } from './dto';
 
 const API_HOST = process.env.EXPO_PUBLIC_API_HOST;
@@ -44,7 +42,8 @@ export type LegionSSEEvent =
 type Disconnect = () => void;
 
 /**
- * Conecta ao SSE GET /legions/events?token=<access_token>.
+ * Conecta ao SSE GET /legions/events?ticket=<sse_ticket> (ticket single-use ~60s
+ * via POST /auth/sse-ticket; o `?token=<jwt>` legado está deprecado).
  *
  * Hub DEDICADO, separado do de notificações: abrir e resolver uma votação já
  * geram notificação, mas o tique por voto não deve virar badge — ninguém quer
@@ -68,16 +67,20 @@ export function connectLegionEvents(
   async function connect() {
     if (closed) return;
 
-    let token = await SecureStore.getItemAsync(ACCESS_KEY);
-
-    if (token && isTokenExpired(token)) {
-      token = await refreshAccessToken();
+    // Ticket single-use (~60s): um novo por conexão/reconexão. O apiFetch cuida
+    // do header Authorization / refresh ao pedir o ticket.
+    let ticket: string;
+    try {
+      ({ ticket } = await getSseTicket());
+    } catch {
+      if (!closed) reconnectTimer = setTimeout(connect, 5000);
+      return;
     }
 
-    if (!token || closed) return;
+    if (closed) return;
 
     xhr = new XMLHttpRequest();
-    xhr.open('GET', `${API_HOST}/legions/events?token=${encodeURIComponent(token)}`, true);
+    xhr.open('GET', `${API_HOST}/legions/events?ticket=${encodeURIComponent(ticket)}`, true);
     xhr.setRequestHeader('Accept', 'text/event-stream');
     xhr.setRequestHeader('Cache-Control', 'no-cache');
 

@@ -1,17 +1,20 @@
 import React from 'react';
-import { Platform, TouchableOpacity, View } from 'react-native';
+import { Platform, ScrollView, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
 import { useTranslation } from 'react-i18next';
-import { ArrowUpIcon, BellIcon } from '../../../../../components/icons';
+import { ArrowUpIcon, BellIcon, StarIcon } from '../../../../../components/icons';
 import SecondaryNav from '../../buttons/secondaryNav';
 
 interface Props {
   inMissionsMode: boolean;
   isReview: boolean;
+  isFavorites: boolean;
   reviewBadge?: number;
+  favoritesBadge?: number;
   onReopenOnboarding: () => void;
   onOpenProgress: () => void;
   onOpenReview: () => void;
+  onOpenFavorites: () => void;
   onBackToMissions: () => void;
 }
 
@@ -21,18 +24,25 @@ interface Props {
 export default function MissionsHeader({
   inMissionsMode,
   isReview,
+  isFavorites,
   reviewBadge,
+  favoritesBadge,
   onReopenOnboarding,
   onOpenProgress,
   onOpenReview,
+  onOpenFavorites,
   onBackToMissions,
 }: Props) {
   const { t } = useTranslation();
   const serif = Platform.OS === 'ios' ? 'Georgia' : 'serif';
 
   if (inMissionsMode) {
+    // Título em uma linha e os acessos secundários numa linha própria com rolagem
+    // horizontal: com 3 pílulas (Favoritos + Progresso + Revisão) elas não cabem
+    // ao lado do título em telas estreitas — o `flex-wrap` quebrava a fileira e
+    // empurrava a Revisão para baixo. A rolagem mantém todas na mesma faixa.
     return (
-      <View className="flex-row items-center justify-between gap-2">
+      <View className="gap-2.5">
         <View className="flex-row items-center gap-1.5">
           <Text className="text-[16px] font-extrabold text-charcoal" style={{ fontFamily: serif }}>
             {t('missions.tabMyMissions')}
@@ -47,7 +57,16 @@ export default function MissionsHeader({
             <Text className="text-[11px] font-bold text-[#9a8f8f]">?</Text>
           </TouchableOpacity>
         </View>
-        <View className="flex-row items-center gap-2">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ gap: 8, paddingRight: 2 }}>
+          <SecondaryNav
+            icon={StarIcon}
+            label={t('missions.tabFavorites')}
+            badge={favoritesBadge}
+            onPress={onOpenFavorites}
+          />
           <SecondaryNav icon={ArrowUpIcon} label={t('missions.tabProgress')} onPress={onOpenProgress} />
           <SecondaryNav
             icon={BellIcon}
@@ -55,7 +74,7 @@ export default function MissionsHeader({
             badge={reviewBadge}
             onPress={onOpenReview}
           />
-        </View>
+        </ScrollView>
       </View>
     );
   }
@@ -71,7 +90,11 @@ export default function MissionsHeader({
         <Text className="text-[18px] font-bold text-primary-500">‹</Text>
       </TouchableOpacity>
       <Text className="text-[16px] font-extrabold text-charcoal" style={{ fontFamily: serif }}>
-        {isReview ? t('missions.tabReview') : t('missions.tabProgress')}
+        {isReview
+          ? t('missions.tabReview')
+          : isFavorites
+            ? t('missions.tabFavorites')
+            : t('missions.tabProgress')}
       </Text>
     </View>
   );

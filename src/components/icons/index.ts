@@ -39,6 +39,9 @@ export { default as MedalIcon } from './medal';
 // Troféu — aba do Placar da Semana (leaderboards)
 export { default as TrophyIcon } from './trophy';
 
+// Estrela de favorito das missões (contorno × preenchida dourada)
+export { default as StarIcon } from './star';
+
 // Sino de notificações
 export { default as BellIcon } from './bell';
 

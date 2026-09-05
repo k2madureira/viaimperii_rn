@@ -1,6 +1,16 @@
 import { LoginStreak } from '../auth';
 
-export type MissionStatus = 'available' | 'in_progress' | 'pending_review' | 'completed';
+// `moderating`: evidência enviada e em análise assíncrona (flag
+// MISSION_MODERATION_ASYNC no backend). A missão segue IN_PROGRESS no servidor;
+// só vira `pending_review`/`completed` DEPOIS de aprovada, ou volta a
+// `in_progress` (+ notificação `mission_rejected`) se reprovada. Estado transitório,
+// exposto pela resposta do `complete` — as listagens ainda trazem `in_progress`.
+export type MissionStatus =
+  | 'available'
+  | 'in_progress'
+  | 'moderating'
+  | 'pending_review'
+  | 'completed';
 
 // Tipo de evidência exigida para concluir a missão.
 export type ProofType = 'none' | 'link' | 'image' | 'text' | 'any';
@@ -40,6 +50,17 @@ export interface Mission {
   completed_at: string | null;
   xp_earned: number | null;
   mastery_earned: number | null;
+  // Favorito do usuário (marcador de leitura; não altera XP/moeda/janela). Vêm de
+  // graça em todas as listagens (list/available/recommended/status/daily-briefing).
+  is_favorite: boolean;
+  favorited_at: string | null;
+}
+
+// Resposta de POST/DELETE /missions/{slug}/favorite (idempotente).
+export interface FavoriteResult {
+  slug: string;
+  is_favorite: boolean;
+  favorited_at: string | null;
 }
 
 export interface RecommendedLegion {
@@ -52,7 +73,9 @@ export interface RecommendedLegion {
 export interface CompleteMissionResult {
   message: string;
   mission_slug: string;
-  status: 'pending_review' | 'completed';
+  // `moderating` = evidência parkeada em análise assíncrona; a missão continua
+  // IN_PROGRESS e nenhum XP é concedido ainda (ver MissionStatus).
+  status: 'pending_review' | 'completed' | 'moderating';
   completable_at: string | null;
   remaining_seconds: number | null;
   approvals_required: number;
@@ -129,6 +152,8 @@ export interface DailyBriefing {
   date: string;
   personalized: boolean;
   suggested_missions: RecommendedMission[];
+  // Favoritas do usuário (rotina do dia), mais recentes primeiro, capadas em 10.
+  favorite_missions: Mission[];
   goal: MissionAllowance;
   streak: LoginStreak;
   active_bonus: DailyBriefingActiveBonus;
