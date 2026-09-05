@@ -19,6 +19,9 @@ import LeaderboardsScreen from '../screens/leaderboards';
 import AchievementsScreen from '../screens/achievements';
 import FriendsScreen from '../screens/friends';
 import DmConversationScreen from '../screens/dmConversation';
+import ChestsScreen from '../screens/chests';
+import ChestDetailScreen from '../screens/chests/chestDetail';
+import FounderRedeemScreen from '../screens/founder';
 import { FeedItem } from '../api/feed';
 import { LeaderboardScope } from '../api/leaderboards';
 import { PresenceStatus } from '../api/friendship';
@@ -52,6 +55,10 @@ export type HomeStackParamList = {
     avatarUrl?: string | null;
     presenceStatus?: PresenceStatus;
   };
+  // Baús de Riquezas (§35): lista, detalhe/abertura. Founder redeem (§34).
+  Chests: undefined;
+  ChestDetail: { userChestId: number };
+  FounderRedeem: undefined;
 };
 
 export type HomeNavigationProp = NativeStackNavigationProp<HomeStackParamList>;
@@ -76,6 +83,9 @@ export default function HomeStack() {
       <Stack.Screen name="Achievements" component={AchievementsScreen} />
       <Stack.Screen name="Friends" component={FriendsScreen} />
       <Stack.Screen name="DmConversation" component={DmConversationScreen} />
+      <Stack.Screen name="Chests" component={ChestsScreen} />
+      <Stack.Screen name="ChestDetail" component={ChestDetailScreen} />
+      <Stack.Screen name="FounderRedeem" component={FounderRedeemScreen} />
     </Stack.Navigator>
   );
 }

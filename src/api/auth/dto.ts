@@ -21,6 +21,10 @@ export interface LoginResponse {
   email: string;
   name: string;
   is_admin: boolean;
+  // Founder Access (§34). Opcionais: um backend antigo não devolve os campos e a
+  // insígnia simplesmente não aparece.
+  is_founder?: boolean;
+  founder_number?: number | null;
   is_temporary_password: boolean;
   rank: string;
   total_xp: number;

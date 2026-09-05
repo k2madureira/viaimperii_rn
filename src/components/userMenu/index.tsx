@@ -13,7 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '../../contexts/AuthContext';
 import { LogoutIcon, UserIcon } from '../../navigation/icons/MenuIcons';
-import { GearIcon } from '../icons';
+import { GearIcon, ChestIcon } from '../icons';
 import { useUserProfile } from '../../screens/dashboard/model/queries/useUserProfile';
 import { viaimperiiApi } from '../../api';
 import { SettableStatus, SETTABLE_STATUSES } from '../../api/presence';
@@ -76,6 +76,11 @@ export default function UserMenu({ variant = 'default' }: Props) {
   const goToProfile = () => {
     close();
     navigation.navigate('Home', { screen: 'Profile', params: {} });
+  };
+
+  const goToChests = () => {
+    close();
+    navigation.navigate('Home', { screen: 'Chests' });
   };
 
   return (
@@ -195,6 +200,14 @@ export default function UserMenu({ variant = 'default' }: Props) {
                     onPress={goToProfile}>
                     <UserIcon size={18} color="#111" />
                     <Text className="text-[14px] font-medium text-[#111]">{t('userMenu.profile')}</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    className="flex-row items-center gap-3 px-4 py-3"
+                    activeOpacity={0.7}
+                    onPress={goToChests}>
+                    <ChestIcon size={18} color="#8B1A2B" />
+                    <Text className="text-[14px] font-medium text-[#111]">{t('chests.title')}</Text>
                   </TouchableOpacity>
 
                   <View className="h-px bg-[#f0f0f0]" />

@@ -6,6 +6,7 @@ export type AuthStackParamList = {
   ForgotPassword: undefined;
   ResetPassword: { email?: string } | undefined;
   SpecialtyQuiz: { testCode: string; userId: string };
+  FounderPreRegister: undefined;
 };
 
 export type AuthNavigationProp = NativeStackNavigationProp<AuthStackParamList>;

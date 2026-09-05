@@ -19,7 +19,7 @@ leitura/escrita e o prefixo de i18n.
 | Navegação (stacks, ParamList) | `src/navigation/` (`RootNavigator`, `AuthStack`, `BottomTabs`, `HomeStack`, `MissionsStack`) |
 | Auth / sessão | `src/contexts/AuthContext.tsx`, `src/api/config/` (`defaultApi`, `tokenManager`, `authBridge`) |
 | Facade de API (fonte única) | `src/api/index.ts` → `viaimperiiApi.<domínio>.<operação>` |
-| Componentes globais | `src/components/` (`navbar`, `screenContainer`, `text`, `textInput`, `userMenu`, `legionSelectModal`, `createMenu`, `icons/`) |
+| Componentes globais | `src/components/` (`navbar`, `screenContainer`, `text`, `textInput`, `userMenu`, `legionSelectModal`, `createMenu`, `icons/`, `praefectusBadge`, `founderBadge`) |
 | Menu do botão (+) da tab bar | `src/components/createMenu/` (aberto pelo `BottomTabs`; hoje só "Criar post") |
 | Feed social (submódulo, usado por 4 telas) | `src/screens/dashboard/components/feed/` |
 | i18n | `src/i18n/locales/pt.ts` + `en.ts` (pt-BR default) |
@@ -38,6 +38,21 @@ hooks em `model/{queries,mutations,hooks}/`.
 - **Sections**: `achievementsHeader`, `achievementsList`
 - **API**: dados vêm do detalhe do usuário (`users`) — sem query dedicada
 - **Hooks**: —
+
+### chests (+ chestDetail)
+- **Dir**: `chests` · **i18n**: `chests.*`, `codeRedeem.*`
+- **Sub-tela**: `chestDetail/` (seletor de abertura; rota `ChestDetail`)
+- **Cards**: `chestCard` · **Modals**: `codeRedeemModal` · **Selectors**: `chestDetail/.../slotSelector` (carrossel §0.1)
+- **API**: `chests`, `codes`
+- **Queries**: `useChests`, `useChestDetail`
+- **Mutations**: `useOpenChest`, `useRedeemCode`
+- **Notas**: entrada pelo `UserMenu` (Baús); resgate de fundador via link → `FounderRedeem`. Baú abre 1×; `options` some depois de aberto (`selections` fixo).
+
+### founder (+ auth/founderPreRegister)
+- **Dir**: `founder` (resgate, autenticado) · `auth/founderPreRegister` (pré-inscrição pública) · **i18n**: `founder.*`
+- **API**: `founder`
+- **Queries**: `useFounderAvailability` · **Mutations**: `usePreRegisterFounder`, `useRedeemFounder`
+- **Notas**: pré-inscrição no `AuthStack` (link no Login). Resgate → vira Recruit IV + `must_choose_track` → leva a `Ranks` + concede Baú do Fundador. Selo `FounderBadge` (global) onde autor é renderizado.
 
 ### clan
 - **Dir**: `clan` · **i18n**: `clan.*`, `clanCard.*`
@@ -138,11 +153,11 @@ hooks em `model/{queries,mutations,hooks}/`.
 Todos em `src/api/<domínio>/` (padrão: `dto.ts` + 1 arquivo por operação + `index.ts`),
 consumidos **só pelo facade** `viaimperiiApi.<domínio>.<operação>` (`src/api/index.ts`).
 
-`assets` · `auth` · `campaigns` · `chat` · `config` · `dailyRewards` · `feed` ·
-`friendship` · `leaderboards` · `legion` · `legionLeaderboard` · `legionTreasury` ·
-`missions` · `notifications` · `physical` · `presence` · `professions` · `provinces` ·
-`quiz` · `ranking` · `ranks` · `rewards` · `search` · `specialties` · `streak` ·
-`tributes` · `upload` · `users` · `wallet`
+`assets` · `auth` · `campaigns` · `chat` · `chests` · `codes` · `config` ·
+`dailyRewards` · `feed` · `founder` · `friendship` · `leaderboards` · `legion` ·
+`legionLeaderboard` · `legionTreasury` · `missions` · `notifications` · `physical` ·
+`presence` · `professions` · `provinces` · `quiz` · `ranking` · `ranks` · `rewards` ·
+`search` · `specialties` · `streak` · `tributes` · `upload` · `users` · `wallet`
 
 > SSE/eventos não são operações REST — ficam como `<domínio>Events.ts` no domínio
 > (`missionEvents`, `feedEvents`, `notificationEvents`, `chatEvents`).

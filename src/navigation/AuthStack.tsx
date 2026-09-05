@@ -5,6 +5,7 @@ import ResetPasswordScreen from '../screens/auth/forgotPassword/ResetPasswordScr
 import LoginScreen from '../screens/auth/login';
 import SignupScreen from '../screens/auth/signup';
 import SpecialtyQuizScreen from '../screens/defaults/specialtyQuiz';
+import FounderPreRegisterScreen from '../screens/auth/founderPreRegister';
 import { AuthStackParamList } from './types';
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -17,6 +18,7 @@ export default function AuthStack() {
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <Stack.Screen name="ResetPassword" component={ResetPasswordScreen} />
       <Stack.Screen name="SpecialtyQuiz" component={SpecialtyQuizScreen} />
+      <Stack.Screen name="FounderPreRegister" component={FounderPreRegisterScreen} />
     </Stack.Navigator>
   );
 }

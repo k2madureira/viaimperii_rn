@@ -2,9 +2,12 @@ import * as assetsService from './assets';
 import * as authService from './auth';
 import * as campaignsService from './campaigns';
 import * as chatService from './chat';
+import * as chestsService from './chests';
 import * as clanService from './clan';
+import * as codesService from './codes';
 import * as dailyRewardsService from './dailyRewards';
 import * as feedService from './feed';
+import * as founderService from './founder';
 import * as friendshipService from './friendship';
 import * as leaderboardsService from './leaderboards';
 import * as legionService from './legion';
@@ -62,6 +65,11 @@ export const viaimperiiApi = {
     deleteMessage: chatService.deleteMessage,
     reportMessage: chatService.reportMessage,
   },
+  chests: {
+    list: chestsService.getChests,
+    detail: chestsService.getChest,
+    open: chestsService.openChest,
+  },
   clan: {
     list: clanService.getClans,
     detail: clanService.getClan,
@@ -85,6 +93,9 @@ export const viaimperiiApi = {
     declineJoinRequest: clanService.declineJoinRequest,
     cancelJoinRequest: clanService.cancelJoinRequest,
   },
+  codes: {
+    redeem: codesService.redeemCode,
+  },
   dailyRewards: {
     list: dailyRewardsService.getDailyRewards,
     claim: dailyRewardsService.claimDailyReward,
@@ -103,6 +114,11 @@ export const viaimperiiApi = {
     reactors: feedService.getReactors,
     comments: feedService.getFeedComments,
     createComment: feedService.createComment,
+  },
+  founder: {
+    preRegister: founderService.preRegisterFounder,
+    availability: founderService.getFounderAvailability,
+    redeem: founderService.redeemFounderCode,
   },
   friendship: {
     request: friendshipService.sendFriendRequest,
