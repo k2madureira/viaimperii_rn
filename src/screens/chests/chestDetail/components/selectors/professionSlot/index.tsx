@@ -7,6 +7,7 @@ import Text from '../../../../../../components/text';
 import { viaimperiiApi } from '../../../../../../api';
 import { ChestSlot } from '../../../../../../api/chests';
 import { Profession } from '../../../../../../api/professions';
+import { useAuth } from '../../../../../../contexts/AuthContext';
 
 interface Props {
   slot: ChestSlot;
@@ -41,6 +42,7 @@ interface ProfessionEntry {
  */
 export default function ProfessionSlot({ slot, selectedRef, onSelect }: Props) {
   const { t } = useTranslation();
+  const { user } = useAuth();
 
   // Catálogo completo (mesma queryKey do mercado → dedup) para pegar imagem/descrição.
   const { data: catalog } = useQuery({
@@ -48,9 +50,21 @@ export default function ProfessionSlot({ slot, selectedRef, onSelect }: Props) {
     queryFn: () => viaimperiiApi.professions.catalog({ perPage: 100 }),
   });
 
+  // Profissões que o usuário JÁ possui → escondidas do baú (não faz sentido ativar
+  // de novo uma que já é dele).
+  const { data: owned } = useQuery({
+    queryKey: ['user-professions', user?.user_id],
+    queryFn: () => viaimperiiApi.professions.owned(user!.user_id),
+    enabled: !!user?.user_id,
+  });
+  const ownedIds = useMemo(
+    () => new Set((owned ?? []).map((o) => o.profession.id)),
+    [owned],
+  );
+
   // Uma profissão por card; para cada uma, escolhe uma missão (reward_ref) aleatória
   // entre as opções que a ativam. Estável enquanto as opções não mudam.
-  const entries = useMemo<ProfessionEntry[]>(() => {
+  const allEntries = useMemo<ProfessionEntry[]>(() => {
     const map = new Map<number, { id: number; slug: string; name: string; refs: string[] }>();
     for (const o of slot.options) {
       for (const p of o.professions ?? []) {
@@ -67,8 +81,21 @@ export default function ProfessionSlot({ slot, selectedRef, onSelect }: Props) {
     }));
   }, [slot.options]);
 
+  // Esconde as já adquiridas. Fallback: se filtrar tudo (o usuário já tem todas),
+  // mostra todas — melhor oferecer algo do que um slot vazio.
+  const entries = useMemo<ProfessionEntry[]>(() => {
+    const filtered = allEntries.filter((e) => !ownedIds.has(e.id));
+    return filtered.length > 0 ? filtered : allEntries;
+  }, [allEntries, ownedIds]);
+
   const [index, setIndex] = useState(0);
-  const current = entries[index];
+
+  // A lista pode encolher quando `owned` chega → mantém o índice válido.
+  useEffect(() => {
+    setIndex((i) => (i >= entries.length ? 0 : i));
+  }, [entries.length]);
+
+  const current = entries[Math.min(index, entries.length - 1)];
 
   useEffect(() => {
     if (current) onSelect(current.rewardRef);
