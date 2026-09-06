@@ -23,7 +23,7 @@ _2026-07-26: adicionada a ideia **#12 Chat Stickers (figurinhas)** ao backlog pr
 **prioridade baixa** (ROI 1.5), Open (backend), depende do Chat + catálogo de stickers._
 
 _2026-09-05: **F9 Founder Access + Baús de Riquezas** shipada no front (branch
-`feature/founder-chests`, commit `c0d28c9`, **PR pendente**) → `completed/founder-access-chests.md`.
+`feature/founder-chests`, **PR #45**) → `completed/founder-access-chests.md`.
 Admin CRUD (§35 C) fora de escopo (app consumer, sem UI de admin)._
 
 ---
@@ -90,7 +90,7 @@ Loops e sistemas já vivos (regras no `CLAUDE.md` do backend). **Front já cobre
 | F4 | **Weekly Leaderboards (UI)** | `completed/weekly-leaderboards.md` | Shipado no front (`src/screens/leaderboards/` + `src/api/leaderboards/` + facade `viaimperiiApi.leaderboards`). Commit `ce60c7f` / PR #29. |
 | F1 | **Legion Treasury + Estandartes (UI)** | `completed/legion-treasury.md` | Shipado no front (`src/api/legionTreasury/` + `src/screens/legions/HQ/` + War Room). Inclui votação de estandarte via SSE (§14.1) e Praefectus derivado. Merge `d4261be` / PR #31. |
 | F8 | **Legion Leaderboard (UI)** | `completed/legion-leaderboard.md` | Shipado no front (`src/api/legionLeaderboard/` + `legions/components/sections/legionBoard/`). Ranking como corpo da War Room, com preview grátis e gate. Merge `7574237` / PR #32. |
-| F9 | **Founder Access + Baús de Riquezas (UI)** | `completed/founder-access-chests.md` | Shipado no front (branch `feature/founder-chests`, commit `c0d28c9` — **PR pendente**). API `src/api/{founder,chests,codes}` + `ApiError` c/ status; telas `auth/founderPreRegister`, `founder`, `chests` (+ `chestDetail` c/ carrossel §0.1); `FounderBadge` global (feed/comentários/fila de revisão). **§35 C (admin CRUD) fora de escopo** — sem UI de admin no app. Insígnia não coberta em ranking (sem consumidor) nem notificações/menções (texto templated). |
+| F9 | **Founder Access + Baús de Riquezas (UI)** | `completed/founder-access-chests.md` | Shipado no front (**PR #45**). API `src/api/{founder,chests,codes}` + `ApiError` c/ status; telas `auth/founderPreRegister`, `founder`, `chests` (+ `chestDetail` c/ carrossel §0.1); `FounderBadge` global (feed/comentários/fila de revisão). **§35 C (admin CRUD) fora de escopo** — sem UI de admin no app. Insígnia não coberta em ranking (sem consumidor) nem notificações/menções (texto templated). |
 | F6 | **Coin Tributes (UI)** | `completed/coin-tributes.md` | Shipado no front (`src/api/tributes/` + `feed/TributeButton\|TributeModal\|TributeSummaryRow`). **Duas divergências da spec** (registradas no PR): a ação na fila de revisão dispara na aprovação que finaliza a missão, não num botão do `reviewItem` (que ficaria sempre desabilitado, pois a fila só tem `PENDING_REVIEW`); e o contador reconcilia pela resposta do servidor, sem update otimista (o valor é digitado em denários e o front não faz aritmética de moeda). Merge `4b7d417` / PR #33 / release `v1.3.0`. |
 
 ---

@@ -6,7 +6,7 @@
 
 - **Slug:** `founder-access-chests-frontend`
 - **Backlog #:** F9 · **ROI:** — · **Esforço:** L
-- **Status:** ✅ Shipado no front (branch `feature/founder-chests`, commit `c0d28c9`) — 2026-09-05 · PR pendente
+- **Status:** ✅ Shipado no front (PR #45) — 2026-09-05
 - **Autor:** implementação direta a partir do contrato de API do PO · **Data:** 2026-09-05
 
 ---
