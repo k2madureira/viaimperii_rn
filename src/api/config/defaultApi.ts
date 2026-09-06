@@ -96,6 +96,25 @@ export async function readError(response: Response, fallback: string): Promise<s
   return body?.detail ?? body?.message ?? fallback;
 }
 
+/**
+ * Erro de API que carrega o `status` HTTP, para o chamador (hook/tela) mapear
+ * códigos específicos em copy localizada (ex.: 404/410/409/403 no resgate de
+ * código/fundador). A `.message` continua vindo do backend via `readError`.
+ */
+export class ApiError extends Error {
+  status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
+/** Lê a mensagem do backend e lança um `ApiError` com o status HTTP. */
+export async function throwApiError(response: Response, fallback: string): Promise<never> {
+  throw new ApiError(response.status, await readError(response, fallback));
+}
+
 /** Segundos do header Retry-After (aceita segundos ou data HTTP); null se ausente. */
 export function retryAfterSeconds(response: Response): number | null {
   const raw = response.headers.get('Retry-After');

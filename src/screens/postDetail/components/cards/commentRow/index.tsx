@@ -1,6 +1,7 @@
 import React from 'react';
 import { Image, View } from 'react-native';
 import Text from '../../../../../components/text';
+import FounderBadge from '../../../../../components/founderBadge';
 import { FeedComment } from '../../../../../api/feed';
 import { parseBackendDate } from '../../../../../utils/date';
 import { initials } from '../../../../../utils/name';
@@ -25,9 +26,12 @@ export default function CommentRow({ comment }: Props) {
       </View>
       <View className="flex-1 bg-[#f7f4f4] rounded-[12px] px-3 py-2">
         <View className="flex-row items-center justify-between">
-          <Text className="text-[12px] font-extrabold text-charcoal" numberOfLines={1}>
-            {comment.author.name}
-          </Text>
+          <View className="flex-row items-center gap-1.5 flex-1">
+            <Text className="text-[12px] font-extrabold text-charcoal" numberOfLines={1}>
+              {comment.author.name}
+            </Text>
+            {comment.author.is_founder && <FounderBadge size="sm" />}
+          </View>
           <Text className="text-[10px] text-[#aaa] ml-2">{time}</Text>
         </View>
         <Text className="text-[13px] text-[#333] leading-[18px] mt-0.5">{comment.body}</Text>

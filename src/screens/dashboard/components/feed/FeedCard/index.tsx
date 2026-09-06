@@ -2,6 +2,7 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useRef, useState } from 'react';
 import { Alert, Image, TouchableOpacity, View } from 'react-native';
 import Text from '../../../../../components/text';
+import FounderBadge from '../../../../../components/founderBadge';
 import { useTranslation } from 'react-i18next';
 import { HomeNavigationProp } from '../../../../../navigation/HomeStack';
 import { FeedItem, ReactionType } from '../../../../../api/feed';
@@ -183,9 +184,12 @@ export default function FeedCard({
           </TouchableOpacity>
         </View>
         <TouchableOpacity className="flex-1" activeOpacity={0.8} onPress={openUser}>
-          <Text className="text-[14px] font-extrabold text-charcoal" numberOfLines={1}>
-            {author.name}
-          </Text>
+          <View className="flex-row items-center gap-1.5">
+            <Text className="text-[14px] font-extrabold text-charcoal" numberOfLines={1}>
+              {author.name}
+            </Text>
+            {author.is_founder && <FounderBadge size="sm" />}
+          </View>
           <Text className="text-[11px] text-[#999]" numberOfLines={1}>
             {!isCronista && author.rank?.name ? `${author.rank.name} • ` : ''}
             {relativeTime}
@@ -285,9 +289,12 @@ export default function FeedCard({
               )}
             </View>
             <View className="flex-1">
-              <Text className="text-[14px] font-extrabold text-charcoal" numberOfLines={1}>
-                {author.name}
-              </Text>
+              <View className="flex-row items-center gap-1.5">
+                <Text className="text-[14px] font-extrabold text-charcoal" numberOfLines={1}>
+                  {author.name}
+                </Text>
+                {author.is_founder && <FounderBadge size="sm" number={author.founder_number} />}
+              </View>
               {!isCronista && author.rank?.name ? (
                 <View className="flex-row items-center mt-0.5">
                   {author.rank.thumb ?? author.rank.image ? (

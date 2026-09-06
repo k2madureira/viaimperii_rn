@@ -98,6 +98,9 @@ export interface GetUserResponse {
   current_rank_span: number;
   next_rank_name: string | null;
   must_choose_track: boolean;
+  // Founder Access (§34). Opcionais p/ compat com backend antigo.
+  is_founder?: boolean;
+  founder_number?: number | null;
   track: UserTrack | null;
   legion: UserLegion | null;
   province: UserProvince | null;

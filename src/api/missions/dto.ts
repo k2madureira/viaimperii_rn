@@ -197,6 +197,9 @@ export interface ToReviewExecutor {
   image: string | null; // foto de perfil / avatar do OAuth
   active_avatar: ActiveAvatar | null; // avatar cosmético equipado
   legion_id: number | null;
+  // Insígnia de fundador (§34). Best-effort/opcional.
+  is_founder?: boolean;
+  founder_number?: number | null;
 }
 
 // Evidência submetida pelo executor, exibida ao revisor.

@@ -41,6 +41,7 @@ export { default as TrophyIcon } from './trophy';
 
 // Estrela de favorito das missões (contorno × preenchida dourada)
 export { default as StarIcon } from './star';
+export { default as ChestIcon } from './chest';
 
 // Sino de notificações
 export { default as BellIcon } from './bell';

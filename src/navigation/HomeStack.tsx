@@ -19,6 +19,9 @@ import LeaderboardsScreen from '../screens/leaderboards';
 import AchievementsScreen from '../screens/achievements';
 import FriendsScreen from '../screens/friends';
 import DmConversationScreen from '../screens/dmConversation';
+import ChestsScreen from '../screens/chests';
+import ChestDetailScreen from '../screens/chests/chestDetail';
+import RedeemCodeScreen from '../screens/redeemCode';
 import { FeedItem } from '../api/feed';
 import { LeaderboardScope } from '../api/leaderboards';
 import { PresenceStatus } from '../api/friendship';
@@ -52,6 +55,11 @@ export type HomeStackParamList = {
     avatarUrl?: string | null;
     presenceStatus?: PresenceStatus;
   };
+  // Baús de Riquezas (§35): lista, detalhe/abertura. Resgate unificado de código
+  // (§35 endpoint unificado): promo ou fundador (§34), detectado no backend.
+  Chests: undefined;
+  ChestDetail: { userChestId: number };
+  RedeemCode: undefined;
 };
 
 export type HomeNavigationProp = NativeStackNavigationProp<HomeStackParamList>;
@@ -76,6 +84,9 @@ export default function HomeStack() {
       <Stack.Screen name="Achievements" component={AchievementsScreen} />
       <Stack.Screen name="Friends" component={FriendsScreen} />
       <Stack.Screen name="DmConversation" component={DmConversationScreen} />
+      <Stack.Screen name="Chests" component={ChestsScreen} />
+      <Stack.Screen name="ChestDetail" component={ChestDetailScreen} />
+      <Stack.Screen name="RedeemCode" component={RedeemCodeScreen} />
     </Stack.Navigator>
   );
 }

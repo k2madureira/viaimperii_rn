@@ -49,6 +49,11 @@ export interface FeedAuthor {
   // extra. Best-effort no backend: uma falha derruba o selo, nunca a identidade,
   // por isso o default é `false` e não um estado de erro.
   is_legion_leader?: boolean;
+  // Insígnia de fundador (§34). Resolvida ao vivo em TODO payload de autor (feed,
+  // comentários, ranking, notificações, menções, busca, fila de revisão).
+  // Best-effort/opcional: default `false`, nunca derruba a identidade.
+  is_founder?: boolean;
+  founder_number?: number | null;
 }
 
 export interface ReactionSummary {
