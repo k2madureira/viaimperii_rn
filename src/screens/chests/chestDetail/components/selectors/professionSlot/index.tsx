@@ -177,26 +177,6 @@ export default function ProfessionSlot({ slot, selectedRef, onSelect }: Props) {
           ))}
         </View>
       ) : null}
-
-      {/* Grid de seleção — cards com o nome da profissão (clicar seleciona) */}
-      {total > 1 ? (
-        <View className="flex-row flex-wrap justify-center gap-2 mt-4">
-          {entries.map((e, i) => (
-            <TouchableOpacity
-              key={e.id}
-              onPress={() => setIndex(i)}
-              className={`rounded-[10px] px-3 py-2 border-2 ${
-                i === index ? 'border-primary-500 bg-[#f6f1e7]' : 'border-[#eee] bg-white'
-              }`}>
-              <Text
-                className={`text-[12px] font-semibold ${i === index ? 'text-[#8B1A2B]' : 'text-[#555]'}`}
-                numberOfLines={1}>
-                {e.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      ) : null}
     </View>
   );
 }
