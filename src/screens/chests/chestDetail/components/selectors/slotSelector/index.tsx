@@ -1,7 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Image, TouchableOpacity, View } from 'react-native';
+import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import Text from '../../../../../../components/text';
+import { viaimperiiApi } from '../../../../../../api';
 import { ChestSlot, ChestSlotOption } from '../../../../../../api/chests';
 import ProfessionSlot from '../professionSlot';
 
@@ -31,18 +33,35 @@ export default function SlotSelector({ slot, selectedRef, onSelect }: Props) {
 function AvatarSlot({ slot, onSelect }: { slot: ChestSlot; onSelect: (r: string) => void }) {
   const { t } = useTranslation();
 
+  // Avatares que o usuário JÁ possui → escondidos do baú (não faz sentido ganhar de novo).
+  const { data: ownedAssets } = useQuery({
+    queryKey: ['owned-assets', 'avatar'],
+    queryFn: () => viaimperiiApi.assets.owned('avatar'),
+  });
+  const ownedIds = useMemo(
+    () => new Set((ownedAssets ?? []).map((a) => a.id)),
+    [ownedAssets],
+  );
+
+  // Opções disponíveis = todas menos as já possuídas. Fallback: se filtrar tudo
+  // (o usuário já tem todas), mostra todas — melhor que slot vazio.
+  const available = useMemo(() => {
+    const notOwned = slot.options.filter((o) => o.asset && !ownedIds.has(o.asset.id));
+    return notOwned.length > 0 ? notOwned : slot.options;
+  }, [slot.options, ownedIds]);
+
   const rarities = useMemo(() => {
     const set = new Set<string>();
-    slot.options.forEach((o) => o.asset && set.add(o.asset.rarity));
+    available.forEach((o) => o.asset && set.add(o.asset.rarity));
     return Array.from(set);
-  }, [slot.options]);
+  }, [available]);
 
   const [rarityFilter, setRarityFilter] = useState<string | null>(null);
 
   const options = useMemo(() => {
-    if (!rarityFilter) return slot.options;
-    return slot.options.filter((o) => o.asset?.rarity === rarityFilter);
-  }, [slot.options, rarityFilter]);
+    if (!rarityFilter) return available;
+    return available.filter((o) => o.asset?.rarity === rarityFilter);
+  }, [available, rarityFilter]);
 
   const [index, setIndex] = useState(0);
 
@@ -50,7 +69,12 @@ function AvatarSlot({ slot, onSelect }: { slot: ChestSlot; onSelect: (r: string)
     setIndex(0);
   }, [rarityFilter]);
 
-  const current: ChestSlotOption | undefined = options[index];
+  // A lista pode encolher quando `owned` chega → mantém o índice válido.
+  useEffect(() => {
+    setIndex((i) => (i >= options.length ? 0 : i));
+  }, [options.length]);
+
+  const current: ChestSlotOption | undefined = options[Math.min(index, options.length - 1)];
   useEffect(() => {
     if (current) onSelect(current.reward_ref);
     // eslint-disable-next-line react-hooks/exhaustive-deps
